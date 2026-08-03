@@ -123,6 +123,8 @@ Internal-Agent-Projects.md
 
 # ===== Scripts (smoke tests, prechecks) =====
 scripts/
+!electron/scripts/
+!electron/scripts/**
 
 # ===== Test Data & Scripts =====
 test/
