@@ -65,8 +65,8 @@ jobs:
         run: npm run build; if ($LASTEXITCODE) { exit $LASTEXITCODE }; npx electron-builder --dir --publish never
       - name: Packaged startup and graceful exit
         run: npm run smoke:packaged
-      - name: Verify Phase 10 freeze evidence
-        run: npm run audit:phase10
+      - name: Refresh and verify Phase 10 freeze evidence
+        run: npm run freeze:phase10; if ($LASTEXITCODE) { exit $LASTEXITCODE }; npm run audit:phase10
       - name: Upload unpacked application
         uses: actions/upload-artifact@v4
         with:

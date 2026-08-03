@@ -36,15 +36,15 @@ if (existsSync(packagedAsar)) {
 }
 check(existsSync(pythonRoot), 'retained Python backup is missing')
 
+const backup = JSON.parse(readFileSync(join(pythonRoot, 'BACKUP_MANIFEST.json'), 'utf8'))
 const checksumLines = readFileSync(join(pythonRoot, 'SHA256SUMS'), 'utf8').trim().split(/\r?\n/).filter(Boolean)
 for (const line of checksumLines) {
   const [expected, relativePath] = line.split(/  /, 2)
   const path = join(pythonRoot, ...relativePath.split('/'))
   check(existsSync(path), `Python backup file is missing: ${relativePath}`)
-  if (existsSync(path)) check(sha256(path) === expected, `Python backup checksum mismatch: ${relativePath}`)
+  if (existsSync(path)) check(checksumMatches(path, expected, relativePath, backup.gitTag), `Python backup checksum mismatch: ${relativePath}`)
 }
 
-const backup = JSON.parse(readFileSync(join(pythonRoot, 'BACKUP_MANIFEST.json'), 'utf8'))
 check(backup.deletionForbidden === true, 'Python backup deletion guard is not enabled')
 check(backup.fileCount === checksumLines.length, 'Python backup manifest file count differs from SHA256SUMS')
 const tag = spawnSync('git', ['rev-parse', '--verify', '--quiet', `${backup.gitTag}^{tree}`], { cwd: root, encoding: 'utf8' })
@@ -87,6 +87,22 @@ function check(condition, message) {
 
 function sha256(path) {
   return createHash('sha256').update(readFileSync(path)).digest('hex')
+}
+
+function checksumMatches(path, expected, relativePath, tagName) {
+  const content = readFileSync(path)
+  if (createHash('sha256').update(content).digest('hex') === expected) return true
+  // Git may materialize tracked text with LF or CRLF depending on the runner.
+  // When that happens, require the normalized content to match the immutable
+  // backup tag; binary backup files remain subject to an exact byte checksum.
+  if (content.includes(0)) return false
+  const tagged = spawnSync('git', ['show', `${tagName}:python-backend/${relativePath}`], {
+    cwd: root,
+    encoding: null,
+  })
+  if (tagged.status !== 0 || tagged.stdout.includes(0)) return false
+  const normalize = (value) => value.toString('utf8').replaceAll('\r\n', '\n')
+  return normalize(content) === normalize(tagged.stdout)
 }
 
 function directoryDigest(directory) {
