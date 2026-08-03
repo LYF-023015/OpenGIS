@@ -40,8 +40,18 @@ jobs:
           distribution: microsoft
           java-version: 21.0.11
           cache: maven
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: python-backend/pyproject.toml
       - name: Install renderer dependencies
         run: npm ci
+      - name: Prepare Python compatibility test environment
+        run: |
+          python -m venv python-backend\.venv
+          python-backend\.venv\Scripts\python.exe -m pip install --upgrade pip
+          python-backend\.venv\Scripts\python.exe -m pip install -e python-backend
       - name: Verify Java reactor
         working-directory: java-backend
         run: .\mvnw.cmd --batch-mode verify
