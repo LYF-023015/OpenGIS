@@ -1,0 +1,103 @@
+{
+  "schema_version": "1.0",
+  "scope": "workspace-local persistent .opengis files observed in current Python source; caches are listed but excluded from round-trip gates",
+  "stores": [
+    {
+      "name": "sessions-and-inbox",
+      "path_pattern": ".opengis/sessions.json",
+      "fixture": ".opengis/sessions.json",
+      "owner": "SessionStore"
+    },
+    {
+      "name": "agent-profiles",
+      "path_pattern": ".opengis/agents.json",
+      "fixture": ".opengis/agents.json",
+      "owner": "AgentProfileStore"
+    },
+    {
+      "name": "permissions",
+      "path_pattern": ".opengis/permissions.json",
+      "fixture": ".opengis/permissions.json",
+      "owner": "PermissionRuleStore"
+    },
+    {
+      "name": "conversation-context",
+      "path_pattern": ".opengis/contexts/<conversation_id>.json",
+      "fixture": ".opengis/contexts/conversation-phase0-001.json",
+      "owner": "ContextPersistence"
+    },
+    {
+      "name": "titled-conversations",
+      "path_pattern": ".opengis/titled_conversations.json",
+      "fixture": ".opengis/titled_conversations.json",
+      "owner": "RpcHandler"
+    },
+    {
+      "name": "artifact-index",
+      "path_pattern": ".opengis/artifacts.jsonl",
+      "fixture": ".opengis/artifacts.jsonl",
+      "owner": "ArtifactIndex"
+    },
+    {
+      "name": "structured-memory",
+      "path_pattern": ".opengis/memory/{facts,recipes,datasets,failures}.jsonl",
+      "fixture": ".opengis/memory/*.jsonl",
+      "owner": "MemoryStore"
+    },
+    {
+      "name": "legacy-memory",
+      "path_pattern": ".opengis/memory.md",
+      "fixture": ".opengis/memory.md",
+      "owner": "ProjectMemory"
+    },
+    {
+      "name": "workflows",
+      "path_pattern": ".opengis/workflows/*.flow.json",
+      "fixture": ".opengis/workflows/workflow-phase0.flow.json",
+      "owner": "WorkflowDocumentStore"
+    },
+    {
+      "name": "workflow-step-output",
+      "path_pattern": ".opengis/workflow_steps/step<index>_<node_id>.md",
+      "fixture": ".opengis/workflow_steps/step1_node-a.md",
+      "owner": "WorkflowOutputStore"
+    },
+    {
+      "name": "run-archive",
+      "path_pattern": ".opengis/runs/<run_id>/{meta.json,*.jsonl}",
+      "fixture": ".opengis/runs/run-phase0-001",
+      "owner": "RunArchive"
+    },
+    {
+      "name": "workspace-operations",
+      "path_pattern": ".opengis/operations/<operation_id>/",
+      "fixture": ".opengis/operations/legacy-sample",
+      "owner": "OperationStore"
+    },
+    {
+      "name": "operation-runs",
+      "path_pattern": ".opengis/operation-runs/<builtin_operation_id>/<run_id>/",
+      "fixture": ".opengis/operation-runs/legacy-sample/operation-run-phase0-001",
+      "owner": "OperationStore"
+    },
+    {
+      "name": "skill-sources",
+      "path_pattern": ".opengis/skill-sources.json",
+      "fixture": ".opengis/skill-sources.json",
+      "owner": "SkillDiscovery"
+    },
+    {
+      "name": "workspace-skills",
+      "path_pattern": ".opengis/skills/<skill>/SKILL.md",
+      "fixture": ".opengis/skills/synthetic-skill/SKILL.md",
+      "owner": "SkillDiscovery"
+    },
+    {
+      "name": "raster-cache",
+      "path_pattern": ".opengis/raster-cache/",
+      "fixture": null,
+      "owner": "RasterService",
+      "classification": "regenerable-cache"
+    }
+  ]
+}

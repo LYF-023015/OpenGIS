@@ -8,7 +8,7 @@ import {
 } from 'lucide-react'
 import type { ViewTab } from '@/stores/viewStore'
 import { useAssetStore } from '@/stores/assetStore'
-import { pythonClient } from '@/services/pythonClient'
+import { backendClient } from '@/services/backendClient'
 import { useT } from '@/i18n'
 import MarkdownBlock from '@/features/chat/components/MarkdownBlock'
 
@@ -26,7 +26,7 @@ interface OperationDetail {
   abs_path?: string
   runtime?: {
     language?: string
-    python?: string
+    jdk?: string
     dependencies?: string[]
   }
   input_schema?: Record<string, unknown>
@@ -51,7 +51,7 @@ export function OperationEditorView({ tab }: { tab: ViewTab }) {
     setLoading(true)
     setError(null)
     try {
-      const result = await pythonClient.send<{ operation?: OperationDetail }>('rpc.operations.get', {
+      const result = await backendClient.send<{ operation?: OperationDetail }>('rpc.operations.get', {
         workspace_path: workspacePath,
         operation_id: operationId,
         include_readme: true,
@@ -113,7 +113,7 @@ export function OperationEditorView({ tab }: { tab: ViewTab }) {
               <div className="grid grid-cols-2 gap-2 text-xs md:grid-cols-4">
                 <InfoPill label={t.operations.version} value={detail.version || '-'} />
                 <InfoPill label="Revision" value={String(detail.revision ?? '-')} />
-                <InfoPill label={t.operations.entry} value={detail.entry || 'main.py'} />
+                <InfoPill label={t.operations.entry} value={detail.entry || 'Operation.java'} />
                 <InfoPill label="ID" value={detail.id} />
               </div>
             </div>
@@ -121,8 +121,8 @@ export function OperationEditorView({ tab }: { tab: ViewTab }) {
             <div className="min-w-0">
               <SectionTitle>{t.operations.runtime}</SectionTitle>
               <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-2">
-                <InfoPill label="Language" value={detail.runtime?.language || 'python'} />
-                <InfoPill label="Python" value={detail.runtime?.python || '-'} />
+                <InfoPill label="Language" value={detail.runtime?.language || 'java'} />
+                <InfoPill label="JDK" value={detail.runtime?.jdk || '21'} />
               </div>
               <div className="mt-3 flex flex-wrap gap-1.5">
                 {(dependencies.length ? dependencies : [t.operations.noDependencies]).map((dependency) => (

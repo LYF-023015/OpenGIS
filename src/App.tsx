@@ -4,7 +4,7 @@ import { DialogHost } from '@/components/Dialog'
 import { ApprovalGate } from '@/features/approval/ApprovalGate'
 import { useSettingsStore } from '@/stores/settingsStore'
 import { useAssetStore } from '@/stores/assetStore'
-import { pythonClient } from '@/services/pythonClient'
+import { backendClient } from '@/services/backendClient'
 import {
   globalDispatcher,
   globalRegistry,
@@ -22,7 +22,7 @@ function App() {
   // Wire up the v3.0 JSON-RPC 2.0 three-channel bridge once, at app start.
   useEffect(() => {
     registerAllHandlers(globalRegistry, { override: true })
-    pythonClient.setDispatcher(globalDispatcher)
+    backendClient.setDispatcher(globalDispatcher)
     installExtensions()
 
     // Listen for project selection from loading window via main process
@@ -37,12 +37,12 @@ function App() {
     try { window.electronAPI?.signalRendererReady?.() } catch {}
 
     return () => {
-      pythonClient.setDispatcher(null)
+      backendClient.setDispatcher(null)
       if (unsub) unsub()
     }
   }, [])
 
-  // Connect to the Python backend WebSocket once the sidecar is ready.
+  // Connect to the application backend WebSocket once the sidecar is ready.
   // The command bus (installed above) will then receive server-push
   // notifications (map.addLayer, map.flyTo, ...) over this socket.
   useEffect(() => {
@@ -61,7 +61,7 @@ function App() {
     // Fetch WebSocket token from main process
     const fetchToken = async () => {
       try {
-        wsToken = await api.getPythonWsToken()
+        wsToken = await api.getBackendWsToken()
       } catch (e) {
         console.warn('[App] Failed to fetch WebSocket token:', e)
       }
@@ -70,8 +70,8 @@ function App() {
     const tryConnect = (port: number | null | undefined) => {
       if (cancelled || !port) return
       // Reconnect from a clean socket so stale auth state cannot leak across backend restarts.
-      pythonClient.disconnect()
-      pythonClient.connect(port, wsToken ?? undefined)
+      backendClient.disconnect()
+      backendClient.connect(port, wsToken ?? undefined)
     }
 
     // Initialize async
@@ -81,7 +81,7 @@ function App() {
 
       // 1. Poll the current status — handles the case where the sidecar
       //    became 'ready' before this effect ran (we'd have missed the event).
-      const s = await api.getPythonStatus()
+      const s = await api.getBackendStatus()
       if (s?.status === 'ready') {
         // If still no token, try again
         if (!wsToken) await fetchToken()
@@ -89,7 +89,7 @@ function App() {
       }
 
       // 2. Subscribe to future status changes.
-      unsubscribe = api.onPythonStatusChanged((status) => {
+      unsubscribe = api.onBackendStatusChanged((status) => {
         if (status.status === 'ready') {
           currentPort = status.port ?? null
           // Use token from status, or fetch if not available
@@ -101,12 +101,12 @@ function App() {
             tryConnect(status.port)
           }
         } else if (status.status === 'stopped' || status.status === 'error') {
-          pythonClient.disconnect()
+          backendClient.disconnect()
         }
       })
 
       // 3. Listen for token events from main — when token arrives, reconnect if we have a port
-      unsubscribeToken = api.onPythonWsToken?.((token: string) => {
+      unsubscribeToken = api.onBackendWsToken?.((token: string) => {
         wsToken = token
         if (currentPort) {
           // Reconnect with token
@@ -157,7 +157,7 @@ function App() {
 
   // Sync debug mode to backend on startup and when setting changes
   useEffect(() => {
-    pythonClient.send('rpc.debug.set_log_level', {
+    backendClient.send('rpc.debug.set_log_level', {
       level: debugMode ? 'DEBUG' : 'INFO',
     }).catch(() => {/* backend may not be ready yet */})
   }, [debugMode])
@@ -165,7 +165,7 @@ function App() {
   // Install built-in workflow templates when workspace is opened
   useEffect(() => {
     if (workspacePath) {
-      pythonClient.send('rpc.workspace.install_templates', {
+      backendClient.send('rpc.workspace.install_templates', {
         workspace_path: workspacePath,
       }).catch(() => {/* backend may not be ready yet */})
     }

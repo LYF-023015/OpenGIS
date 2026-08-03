@@ -179,7 +179,7 @@ export class PythonManager {
           console.log(`[Python] WebSocket auth token captured`)
           // 如果 status 已经是 ready，立即发送 token 给渲染进程
           if (this.status.status === 'ready') {
-            this.sendToRenderer('python:ws-token', this.wsToken)
+            this.sendToRenderer('backend:ws-token', this.wsToken)
           }
         }
 
@@ -192,7 +192,7 @@ export class PythonManager {
             wsToken: this.wsToken || undefined 
           }
           // Notify renderer about token
-          this.sendToRenderer('python:ws-token', this.wsToken)
+          this.sendToRenderer('backend:ws-token', this.wsToken)
         }
       })
 
@@ -218,10 +218,10 @@ export class PythonManager {
             wsToken: this.wsToken || undefined 
           }
           // Notify renderer
-          this.sendToRenderer('python:status-changed', this.getStatus())
+          this.sendToRenderer('backend:status-changed', { ...this.getStatus(), runtime: 'python' })
           // Also send token explicitly
           if (this.wsToken) {
-            this.sendToRenderer('python:ws-token', this.wsToken)
+            this.sendToRenderer('backend:ws-token', this.wsToken)
           }
         }
       })
@@ -250,7 +250,7 @@ export class PythonManager {
           this.isRestarting = true
           console.log(`[Python] Auto-restarting (${this.restartCount}/${this.maxRestarts}) in ${this.restartDelayMs}ms...`)
           this.status = { status: 'starting' }
-          this.sendToRenderer('python:status-changed', this.getStatus())
+          this.sendToRenderer('backend:status-changed', { ...this.getStatus(), runtime: 'python' })
 
           setTimeout(async () => {
             try {
@@ -270,7 +270,7 @@ export class PythonManager {
         } else {
           // Exhausted retries
           this.status = { status: 'error', error: msg }
-          this.sendToRenderer('python:status-changed', this.getStatus())
+          this.sendToRenderer('backend:status-changed', { ...this.getStatus(), runtime: 'python' })
           if (this.restartCount >= this.maxRestarts) {
             this.showFatalError(msg)
           }

@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-03T03:43:37.836Z",
+  "terminalStates": [
+    "converted",
+    "archived",
+    "discarded"
+  ],
+  "registeredWorkspaceCount": 0,
+  "registeredWorkspaces": [],
+  "assets": [
+    {
+      "type": "operation",
+      "id": "format_converter",
+      "status": "archived",
+      "source": "Python builtin backup",
+      "replacement": "Java builtin format_converter",
+      "userDataDeleted": false
+    },
+    {
+      "type": "operation",
+      "id": "advanced_clustering",
+      "status": "archived",
+      "source": "Python builtin backup",
+      "replacement": "Java builtin advanced_clustering",
+      "userDataDeleted": false
+    },
+    {
+      "type": "operation",
+      "id": "kernel_density",
+      "status": "archived",
+      "source": "Python builtin backup",
+      "replacement": "Java builtin kernel_density",
+      "userDataDeleted": false
+    },
+    {
+      "type": "operation",
+      "id": "legacy-sample",
+      "status": "archived",
+      "source": "Phase 0 compatibility fixture",
+      "replacement": "Legacy reader and migration report",
+      "userDataDeleted": false
+    },
+    {
+      "type": "workflow",
+      "id": "workflow-phase0",
+      "status": "archived",
+      "source": "Phase 0 schema v1 fixture",
+      "replacement": "Workflow v2 converter fixture",
+      "userDataDeleted": false
+    }
+  ],
+  "categorySummary": {
+    "script": {
+      "discovered": 0,
+      "converted": 0,
+      "archived": 0,
+      "discarded": 0
+    },
+    "operation": {
+      "discovered": 4,
+      "converted": 0,
+      "archived": 4,
+      "discarded": 0
+    },
+    "worker": {
+      "discovered": 0,
+      "converted": 0,
+      "archived": 0,
+      "discarded": 0
+    },
+    "workflow": {
+      "discovered": 1,
+      "converted": 0,
+      "archived": 1,
+      "discarded": 0
+    }
+  },
+  "note": "No registered user workspace was found on this Windows profile; no user asset was silently discarded."
+}

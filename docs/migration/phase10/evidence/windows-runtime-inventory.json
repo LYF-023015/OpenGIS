@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-03T03:43:37.836Z",
+  "platform": "windows",
+  "javaVersion": "21.0.11",
+  "javaModules": [
+    "java.base",
+    "java.compiler",
+    "java.datatransfer",
+    "java.xml",
+    "java.prefs",
+    "java.desktop",
+    "java.instrument",
+    "java.logging",
+    "java.management",
+    "java.security.sasl",
+    "java.naming",
+    "java.net.http",
+    "java.rmi",
+    "java.scripting",
+    "java.security.jgss",
+    "java.transaction.xa",
+    "java.sql",
+    "jdk.internal.opt",
+    "jdk.zipfs",
+    "jdk.compiler",
+    "jdk.crypto.ec",
+    "jdk.jfr",
+    "jdk.unsupported"
+  ],
+  "javaRuntimeSha256": "b40a40e0fa6d0c0f7d3ac05f2342da2c56d35588c321e3ab35c92be9b4dcdaac",
+  "serverJarSha256": "8483aea82afcf2de523267b5b3245961ef589b5d79402fe3e7f13b0510b7f0f9",
+  "thirdPartyJarCount": 169,
+  "gisJarCount": 19,
+  "fontFileCount": 60,
+  "pdf": {
+    "provider": "Electron/Chromium 30.5.1",
+    "dedicatedLibrary": false
+  },
+  "packaged": {
+    "javaExecutable": true,
+    "serverJar": true,
+    "pythonBackend": false
+  }
+}

@@ -1,8 +1,7 @@
-import { app, BrowserWindow, shell, ipcMain, nativeImage, nativeTheme } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, nativeImage, nativeTheme, dialog } from 'electron'
 import { join } from 'path'
 import { readFileSync, existsSync } from 'fs'
-import { PythonManager } from './ipc/pythonManager'
-import { ensurePythonEnv } from './ipc/pythonSetup'
+import { BackendManager } from './ipc/backendManager'
 import { registerFileHandlers } from './ipc/fileHandlers'
 import { registerSettingsHandlers, loadProjects } from './ipc/settingsHandlers'
 import { createMenu } from './menu'
@@ -35,7 +34,7 @@ if (!gotTheLock) {
 
 let mainWindow: BrowserWindow | null = null
 let loadingWindow: BrowserWindow | null = null
-let pythonManager: PythonManager | null = null
+let backendManager: BackendManager | null = null
 
 // Resolve the app icon path for both dev and packaged mode
 function getAppIcon(): Electron.NativeImage {
@@ -158,45 +157,62 @@ function createWindow(): void {
 
   mainWindow.on('closed', () => {
     mainWindow = null
-    // Detach so PythonManager doesn't keep a destroyed BrowserWindow alive.
-    pythonManager?.setMainWindow(null)
+    backendManager?.setMainWindow(null)
   })
 }
 
-function registerPythonIpcHandlers(): void {
+function registerBackendIpcHandlers(): void {
   // Register early so the renderer can call them during setup.
-  ipcMain.handle('python:status', () => {
-    return pythonManager?.getStatus() ?? { status: 'stopped' }
+  ipcMain.handle('backend:status', () => {
+    return backendManager?.getStatus() ?? { status: 'stopped', runtime: 'java' }
   })
 
-  ipcMain.handle('python:restart', async () => {
-    await pythonManager?.restart()
-    return pythonManager?.getStatus()
+  ipcMain.handle('backend:restart', async () => {
+    await backendManager?.restart()
+    return backendManager?.getStatus()
   })
 
-  ipcMain.handle('python:get-port', () => {
-    return pythonManager?.getPort() ?? null
+  ipcMain.handle('backend:get-port', () => {
+    return backendManager?.getPort() ?? null
   })
 
-  ipcMain.handle('python:get-ws-token', () => {
-    return pythonManager?.getWsToken() ?? null
+  ipcMain.handle('backend:get-ws-token', () => {
+    return backendManager?.getWsToken() ?? null
   })
 }
 
-async function initializePythonBackend(): Promise<void> {
-  pythonManager = new PythonManager()
-  pythonManager.setMainWindow(mainWindow)
+async function initializeBackend(): Promise<void> {
+  backendManager = new BackendManager()
+  backendManager.setMainWindow(mainWindow)
 
-  try {
-    await pythonManager.start()
-    updateLoadingProgress(3, 'Python backend connected!')
-    mainWindow?.webContents.send('python:status-changed', pythonManager.getStatus())
-  } catch (error) {
-    console.error('Failed to start Python backend:', error)
-    mainWindow?.webContents.send('python:status-changed', {
-      status: 'error',
-      error: String(error),
-    })
+  while (true) {
+    try {
+      await backendManager.start()
+      updateLoadingProgress(3, `${backendManager.runtime === 'java' ? 'Java' : 'Development Python'} backend connected!`)
+      mainWindow?.webContents.send('backend:status-changed', backendManager.getStatus())
+      return
+    } catch (error) {
+      console.error('Failed to start backend:', error)
+      const status = backendManager.getStatus()
+      mainWindow?.webContents.send('backend:status-changed', status)
+      const result = await dialog.showMessageBox(loadingWindow ?? undefined, {
+        type: 'error',
+        title: 'OpenGIS Java Backend Failed',
+        message: 'The Java backend could not be started.',
+        detail: `${status.error ?? String(error)}\n\nYour workspace has not been modified. Python fallback is disabled. Check the logs, retry, or quit and reinstall the previous OpenGIS version.`,
+        buttons: ['Retry', 'Open Logs', 'Quit'],
+        defaultId: 0,
+        cancelId: 2,
+      })
+      if (result.response === 0) continue
+      if (result.response === 1) {
+        const dir = getLogDir()
+        if (dir) await shell.openPath(dir)
+        continue
+      }
+      app.quit()
+      throw error
+    }
   }
 }
 
@@ -381,74 +397,10 @@ app.whenReady().then(async () => {
   // Create application menu (attached to main window)
   createMenu(mainWindow!)
 
-  console.log('[loading] Step 3: start Python');
-  // ── Step 3: ensure Python env then start backend ───────────────
-  updateLoadingProgress(2, 'Starting Python backend…')
-
-  // Register IPC handlers early so the renderer can call them during setup
-  registerPythonIpcHandlers()
-
-  // Always run ensurePythonEnv — it checks version and upgrades deps if needed
-  const tempManager = new PythonManager()
-  const needsSetup = !tempManager.hasVenv()
-
-  if (needsSetup) {
-    console.log('[loading] No .venv found — running first-launch setup')
-    loadingWindow?.webContents.send('loading:install-start', {})
-  } else {
-    console.log('[loading] .venv exists — checking version')
-  }
-
-  {
-    const runSetup = async (): Promise<void> => {
-      const backendPath = tempManager.getBackendPath()
-      const venvPath = tempManager.getVenvPath()
-      await ensurePythonEnv(backendPath, venvPath, (progress) => {
-        if (needsSetup) {
-          loadingWindow?.webContents.send('loading:install-progress', progress)
-        }
-      }, app.getVersion())
-    }
-
-    try {
-      await runSetup()
-      if (needsSetup) {
-        loadingWindow?.webContents.send('loading:install-done', {})
-      }
-      console.log('[loading] Python env ready')
-    } catch (err) {
-      console.error('[loading] Python env setup failed:', err)
-      // Show install UI on error even if it wasn't shown before (version upgrade case)
-      if (!needsSetup) {
-        loadingWindow?.webContents.send('loading:install-start', {})
-      }
-      loadingWindow?.webContents.send('loading:install-error', { error: String(err) })
-
-      // Wait for user to retry — also resolves if loading window is closed
-      await new Promise<void>((resolve) => {
-        const onRetry = async () => {
-          loadingWindow?.webContents.send('loading:install-start', {})
-          try {
-            await runSetup()
-            loadingWindow?.webContents.send('loading:install-done', {})
-            ipcMain.removeListener('loading:install-retry', onRetry)
-            resolve()
-          } catch (retryErr) {
-            loadingWindow?.webContents.send('loading:install-error', { error: String(retryErr) })
-          }
-        }
-        ipcMain.on('loading:install-retry', onRetry)
-        // Resolve on window close so app startup continues (avoids zombie)
-        const onClosed = () => {
-          ipcMain.removeListener('loading:install-retry', onRetry)
-          resolve()
-        }
-        loadingWindow?.on('closed', onClosed)
-      })
-    }
-  }
-
-  await initializePythonBackend()
+  console.log('[loading] Step 3: start backend');
+  updateLoadingProgress(2, 'Starting Java backend…')
+  registerBackendIpcHandlers()
+  await initializeBackend()
 
   console.log('[loading] Step 4: done');
   // ── Step 4: done ────────────────────────────────────────
@@ -459,6 +411,13 @@ app.whenReady().then(async () => {
   console.log('[loading] Step 4: backend ready, sending project list...')
   const projectsData = await loadProjects()
   loadingWindow?.webContents.send('loading:show-projects', projectsData)
+
+  // Packaged smoke tests can verify startup and graceful sidecar shutdown
+  // without interacting with the project selector. Never enabled by default.
+  const smokeExitMs = Number(process.env.OPENGIS_PHASE9_SMOKE_EXIT_MS ?? 0)
+  if (Number.isFinite(smokeExitMs) && smokeExitMs > 0) {
+    setTimeout(() => app.quit(), smokeExitMs)
+  }
 
   // The loading window will send 'loading:project-selected' when user picks a project.
   // Then renderer:ready + project-selected together trigger the transition.
@@ -477,18 +436,15 @@ app.whenReady().then(async () => {
       existingWindow.focus()
     } else {
       createWindow()
-      // Re-inject the new main window into PythonManager
-      if (pythonManager) {
-        pythonManager.setMainWindow(mainWindow)
-        // Restart Python if it was stopped (e.g. by window-all-closed on non-macOS,
-        // or if it crashed while the app was in the background)
-        const status = pythonManager.getStatus()
+      if (backendManager) {
+        backendManager.setMainWindow(mainWindow)
+        const status = backendManager.getStatus()
         if (status.status === 'stopped' || status.status === 'error') {
           try {
-            await pythonManager.start()
-            mainWindow?.webContents.send('python:status-changed', pythonManager.getStatus())
+            await backendManager.start()
+            mainWindow?.webContents.send('backend:status-changed', backendManager.getStatus())
           } catch (err) {
-            console.error('[main] Failed to restart Python on activate:', err)
+            console.error('[main] Failed to restart backend on activate:', err)
           }
         }
       }
@@ -501,14 +457,14 @@ app.whenReady().then(async () => {
 
 app.on('window-all-closed', () => {
   // On macOS, closing all windows doesn't quit the app (stays in dock).
-  // Keep Python backend alive so it's ready when the user re-opens.
+  // Keep the backend alive so it is ready when the user re-opens.
   // The backend is stopped in 'before-quit' when the app truly exits.
   if (process.platform !== 'darwin') {
-    pythonManager?.stop()
+    backendManager?.stop()
     app.quit()
   }
 })
 
 app.on('before-quit', () => {
-  pythonManager?.stop()
+  backendManager?.stop()
 })

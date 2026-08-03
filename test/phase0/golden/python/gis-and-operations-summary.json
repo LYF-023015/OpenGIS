@@ -1,0 +1,255 @@
+{
+  "schema_version": "1.0",
+  "vectors": [
+    {
+      "file": "test/phase0/fixtures/gis/points_wgs84.geojson",
+      "feature_count": 6,
+      "geometry_types": [
+        "Point"
+      ],
+      "null_geometry_count": 0,
+      "valid_geometry_count": 6,
+      "invalid_geometry_count": 0,
+      "crs": "EPSG:4326",
+      "bbox": [
+        87.617,
+        22.543,
+        121.474,
+        43.826
+      ],
+      "fields": [
+        "name",
+        "category",
+        "value",
+        "weight"
+      ]
+    },
+    {
+      "file": "test/phase0/fixtures/gis/lines_wgs84.geojson",
+      "feature_count": 2,
+      "geometry_types": [
+        "LineString"
+      ],
+      "null_geometry_count": 0,
+      "valid_geometry_count": 2,
+      "invalid_geometry_count": 0,
+      "crs": "EPSG:4326",
+      "bbox": [
+        116.2,
+        31.0,
+        121.8,
+        40.0
+      ],
+      "fields": [
+        "name",
+        "class"
+      ]
+    },
+    {
+      "file": "test/phase0/fixtures/gis/polygons_wgs84.geojson",
+      "feature_count": 2,
+      "geometry_types": [
+        "Polygon"
+      ],
+      "null_geometry_count": 0,
+      "valid_geometry_count": 2,
+      "invalid_geometry_count": 0,
+      "crs": "EPSG:4326",
+      "bbox": [
+        116.2,
+        30.9,
+        121.9,
+        40.1
+      ],
+      "fields": [
+        "name",
+        "population"
+      ]
+    },
+    {
+      "file": "test/phase0/fixtures/gis/edge_cases_wgs84.geojson",
+      "feature_count": 4,
+      "geometry_types": [
+        "Point",
+        "Polygon"
+      ],
+      "null_geometry_count": 1,
+      "valid_geometry_count": 2,
+      "invalid_geometry_count": 1,
+      "crs": "EPSG:4326",
+      "bbox": [
+        0.0,
+        0.0,
+        179.9,
+        85.0
+      ],
+      "fields": [
+        "name",
+        "unicode",
+        "nullable"
+      ]
+    },
+    {
+      "file": "test/phase0/fixtures/gis/points_shapefile/points.shp",
+      "feature_count": 6,
+      "geometry_types": [
+        "Point"
+      ],
+      "null_geometry_count": 0,
+      "valid_geometry_count": 6,
+      "invalid_geometry_count": 0,
+      "crs": "EPSG:4326",
+      "bbox": [
+        87.617,
+        22.543,
+        121.474,
+        43.826
+      ],
+      "fields": [
+        "name",
+        "category",
+        "value",
+        "weight"
+      ]
+    },
+    {
+      "file": "test/phase0/fixtures/gis/points.gpkg",
+      "feature_count": 6,
+      "geometry_types": [
+        "Point"
+      ],
+      "null_geometry_count": 0,
+      "valid_geometry_count": 6,
+      "invalid_geometry_count": 0,
+      "crs": "EPSG:4326",
+      "bbox": [
+        87.617,
+        22.543,
+        121.474,
+        43.826
+      ],
+      "fields": [
+        "name",
+        "category",
+        "value",
+        "weight"
+      ]
+    }
+  ],
+  "raster": {
+    "file": "test/phase0/fixtures/gis/small_raster_3857.tif",
+    "driver": "GTiff",
+    "width": 32,
+    "height": 32,
+    "count": 1,
+    "dtype": "float32",
+    "crs": "EPSG:3857",
+    "nodata": -9999.0,
+    "bounds": [
+      -20037508.3428,
+      -20037508.3428,
+      20037508.3428,
+      20037508.3428
+    ],
+    "min": 1.0,
+    "max": 1023.0,
+    "mean": 512.0,
+    "valid_pixel_count": 1023
+  },
+  "scale_vectors": [
+    {
+      "file": "test/phase0/fixtures/gis/scale/points_10000.geojson.gz",
+      "compression": "gzip with mtime=0",
+      "feature_count": 10000,
+      "geometry_type": "Point",
+      "crs": "EPSG:4326",
+      "bbox": [
+        100.0,
+        20.0,
+        100.999,
+        20.009
+      ],
+      "uncompressed_bytes": 1154721,
+      "compressed_bytes": 83026,
+      "sha256": "45fdb527b290ffcad6868291d8f4d2f9283971a7c9b09dd2a8ecfa689eeba9d4"
+    },
+    {
+      "file": "test/phase0/fixtures/gis/scale/points_100000.geojson.gz",
+      "compression": "gzip with mtime=0",
+      "feature_count": 100000,
+      "geometry_type": "Point",
+      "crs": "EPSG:4326",
+      "bbox": [
+        100.0,
+        20.0,
+        100.999,
+        20.099
+      ],
+      "uncompressed_bytes": 11755821,
+      "compressed_bytes": 827317,
+      "sha256": "72ac0ef7e6ea1164ae56fe06dcf957a2b02f04505fb33b4ea71d9b0e7da4376c"
+    }
+  ],
+  "operations": {
+    "format_converter": {
+      "success": true,
+      "input_format": ".geojson",
+      "output_format": "csv",
+      "feature_count": 6,
+      "geometry_types": [
+        "Point"
+      ],
+      "input_crs": "EPSG:4326",
+      "output_crs": "EPSG:4326",
+      "columns": [
+        "name",
+        "category",
+        "value",
+        "weight"
+      ]
+    },
+    "advanced_clustering_kmeans": {
+      "input_features": 6,
+      "cluster_count": 2,
+      "labels": [
+        0,
+        0,
+        0,
+        0,
+        0,
+        1
+      ],
+      "random_state": 42
+    },
+    "kernel_density": {
+      "success": true,
+      "n_features": 6,
+      "bandwidth": 800000.0,
+      "cell_size": 200000.0,
+      "kernel": "gaussian",
+      "grid_size": [
+        34,
+        30
+      ],
+      "density_range": [
+        2.3728413814837232e-20,
+        1.0553304192425783e-13
+      ],
+      "statistics": {
+        "min": 2.3728413814837232e-20,
+        "max": 1.0553304192425783e-13,
+        "mean": 2.1899238858000725e-14,
+        "std": 2.5004836523924802e-14,
+        "nonzero_cells": 1020,
+        "total_cells": 1020
+      },
+      "n_points_sampled": 6
+    }
+  },
+  "tolerances": {
+    "bbox_absolute": 1e-06,
+    "area_length_relative": 1e-06,
+    "raster_stat_relative": 1e-05,
+    "cluster_labels": "labels may be permuted; compare partition membership and counts"
+  }
+}

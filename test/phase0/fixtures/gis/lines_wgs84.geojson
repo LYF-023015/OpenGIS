@@ -1,0 +1,62 @@
+{
+  "type": "FeatureCollection",
+  "name": "phase0-fixture",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "EPSG:4326"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "id": 1,
+      "properties": {
+        "name": "route-a",
+        "class": 1
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            116.2,
+            39.8
+          ],
+          [
+            116.6,
+            40.0
+          ],
+          [
+            117.0,
+            39.9
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 2,
+      "properties": {
+        "name": "route-b",
+        "class": 2
+      },
+      "geometry": {
+        "type": "LineString",
+        "coordinates": [
+          [
+            121.2,
+            31.0
+          ],
+          [
+            121.5,
+            31.3
+          ],
+          [
+            121.8,
+            31.1
+          ]
+        ]
+      }
+    }
+  ]
+}

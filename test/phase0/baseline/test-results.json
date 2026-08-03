@@ -1,0 +1,80 @@
+{
+  "captured_at": "2026-08-02",
+  "source_commit": "1e59165373fecb4f8cc7b58d74de2733905f4044",
+  "python": {
+    "command": "python-backend/.venv/Scripts/python.exe -m pytest -q",
+    "total": 167,
+    "passed": 162,
+    "failed": 5,
+    "warnings": 1,
+    "pytest_reported_seconds": 19.44,
+    "wall_seconds": 21.094,
+    "exit_code": 1,
+    "failed_tests": [
+      "tests/test_agent_tools.py::AgentToolUpgradeTests::test_bash_prefers_backend_python_on_path",
+      "tests/test_agent_tools.py::AgentToolUpgradeTests::test_run_script_file_executes_existing_script_asset",
+      "tests/test_agent_tools.py::AgentToolUpgradeTests::test_running_worker_is_removed_when_folder_disappears",
+      "tests/test_agent_tools.py::AgentToolUpgradeTests::test_script_tools_list_read_and_mark_for_edit",
+      "tests/test_agent_tools.py::AgentToolUpgradeTests::test_worker_start_creates_service_package"
+    ]
+  },
+  "frontend": {
+    "vitest": {
+      "command": "npm test -- --reporter=verbose",
+      "files_total": 13,
+      "files_passed": 12,
+      "files_failed": 1,
+      "tests_total": 153,
+      "tests_passed": 151,
+      "tests_failed": 2,
+      "vitest_reported_seconds": 2.43,
+      "wall_seconds": 3.151,
+      "exit_code": 1,
+      "failed_tests": [
+        "src/services/rpc/__tests__/handlers.test.ts > Handler registration > registers expected method count",
+        "src/services/rpc/__tests__/handlers.test.ts > Handler contract: invalid params -> -32602 invalidParams > rpc.ui.map.add_raster_from_url with invalid params returns -32602"
+      ]
+    },
+    "typecheck": {
+      "command": "npm run typecheck",
+      "wall_seconds": 7.056,
+      "exit_code": 0
+    },
+    "lint": {
+      "command": "npm run lint",
+      "wall_seconds": 4.509,
+      "exit_code": 2,
+      "reason": "ESLint 9 could not find eslint.config.js, eslint.config.mjs, or eslint.config.cjs"
+    }
+  },
+  "phase0_asset_validation": {
+    "command": "python-backend/.venv/Scripts/python.exe test/phase0/scripts/validate_phase0_assets.py",
+    "exit_code": 0,
+    "backend_methods": 47,
+    "frontend_methods": 56,
+    "rpc_method_contracts": 47,
+    "transcripts": 20,
+    "vector_fixtures": 6,
+    "scale_vector_fixtures": 2,
+    "opengis_store_schemas": 16,
+    "providers": 24,
+    "python_semantic_consumers": 44,
+    "migration_matrix_entries": 347,
+    "rpc_transcript_replay": {
+      "command": "python-backend/.venv/Scripts/python.exe test/phase0/scripts/validate_rpc_transcripts.py",
+      "exit_code": 0,
+      "replayed_cases": 17,
+      "structurally_validated_server_push_messages": 4
+    }
+  },
+  "sidecar_transport_probe": {
+    "command": "test/phase0/scripts/probe_backend.ps1",
+    "exit_code": 0,
+    "token_before_ready": true,
+    "health_ok": true,
+    "invalid_token_error_code": -32001,
+    "valid_rpc_ok": true,
+    "clean_disconnect_state": "Closed",
+    "manual_reconnect_rpc_ok": true
+  }
+}

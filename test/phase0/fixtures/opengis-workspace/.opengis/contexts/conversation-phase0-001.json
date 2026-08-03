@@ -1,0 +1,17 @@
+{
+  "schema_version": "1.0",
+  "conversation_id": "conversation-phase0-001",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Synthetic migration fixture"
+    },
+    {
+      "role": "assistant",
+      "content": "Fixture ready"
+    }
+  ],
+  "working_state": {
+    "workspace": "${WORKSPACE}"
+  }
+}

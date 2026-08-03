@@ -6,25 +6,26 @@ directories:
 
 files:
   - "out/**/*"
+  # Development-only Python manager stays in the repository but is never shipped.
+  - "!out/electron/chunks/pythonManager-*.js"
   - "resources/icons/**/*"
 
 extraResources:
-  - from: "python-backend/"
-    to: "python-backend/"
+  - from: "java-backend/opengis-server/target/runtime/"
+    to: "java-runtime/"
     filter:
       - "**/*"
-      - "!**/__pycache__/**"
-      - "!**/tests/**"
-      - "!**/.venv"
-      - "!**/.venv/**"
-      - "!**/.egg-info"
-      - "!**/.egg-info/**"
+  - from: "java-backend/opengis-server/target/opengis-server-0.1.0-SNAPSHOT.jar"
+    to: "java-backend/opengis-server.jar"
   - from: "resources/icons/"
     to: "icons/"
     filter:
       - "**/*"
 
 win:
+  # Phase 9 produces unsigned verification packages. Enable executable editing
+  # together with a real certificate in the release-signing phase.
+  signAndEditExecutable: false
   target:
     - nsis
     - portable
@@ -35,36 +36,3 @@ nsis:
   oneClick: false
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
-
-mac:
-  target:
-    - dmg
-    - zip
-  # 1254×1254 PNG，electron-builder 会在打包阶段自动转成 .icns。
-  icon: resources/icons/app-icon.png
-  category: public.app-category.developer-tools
-  artifactName: "${productName}-${version}-mac-${arch}.${ext}"
-  # 暂未配置代码签名 / 公证：未签名 .dmg 在 macOS 12+ 首次打开
-  # 需用户右键→打开。正式发版前需补 identity + notarize。
-
-dmg:
-  contents:
-    - x: 130
-      y: 220
-    - x: 410
-      y: 220
-      type: link
-      path: /Applications
-  window:
-    width: 540
-    height: 380
-  iconSize: 80
-  iconTextSize: 12
-
-linux:
-  target:
-    - AppImage
-    - deb
-  icon: resources/icons/app-icon.png
-  category: Science
-  artifactName: "${productName}-${version}-linux-${arch}.${ext}"

@@ -1,0 +1,18 @@
+{
+  "profiles": [
+    {
+      "name": "gis-build",
+      "mode": "build",
+      "description": "Synthetic profile",
+      "max_steps": 20,
+      "tool_groups": [
+        "system",
+        "map"
+      ],
+      "permission_level": "safe_write",
+      "metadata": {
+        "permission_enforce": false
+      }
+    }
+  ]
+}

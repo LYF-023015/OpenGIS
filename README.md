@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <strong>Agent-driven open-source GIS desktop app — geospatial analysis, cartography, automation & knowledge retention with natural language</strong>
+  <strong>Java-powered, Agent-driven open-source GIS desktop app — geospatial analysis, cartography, automation & knowledge retention with natural language</strong>
 </p>
 
 <p align="center">
@@ -24,15 +24,31 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-blue" alt="Platform" />
+  <img src="https://img.shields.io/badge/platform-Windows-blue" alt="Platform" />
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License" />
   <img src="https://img.shields.io/badge/electron-30.x-47848F?logo=electron" alt="Electron" />
-  <img src="https://img.shields.io/badge/python-3.11+-3776AB?logo=python&logoColor=white" alt="Python" />
+  <img src="https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white" alt="Java 21" />
+  <img src="https://img.shields.io/badge/Spring%20Boot-4.1-6DB33F?logo=springboot&logoColor=white" alt="Spring Boot 4.1" />
   <img src="https://img.shields.io/badge/react-18.x-61DAFB?logo=react" alt="React" />
   <img src="https://img.shields.io/badge/maplibre-4.x-396CB2" alt="MapLibre" />
 </p>
 
 ---
+
+> [!NOTE]
+> **Java Edition:** This repository is [LYF-023015/OpenGIS](https://github.com/LYF-023015/OpenGIS), a Java-backend evolution of the original [ATFfang/OpenGIS](https://github.com/ATFfang/OpenGIS). The production desktop app now runs a bundled Java 21 / Spring Boot sidecar; the former Python backend remains in the repository only as an explicit recovery and compatibility backup. The current validated release target is Windows.
+
+### Java Edition quick start
+
+Requirements: Windows, Node.js 18+, JDK 21, and Git. Maven is provided through the repository wrapper.
+
+```powershell
+npm install
+java-backend\mvnw.cmd --batch-mode verify
+npm run dev:electron
+```
+
+Build the Windows package with `npm run dist:win`. See [`java-backend/README.md`](java-backend/README.md) for the module layout and [`docs/migration/phase10/README.md`](docs/migration/phase10/README.md) for migration and release evidence.
 
 <p align="center">
   <a href="https://youtu.be/F5lVRs_XXjU">

@@ -38,7 +38,7 @@ describe('chatMessageParts', () => {
     expect(messagePartsForRender(message)).toEqual([])
   })
 
-  it('upserts native streaming parts by stable id', () => {
+  it('appends explicit delta streaming parts by stable id', () => {
     const message: ChatMessage = {
       ts: 4000,
       type: 'say',
@@ -51,12 +51,14 @@ describe('chatMessageParts', () => {
       type: 'text',
       status: 'streaming',
       text: 'hel',
+      data: { text_mode: 'delta' },
     })
     const second = upsertMessagePart(first, {
       id: 'run:text:final',
       type: 'text',
       status: 'streaming',
       text: 'lo',
+      data: { text_mode: 'delta' },
     })
     const done = upsertMessagePart(second, {
       id: 'run:text:final',
@@ -71,8 +73,66 @@ describe('chatMessageParts', () => {
       type: 'text',
       status: 'completed',
       text: 'hello',
-      data: { finished: true },
+      data: { text_mode: 'delta', finished: true },
     })
+  })
+
+  it('replaces cumulative streaming snapshots instead of repeating them', () => {
+    const message: ChatMessage = {
+      ts: 4500,
+      type: 'say',
+      say: 'text',
+      text: '',
+    }
+
+    const first = upsertMessagePart(message, {
+      id: 'run:text:final',
+      type: 'text',
+      status: 'streaming',
+      text: '回顾',
+      data: { text_mode: 'snapshot' },
+    })
+    const second = upsertMessagePart(first, {
+      id: 'run:text:final',
+      type: 'text',
+      status: 'streaming',
+      text: '回顾一下',
+      data: { text_mode: 'snapshot' },
+    })
+    const third = upsertMessagePart(second, {
+      id: 'run:text:final',
+      type: 'text',
+      status: 'streaming',
+      text: '回顾一下对话',
+      data: { text_mode: 'snapshot' },
+    })
+
+    expect(messagePartsForRender(third)).toHaveLength(1)
+    expect(messagePartsForRender(third)[0].text).toBe('回顾一下对话')
+  })
+
+  it('recognizes legacy cumulative snapshots without a text mode marker', () => {
+    const message: ChatMessage = {
+      ts: 4600,
+      type: 'say',
+      say: 'text',
+      text: '',
+    }
+
+    const first = upsertMessagePart(message, {
+      id: 'run:text:final',
+      type: 'text',
+      status: 'streaming',
+      text: 'hello',
+    })
+    const second = upsertMessagePart(first, {
+      id: 'run:text:final',
+      type: 'text',
+      status: 'streaming',
+      text: 'hello world',
+    })
+
+    expect(messagePartsForRender(second)[0].text).toBe('hello world')
   })
 
   it('keeps reasoning and text as separate native parts', () => {

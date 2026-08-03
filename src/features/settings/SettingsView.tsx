@@ -24,7 +24,7 @@ import type { RunDetail, RunLLMUsageRecord, RunSummary } from '@/stores/runsStor
 import { BUILTIN_BASEMAPS } from '@/services/geo'
 import { useMapStore } from '@/stores/mapStore'
 import { mapEngine } from '@/features/map/engine/MapEngine'
-import { pythonClient } from '@/services/pythonClient'
+import { backendClient } from '@/services/backendClient'
 import { iconMap, PROVIDERS, type ProviderConfig } from './providerMap'
 import {
   SettingItem,
@@ -65,15 +65,15 @@ export function SettingsView() {
     { id: 'agent', label: t.settings.agent, icon: Cpu, keywords: ['agent', 'iteration', 'confirmation', 'timeout', 'instructions'] },
     { id: 'promptCache', label: t.settings.promptCacheTest, icon: Gauge, keywords: ['cache', 'prompt cache', 'deepseek', 'usage', 'token', 'section', 'llm'] },
     { id: 'appearance', label: t.settings.appearance, icon: Palette, keywords: ['theme', 'font', 'language', 'map', 'dark', 'light'] },
-    { id: 'python', label: t.settings.python, icon: Terminal, keywords: ['python', 'path', 'environment', 'interpreter'] },
+    { id: 'backend', label: t.settings.backend, icon: Terminal, keywords: ['java', 'backend', 'runtime', 'jdk', 'sidecar'] },
   ]
   const [searchQuery, setSearchQuery] = useState('')
   const [activeSection, setActiveSection] = useState('model')
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [testStatus, setTestStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle')
-  const [pythonBackendStatus, setPythonBackendStatus] = useState<'stopped' | 'starting' | 'ready' | 'error'>('stopped')
-  const [pythonBackendError, setPythonBackendError] = useState<string>('')
-  const [pythonRestarting, setPythonRestarting] = useState(false)
+  const [backendStatus, setBackendStatus] = useState<'stopped' | 'starting' | 'ready' | 'error'>('stopped')
+  const [backendError, setBackendError] = useState<string>('')
+  const [backendRestarting, setBackendRestarting] = useState(false)
   const [showSaveAsNew, setShowSaveAsNew] = useState(false)
   const [newPresetName, setNewPresetName] = useState('')
   const [showProviderDropdown, setShowProviderDropdown] = useState(false)
@@ -177,7 +177,7 @@ export function SettingsView() {
   // Load user instructions from backend (source of truth)
   useEffect(() => {
     let cancelled = false
-    pythonClient.send('user_instructions.get', {})
+    backendClient.send('user_instructions.get', {})
       .then((res: any) => {
         if (!cancelled && res?.content) {
           useSettingsStore.getState().updateAgent({ customInstructions: res.content })
@@ -187,33 +187,33 @@ export function SettingsView() {
     return () => { cancelled = true }
   }, [])
 
-  // Monitor Python backend status
+  // Monitor the application backend status.
   useEffect(() => {
     // Fetch initial status
-    window.electronAPI?.getPythonStatus().then((status) => {
+    window.electronAPI?.getBackendStatus().then((status) => {
       if (status) {
-        setPythonBackendStatus(status.status)
-        setPythonBackendError(status.error || '')
+        setBackendStatus(status.status)
+        setBackendError(status.error || '')
       }
     }).catch(() => {})
 
     // Listen for status changes
-    const unsubscribe = window.electronAPI?.onPythonStatusChanged((status) => {
-      setPythonBackendStatus(status.status)
-      setPythonBackendError(status.error || '')
+    const unsubscribe = window.electronAPI?.onBackendStatusChanged((status) => {
+      setBackendStatus(status.status)
+      setBackendError(status.error || '')
       if (status.status === 'ready' || status.status === 'error') {
-        setPythonRestarting(false)
+        setBackendRestarting(false)
       }
     })
 
     return unsubscribe ?? (() => {})
   }, [])
 
-  // Restart Python backend
-  const handleRestartPython = useCallback(async () => {
+  // Restart the bundled Java backend.
+  const handleRestartBackend = useCallback(async () => {
     if (!window.electronAPI) return
-    setPythonRestarting(true)
-    setPythonBackendError('')
+    setBackendRestarting(true)
+    setBackendError('')
     try {
       // Flush any pending debounced save so the restart reads the latest settings
       if (saveTimeoutRef.current) {
@@ -222,18 +222,18 @@ export function SettingsView() {
       }
       await saveToElectron()
 
-      const status = await window.electronAPI.restartPython()
+      const status = await window.electronAPI.restartBackend()
       if (status) {
-        setPythonBackendStatus(status.status)
-        setPythonBackendError(status.error || '')
+        setBackendStatus(status.status)
+        setBackendError(status.error || '')
         if (status.status === 'ready' || status.status === 'error') {
-          setPythonRestarting(false)
+          setBackendRestarting(false)
         }
       }
     } catch (err: any) {
-      setPythonBackendStatus('error')
-      setPythonBackendError(err.message || String(err))
-      setPythonRestarting(false)
+      setBackendStatus('error')
+      setBackendError(err.message || String(err))
+      setBackendRestarting(false)
     }
   }, [saveToElectron])
 
@@ -560,7 +560,7 @@ export function SettingsView() {
     }
   }, [promptCacheTestEnabled, promptCacheTestExpanded, visiblePromptCacheRuns, runDetails, getRunDetail])
 
-  // Test API connection via Python backend (delegates to litellm)
+  // Test provider connectivity through the Java backend.
   const handleTestConnection = useCallback(async () => {
     setTestStatus('testing')
     try {
@@ -570,7 +570,7 @@ export function SettingsView() {
         return
       }
 
-      const result = await pythonClient.send('rpc.agent.test_connection', {
+      const result = await backendClient.send('rpc.agent.test_connection', {
         protocol: model.protocol,
         model: model.modelName || 'gpt-4o',
         api_key: model.apiKey,
@@ -1136,7 +1136,7 @@ export function SettingsView() {
                       checked={agent.debugMode}
                       onChange={(v) => {
                         setAgent({ debugMode: v })
-                        pythonClient.send('rpc.debug.set_log_level', {
+                        backendClient.send('rpc.debug.set_log_level', {
                           level: v ? 'DEBUG' : 'INFO',
                         }).catch(() => {/* ignore if backend not ready */})
                       }}
@@ -1158,7 +1158,7 @@ export function SettingsView() {
                         const trimmed = v.slice(0, 2000)
                         setAgent({ customInstructions: trimmed })
                         try {
-                          await pythonClient.send('user_instructions.set', { content: trimmed })
+                          await backendClient.send('user_instructions.set', { content: trimmed })
                         } catch (e) {
                           console.warn('[Settings] user_instructions.set failed:', e)
                         }
@@ -1486,40 +1486,40 @@ export function SettingsView() {
               </div>
             )}
 
-            {/* Python 环境 */}
-            {filteredSections.some((s) => s.id === 'python') && (
+            {/* Java backend runtime */}
+            {filteredSections.some((s) => s.id === 'backend') && (
               <div
-                id="section-python"
-                ref={(el) => { sectionRefs.current['python'] = el }}
+                id="section-backend"
+                ref={(el) => { sectionRefs.current['backend'] = el }}
               >
-                <SettingSection title={t.settings.pythonEnv}>
+                <SettingSection title={t.settings.backendRuntime}>
                   {/* Backend Status */}
                   <SettingItem
-                    id="python-backend-status"
-                    label={t.settings.pythonStatus}
-                    description={t.settings.pythonStatusDesc}
+                    id="backend-status"
+                    label={t.settings.backendStatus}
+                    description={t.settings.backendStatusDesc}
                   >
                     <div className="flex items-center gap-3">
                       <div className="flex items-center gap-1.5">
-                        {pythonBackendStatus === 'ready' && (
+                        {backendStatus === 'ready' && (
                           <>
                             <CheckCircle2 className="w-3.5 h-3.5 text-accent-success" />
                             <span className="text-sm text-accent-success">{t.settings.statusReady}</span>
                           </>
                         )}
-                        {pythonBackendStatus === 'starting' && (
+                        {backendStatus === 'starting' && (
                           <>
                             <Loader2 className="w-3.5 h-3.5 text-accent-warning animate-spin" />
                             <span className="text-sm text-accent-warning">{t.settings.statusStarting}</span>
                           </>
                         )}
-                        {pythonBackendStatus === 'stopped' && (
+                        {backendStatus === 'stopped' && (
                           <>
                             <div className="w-2 h-2 rounded-full bg-text-muted" />
                             <span className="text-sm text-text-muted">{t.settings.statusStopped}</span>
                           </>
                         )}
-                        {pythonBackendStatus === 'error' && (
+                        {backendStatus === 'error' && (
                           <>
                             <AlertCircle className="w-3.5 h-3.5 text-accent-danger" />
                             <span className="text-sm text-accent-danger">{t.settings.statusError}</span>
@@ -1527,8 +1527,8 @@ export function SettingsView() {
                         )}
                       </div>
                       <button
-                        onClick={handleRestartPython}
-                        disabled={pythonRestarting || pythonBackendStatus === 'starting'}
+                        onClick={handleRestartBackend}
+                        disabled={backendRestarting || backendStatus === 'starting'}
                         className="
                           h-[30px] px-3 text-sm font-medium rounded
                           bg-accent-primary/15 text-accent-primary
@@ -1538,20 +1538,20 @@ export function SettingsView() {
                           flex items-center gap-1.5
                         "
                       >
-                        {pythonRestarting ? (
+                        {backendRestarting ? (
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
                         ) : (
                           <RotateCcw className="w-3.5 h-3.5" />
                         )}
-                        {pythonRestarting ? t.settings.restarting : t.settings.restart}
+                        {backendRestarting ? t.settings.restarting : t.settings.restart}
                       </button>
                     </div>
                   </SettingItem>
 
                   {/* Error message */}
-                  {pythonBackendStatus === 'error' && pythonBackendError && (
+                  {backendStatus === 'error' && backendError && (
                     <div className="ml-0 mb-2 px-3 py-2 rounded bg-accent-danger/10 text-xs text-accent-danger break-all">
-                      {pythonBackendError}
+                      {backendError}
                     </div>
                   )}
                 </SettingSection>

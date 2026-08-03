@@ -8,7 +8,7 @@ import {
   RefreshCw,
   Search,
 } from 'lucide-react'
-import { pythonClient } from '@/services/pythonClient'
+import { backendClient } from '@/services/backendClient'
 import { useAssetStore } from '@/stores/assetStore'
 import { useViewStore } from '@/stores/viewStore'
 import { useT } from '@/i18n'
@@ -54,7 +54,7 @@ export function OperationsPanel() {
     setLoading(true)
     setError(null)
     try {
-      const result = await pythonClient.send<{
+      const result = await backendClient.send<{
         operation_root?: string
         operation_roots?: Record<string, string>
         operations?: OperationSummary[]

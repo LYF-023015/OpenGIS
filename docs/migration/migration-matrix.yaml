@@ -1,0 +1,2785 @@
+schema_version: '1.0'
+generated_from:
+- test/phase0/rpc/method-inventory.json
+- test/phase0/providers/provider-migration.json
+- test/phase0/baseline/python-semantic-consumers.json
+- test/phase0/fixtures/opengis-workspace/.opengis/schema-inventory.json
+- runtime ToolRegistry
+entry_count: 347
+entries:
+- id: transport:GET:/api/health
+  category: rest-or-websocket
+  source: python-backend/opengis_backend/server.py
+  consumer: opengis-ui/external client
+  decision: migrate
+  java_target: opengis-server
+  phase: 2
+  verification: HTTP/WebSocket contract transcript
+- id: transport:GET:/api/tools
+  category: rest-or-websocket
+  source: python-backend/opengis_backend/server.py
+  consumer: opengis-ui/external client
+  decision: migrate
+  java_target: opengis-server
+  phase: 2
+  verification: HTTP/WebSocket contract transcript
+- id: transport:GET:/api/user-skills
+  category: rest-or-websocket
+  source: python-backend/opengis_backend/server.py
+  consumer: opengis-ui/external client
+  decision: migrate
+  java_target: opengis-server
+  phase: 2
+  verification: HTTP/WebSocket contract transcript
+- id: transport:POST:/api/user-skills/sources
+  category: rest-or-websocket
+  source: python-backend/opengis_backend/server.py
+  consumer: opengis-ui/external client
+  decision: migrate
+  java_target: opengis-server
+  phase: 2
+  verification: HTTP/WebSocket contract transcript
+- id: transport:GET:/api/system/logs-dir
+  category: rest-or-websocket
+  source: python-backend/opengis_backend/server.py
+  consumer: opengis-ui/external client
+  decision: migrate
+  java_target: opengis-server
+  phase: 2
+  verification: HTTP/WebSocket contract transcript
+- id: transport:GET:/api/rasters/{raster_id}/metadata
+  category: rest-or-websocket
+  source: python-backend/opengis_backend/server.py
+  consumer: opengis-ui/external client
+  decision: migrate
+  java_target: opengis-server
+  phase: 2
+  verification: HTTP/WebSocket contract transcript
+- id: transport:POST:/api/rasters/{raster_id}/style
+  category: rest-or-websocket
+  source: python-backend/opengis_backend/server.py
+  consumer: opengis-ui/external client
+  decision: migrate
+  java_target: opengis-server
+  phase: 2
+  verification: HTTP/WebSocket contract transcript
+- id: transport:GET:/api/rasters/{raster_id}/tiles/{z}/{x}/{y}.png
+  category: rest-or-websocket
+  source: python-backend/opengis_backend/server.py
+  consumer: opengis-ui/external client
+  decision: migrate
+  java_target: opengis-server
+  phase: 2
+  verification: HTTP/WebSocket contract transcript
+- id: transport:POST:/api/rpc
+  category: rest-or-websocket
+  source: python-backend/opengis_backend/server.py
+  consumer: opengis-ui/external client
+  decision: migrate
+  java_target: opengis-server
+  phase: 2
+  verification: HTTP/WebSocket contract transcript
+- id: transport:WEBSOCKET:/ws
+  category: rest-or-websocket
+  source: python-backend/opengis_backend/server.py
+  consumer: opengis-ui/external client
+  decision: migrate
+  java_target: opengis-server
+  phase: 2
+  verification: HTTP/WebSocket contract transcript
+- id: rpc-in:chat.user_message
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-agent
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.agent.artifacts.list
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-agent
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.agent.inbox.list
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-agent
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.agent.interrupt
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-agent
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.agent.permissions.list
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-agent
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.agent.permissions.rules.add
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-agent
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.agent.permissions.rules.list
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-agent
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.agent.permissions.rules.remove
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-agent
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.agent.profiles.install_defaults
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-agent
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.agent.profiles.list
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-agent
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.agent.queue.cancel
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-agent
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.agent.queue.get
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-agent
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.agent.queue.list
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-agent
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.agent.queue.process
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-agent
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.agent.queue.resume
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-agent
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.agent.queue.retry
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-agent
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.agent.queue.run
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-agent
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.agent.queue.submit
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-agent
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.agent.sessions.list
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-agent
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.agent.set_llm_config
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-agent
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.agent.test_connection
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-agent
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.code.cancel_script
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-platform
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.code.run_script
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-platform
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.debug.get_log_level
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-server
+  phase: 2
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.debug.set_log_level
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-server
+  phase: 2
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.fs.get_file_info
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-platform
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.fs.load_file
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-platform
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.operations.get
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.operations.list
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.operations.run
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.runs.get
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-agent
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.runs.list
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-agent
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.runs.replay
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-agent
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.tool.execute
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-tool
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.tool.list
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-tool
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.user_skill.add_source
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-knowledge
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.user_skill.list
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-knowledge
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.user_skill.load
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-knowledge
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.worker.delete
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-worker
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.worker.get
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-worker
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.worker.list
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-worker
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.worker.pause
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-worker
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.worker.restart
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-worker
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.workspace.install_templates
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-platform
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:rpc.workspace.revert_run
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-platform
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:user_instructions.get
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-platform
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-in:user_instructions.set
+  category: renderer-to-backend-rpc
+  source: python-backend/opengis_backend/rpc/handler.py
+  consumer: src/services/pythonClient.ts
+  decision: migrate
+  java_target: opengis-platform
+  phase: owning-module
+  verification: protocol transcript + method-specific contract test
+- id: rpc-out:rpc.agent.hello
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.ask.approve_code
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.ask.choose
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.ask.confirm
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.ask.text
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.chat.interactive_snapshot
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.chat.plan_update
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.chat.show_image
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.chat.show_table
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.chat.show_text
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.chat.subagent_update
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.fs.get_workspace
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.fs.list_assets
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.fs.open_external
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.fs.refresh_assets
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.layout.add_element
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.layout.capture_map
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.layout.export
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.layout.get_state
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.layout.remove_element
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.layout.select_element
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.layout.set_page
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.layout.update_frame
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.layout.update_map_view
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.layout.update_props
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.layout.update_style
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.add_image_overlay
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.add_layer
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.add_layer_from_geojson
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.add_raster_from_file
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.add_raster_from_url
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.dynamic_layer_update
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.export_map
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.fly_to
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.get_layer
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.get_legend_spec
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.get_raster_info
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.get_state
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.highlight_features
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.list_layers
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.query_features
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.remove_layer
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.set_basemap
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.set_basemap_visibility
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.set_camera
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.set_layer_filter
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.set_layer_label
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.set_layer_order
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.set_layer_renderer
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.set_layer_style
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.set_layer_visibility
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.set_raster_style
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.update_legend_spec
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.update_visual_variables
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.zoom_to_bbox
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: rpc-out:rpc.ui.map.zoom_to_layer
+  category: backend-to-renderer-rpc
+  source: python Tool/Agent/Worker notification
+  consumer: src/services/rpc/handlers
+  decision: migrate
+  java_target: opengis-common UiRpcPort + opengis-ui handler
+  phase: 2
+  verification: TypeScript handler test + server-push transcript
+- id: event:chat.message_part
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.code.script_done
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.code.script_started
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.code.stdout
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.*
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.chat.interactive_snapshot
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.chat.plan_update
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.chat.show_image
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.chat.subagent_update
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.fs.refresh_assets
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.layout.add_element
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.layout.capture_map
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.layout.export
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.layout.get_state
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.layout.remove_element
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.layout.set_page
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.layout.update_frame
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.layout.update_map_view
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.layout.update_props
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.layout.update_style
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.map.add_image_overlay
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.map.add_layer_from_geojson
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.map.add_raster_from_file
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.map.add_raster_from_url
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.map.dynamic_layer_update
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.map.fly_to
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.map.get_layer
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.map.get_raster_info
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.map.get_state
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.map.highlight_features
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.map.list_layers
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.map.query_features
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.map.remove_layer
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.map.set_basemap_visibility
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.map.set_camera
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.map.set_layer_filter
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.map.set_layer_label
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.map.set_layer_order
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.map.set_layer_renderer
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.map.set_layer_style
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.map.set_layer_visibility
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.map.set_raster_style
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.map.update_legend_spec
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.map.update_visual_variables
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.map.zoom_to_bbox
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: event:rpc.ui.map.zoom_to_layer
+  category: event-or-notification
+  source: python-backend/opengis_backend
+  consumer: src/services/pythonClient.ts subscribers
+  decision: migrate
+  java_target: opengis-common event contract
+  phase: 2
+  verification: JSON envelope + MessagePart/event projection test
+- id: tool:academic_polish
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:academic_translate
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:academic_grammar_check
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:generate_abstract
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:format_references
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:debug_agent_context
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:bash
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:csv_to_geojson
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:datasource_call
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:add_layer
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:remove_layer
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:list_layers
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:get_layer
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:query_features
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:fly_to
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:set_map_camera
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:enter_3d_view
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:exit_3d_view
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:zoom_to_layer
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:set_basemap
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:set_basemap_visibility
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:get_map_state
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:update_layer_style
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:set_graduated_style
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:set_categorized_style
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:set_extrusion_style
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:set_layer_visual_variables
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:set_layer_filter
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:set_layer_label
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:highlight_features
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:set_layer_order
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:update_legend_spec
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:add_raster
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:get_raster_info
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:set_raster_style
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:layout_get_state
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:layout_set_page
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:layout_add_element
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:layout_update_frame
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:layout_update_style
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:layout_update_props
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:layout_update_map_view
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:layout_capture_map
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:layout_remove_element
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:layout_export
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:edit_file
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:list_extensions
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:create_directory
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:delete_file
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:move_file
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:copy_file
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:file_exists
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:list_directory
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:glob
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:grep
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:load_skill
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:list_operations
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:get_operation
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:copy_operation_to_workspace
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:validate_operation
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:run_operation
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:create_operation
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:edit_operation
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:promote_script_to_operation
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:osm_call
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:update_plan
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:save_plot
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:qgis_call
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-gis
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:read_file
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:interactive_snapshot
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:write_report_section
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:export_report_pdf
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:list_scripts
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:read_script
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:run_subagent
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-agent
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:run_subagents
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-agent
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:update_user_instructions
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:webfetch
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:websearch
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:start_worker
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-worker
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:start_dynamic_map_worker
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-worker
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:get_worker
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-worker
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:wait_worker_update
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-worker
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:restart_worker
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-worker
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:list_workers
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-worker
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:pause_worker
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-worker
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:delete_worker
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-worker
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:create_workflow
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-workflow
+  phase: owning-module
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: tool:write_file
+  category: tool
+  source: python-backend/opengis_backend/tools or integrations
+  consumer: Agent ToolRuntime
+  decision: migrate
+  java_target: opengis-tool
+  phase: 4
+  verification: tool schema + success/invalid/deny/cancel/error tests
+- id: storage:sessions-and-inbox
+  category: storage
+  source: .opengis/sessions.json
+  consumer: workspace/user
+  decision: migrate
+  java_target: opengis-agent
+  phase: 3
+  verification: anonymous fixture + Python/Java round-trip
+- id: storage:agent-profiles
+  category: storage
+  source: .opengis/agents.json
+  consumer: workspace/user
+  decision: migrate
+  java_target: opengis-agent
+  phase: 3
+  verification: anonymous fixture + Python/Java round-trip
+- id: storage:permissions
+  category: storage
+  source: .opengis/permissions.json
+  consumer: workspace/user
+  decision: migrate
+  java_target: opengis-tool
+  phase: 3
+  verification: anonymous fixture + Python/Java round-trip
+- id: storage:conversation-context
+  category: storage
+  source: .opengis/contexts/<conversation_id>.json
+  consumer: workspace/user
+  decision: migrate
+  java_target: opengis-knowledge
+  phase: 3
+  verification: anonymous fixture + Python/Java round-trip
+- id: storage:titled-conversations
+  category: storage
+  source: .opengis/titled_conversations.json
+  consumer: workspace/user
+  decision: migrate
+  java_target: opengis-platform
+  phase: 3
+  verification: anonymous fixture + Python/Java round-trip
+- id: storage:artifact-index
+  category: storage
+  source: .opengis/artifacts.jsonl
+  consumer: workspace/user
+  decision: migrate
+  java_target: opengis-agent
+  phase: 3
+  verification: anonymous fixture + Python/Java round-trip
+- id: storage:structured-memory
+  category: storage
+  source: .opengis/memory/{facts,recipes,datasets,failures}.jsonl
+  consumer: workspace/user
+  decision: migrate
+  java_target: opengis-knowledge
+  phase: 3
+  verification: anonymous fixture + Python/Java round-trip
+- id: storage:legacy-memory
+  category: storage
+  source: .opengis/memory.md
+  consumer: workspace/user
+  decision: migrate
+  java_target: opengis-knowledge
+  phase: 3
+  verification: anonymous fixture + Python/Java round-trip
+- id: storage:workflows
+  category: storage
+  source: .opengis/workflows/*.flow.json
+  consumer: workspace/user
+  decision: migrate
+  java_target: opengis-workflow
+  phase: 3
+  verification: anonymous fixture + Python/Java round-trip
+- id: storage:workflow-step-output
+  category: storage
+  source: .opengis/workflow_steps/step<index>_<node_id>.md
+  consumer: workspace/user
+  decision: migrate
+  java_target: opengis-workflow
+  phase: 3
+  verification: anonymous fixture + Python/Java round-trip
+- id: storage:run-archive
+  category: storage
+  source: .opengis/runs/<run_id>/{meta.json,*.jsonl}
+  consumer: workspace/user
+  decision: migrate
+  java_target: opengis-agent
+  phase: 3
+  verification: anonymous fixture + Python/Java round-trip
+- id: storage:workspace-operations
+  category: storage
+  source: .opengis/operations/<operation_id>/
+  consumer: workspace/user
+  decision: migrate
+  java_target: opengis-gis
+  phase: 3
+  verification: anonymous fixture + Python/Java round-trip
+- id: storage:operation-runs
+  category: storage
+  source: .opengis/operation-runs/<builtin_operation_id>/<run_id>/
+  consumer: workspace/user
+  decision: migrate
+  java_target: opengis-gis
+  phase: 3
+  verification: anonymous fixture + Python/Java round-trip
+- id: storage:skill-sources
+  category: storage
+  source: .opengis/skill-sources.json
+  consumer: workspace/user
+  decision: migrate
+  java_target: opengis-knowledge
+  phase: 3
+  verification: anonymous fixture + Python/Java round-trip
+- id: storage:workspace-skills
+  category: storage
+  source: .opengis/skills/<skill>/SKILL.md
+  consumer: workspace/user
+  decision: migrate
+  java_target: opengis-knowledge
+  phase: 3
+  verification: anonymous fixture + Python/Java round-trip
+- id: storage:raster-cache
+  category: storage
+  source: .opengis/raster-cache/
+  consumer: workspace/user
+  decision: migrate
+  java_target: opengis-gis
+  phase: 3
+  verification: regenerate cache from source fixture
+- id: storage:user-instructions
+  category: storage
+  source: ~/.opengis/user_instructions.md
+  consumer: global user preferences
+  decision: migrate
+  java_target: opengis-platform
+  phase: 3
+  verification: temporary-home anonymous fixture + Python/Java round-trip
+- id: provider:openai
+  category: llm-provider
+  source: src/features/settings/providerMap.ts
+  consumer: Settings + Agent LLM caller
+  decision: migrate
+  java_target: opengis-ai
+  phase: 5
+  verification: openai fixture + tier-1-contract-gate
+- id: provider:anthropic
+  category: llm-provider
+  source: src/features/settings/providerMap.ts
+  consumer: Settings + Agent LLM caller
+  decision: migrate
+  java_target: opengis-ai
+  phase: 5
+  verification: anthropic fixture + tier-1-contract-gate
+- id: provider:deepseek
+  category: llm-provider
+  source: src/features/settings/providerMap.ts
+  consumer: Settings + Agent LLM caller
+  decision: migrate
+  java_target: opengis-ai
+  phase: 5
+  verification: openai fixture + tier-1-contract-gate
+- id: provider:minimax
+  category: llm-provider
+  source: src/features/settings/providerMap.ts
+  consumer: Settings + Agent LLM caller
+  decision: migrate
+  java_target: opengis-ai
+  phase: 5
+  verification: anthropic fixture + tier-2-certification
+- id: provider:mistral
+  category: llm-provider
+  source: src/features/settings/providerMap.ts
+  consumer: Settings + Agent LLM caller
+  decision: migrate
+  java_target: opengis-ai
+  phase: 5
+  verification: openai fixture + tier-2-certification
+- id: provider:google
+  category: llm-provider
+  source: src/features/settings/providerMap.ts
+  consumer: Settings + Agent LLM caller
+  decision: migrate
+  java_target: opengis-ai
+  phase: 5
+  verification: openai fixture + tier-2-certification
+- id: provider:xai
+  category: llm-provider
+  source: src/features/settings/providerMap.ts
+  consumer: Settings + Agent LLM caller
+  decision: migrate
+  java_target: opengis-ai
+  phase: 5
+  verification: openai fixture + tier-2-certification
+- id: provider:ollama
+  category: llm-provider
+  source: src/features/settings/providerMap.ts
+  consumer: Settings + Agent LLM caller
+  decision: migrate
+  java_target: opengis-ai
+  phase: 5
+  verification: openai fixture + tier-1-contract-gate
+- id: provider:openrouter
+  category: llm-provider
+  source: src/features/settings/providerMap.ts
+  consumer: Settings + Agent LLM caller
+  decision: migrate
+  java_target: opengis-ai
+  phase: 5
+  verification: openai fixture + tier-2-certification
+- id: provider:cohere
+  category: llm-provider
+  source: src/features/settings/providerMap.ts
+  consumer: Settings + Agent LLM caller
+  decision: migrate
+  java_target: opengis-ai
+  phase: 5
+  verification: openai fixture + tier-2-certification
+- id: provider:azure
+  category: llm-provider
+  source: src/features/settings/providerMap.ts
+  consumer: Settings + Agent LLM caller
+  decision: migrate
+  java_target: opengis-ai
+  phase: 5
+  verification: openai fixture + compatibility-spike
+- id: provider:baidu
+  category: llm-provider
+  source: src/features/settings/providerMap.ts
+  consumer: Settings + Agent LLM caller
+  decision: migrate
+  java_target: opengis-ai
+  phase: 5
+  verification: openai fixture + compatibility-spike
+- id: provider:zhipu
+  category: llm-provider
+  source: src/features/settings/providerMap.ts
+  consumer: Settings + Agent LLM caller
+  decision: migrate
+  java_target: opengis-ai
+  phase: 5
+  verification: openai fixture + tier-2-certification
+- id: provider:hunyuan
+  category: llm-provider
+  source: src/features/settings/providerMap.ts
+  consumer: Settings + Agent LLM caller
+  decision: migrate
+  java_target: opengis-ai
+  phase: 5
+  verification: openai fixture + tier-2-certification
+- id: provider:qwen
+  category: llm-provider
+  source: src/features/settings/providerMap.ts
+  consumer: Settings + Agent LLM caller
+  decision: migrate
+  java_target: opengis-ai
+  phase: 5
+  verification: openai fixture + tier-2-certification
+- id: provider:doubao
+  category: llm-provider
+  source: src/features/settings/providerMap.ts
+  consumer: Settings + Agent LLM caller
+  decision: migrate
+  java_target: opengis-ai
+  phase: 5
+  verification: openai fixture + tier-2-certification
+- id: provider:kimi
+  category: llm-provider
+  source: src/features/settings/providerMap.ts
+  consumer: Settings + Agent LLM caller
+  decision: migrate
+  java_target: opengis-ai
+  phase: 5
+  verification: openai fixture + tier-2-certification
+- id: provider:stepfun
+  category: llm-provider
+  source: src/features/settings/providerMap.ts
+  consumer: Settings + Agent LLM caller
+  decision: migrate
+  java_target: opengis-ai
+  phase: 5
+  verification: openai fixture + tier-2-certification
+- id: provider:yi
+  category: llm-provider
+  source: src/features/settings/providerMap.ts
+  consumer: Settings + Agent LLM caller
+  decision: migrate
+  java_target: opengis-ai
+  phase: 5
+  verification: openai fixture + tier-2-certification
+- id: provider:siliconflow
+  category: llm-provider
+  source: src/features/settings/providerMap.ts
+  consumer: Settings + Agent LLM caller
+  decision: migrate
+  java_target: opengis-ai
+  phase: 5
+  verification: openai fixture + tier-2-certification
+- id: provider:xiaomimimo
+  category: llm-provider
+  source: src/features/settings/providerMap.ts
+  consumer: Settings + Agent LLM caller
+  decision: migrate
+  java_target: opengis-ai
+  phase: 5
+  verification: openai fixture + tier-2-certification
+- id: provider:perplexity
+  category: llm-provider
+  source: src/features/settings/providerMap.ts
+  consumer: Settings + Agent LLM caller
+  decision: migrate
+  java_target: opengis-ai
+  phase: 5
+  verification: openai fixture + tier-2-certification
+- id: provider:nvidia
+  category: llm-provider
+  source: src/features/settings/providerMap.ts
+  consumer: Settings + Agent LLM caller
+  decision: migrate
+  java_target: opengis-ai
+  phase: 5
+  verification: openai fixture + tier-2-certification
+- id: provider:huggingface
+  category: llm-provider
+  source: src/features/settings/providerMap.ts
+  consumer: Settings + Agent LLM caller
+  decision: migrate
+  java_target: opengis-ai
+  phase: 5
+  verification: openai fixture + compatibility-spike
+- id: python-consumer:docs/adding-a-new-tool.md
+  category: python-semantic-consumer
+  source: docs/adding-a-new-tool.md
+  consumer: documentation
+  decision: migrate
+  java_target: docs
+  phase: 9
+  verification: update process diagrams, commands and extension examples at the owning migration phase
+- id: python-consumer:docs/message-compaction-architecture.md
+  category: python-semantic-consumer
+  source: docs/message-compaction-architecture.md
+  consumer: documentation
+  decision: migrate
+  java_target: docs
+  phase: 9
+  verification: update process diagrams, commands and extension examples at the owning migration phase
+- id: python-consumer:docs/opengis-agent-loop-termination-report.md
+  category: python-semantic-consumer
+  source: docs/opengis-agent-loop-termination-report.md
+  consumer: documentation
+  decision: migrate
+  java_target: docs
+  phase: 9
+  verification: update process diagrams, commands and extension examples at the owning migration phase
+- id: python-consumer:docs/prompt-cache-stable-prefix-architecture.md
+  category: python-semantic-consumer
+  source: docs/prompt-cache-stable-prefix-architecture.md
+  consumer: documentation
+  decision: migrate
+  java_target: docs
+  phase: 9
+  verification: update process diagrams, commands and extension examples at the owning migration phase
+- id: python-consumer:electron/ipc/pythonManager.ts
+  category: python-semantic-consumer
+  source: electron/ipc/pythonManager.ts
+  consumer: electron-launcher
+  decision: migrate
+  java_target: opengis-server/opengis-ui
+  phase: 9
+  verification: replace with BackendManager + bundled JRE launcher; keep compatibility flag during migration
+- id: python-consumer:electron/ipc/pythonSetup.ts
+  category: python-semantic-consumer
+  source: electron/ipc/pythonSetup.ts
+  consumer: electron-launcher
+  decision: migrate
+  java_target: opengis-server/opengis-ui
+  phase: 9
+  verification: replace with BackendManager + bundled JRE launcher; keep compatibility flag during migration
+- id: python-consumer:electron/main.ts
+  category: python-semantic-consumer
+  source: electron/main.ts
+  consumer: electron-launcher
+  decision: migrate
+  java_target: opengis-server/opengis-ui
+  phase: 9
+  verification: replace with BackendManager + bundled JRE launcher; keep compatibility flag during migration
+- id: python-consumer:electron-builder.yml
+  category: python-semantic-consumer
+  source: electron-builder.yml
+  consumer: electron-launcher
+  decision: migrate
+  java_target: opengis-server/opengis-ui
+  phase: 9
+  verification: replace with BackendManager + bundled JRE launcher; keep compatibility flag during migration
+- id: python-consumer:package.json
+  category: python-semantic-consumer
+  source: package.json
+  consumer: electron-launcher
+  decision: migrate
+  java_target: opengis-server/opengis-ui
+  phase: 9
+  verification: replace with BackendManager + bundled JRE launcher; keep compatibility flag during migration
+- id: python-consumer:README.md
+  category: python-semantic-consumer
+  source: README.md
+  consumer: transport-client
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: rename to backendClient only after Java protocol parity; behavior remains JSON-RPC
+- id: python-consumer:README.zh.md
+  category: python-semantic-consumer
+  source: README.zh.md
+  consumer: transport-client
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: rename to backendClient only after Java protocol parity; behavior remains JSON-RPC
+- id: python-consumer:src/App.tsx
+  category: python-semantic-consumer
+  source: src/App.tsx
+  consumer: transport-client
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: rename to backendClient only after Java protocol parity; behavior remains JSON-RPC
+- id: python-consumer:src/features/approval/ApprovalGate.tsx
+  category: python-semantic-consumer
+  source: src/features/approval/ApprovalGate.tsx
+  consumer: transport-client
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: rename to backendClient only after Java protocol parity; behavior remains JSON-RPC
+- id: python-consumer:src/features/assets/AssetExplorer.tsx
+  category: python-semantic-consumer
+  source: src/features/assets/AssetExplorer.tsx
+  consumer: renderer-consumer
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: preserve UI behavior and replace Python-specific labels/types with backend-neutral terms
+- id: python-consumer:src/features/chat/components/CodeStepRow.tsx
+  category: python-semantic-consumer
+  source: src/features/chat/components/CodeStepRow.tsx
+  consumer: code-execution-ui
+  decision: migrate
+  java_target: opengis-platform/opengis-ui
+  phase: owning-module
+  verification: retain protocol initially; change language metadata and labels from Python to Java
+- id: python-consumer:src/features/chat/components/FileBrowserDialog.tsx
+  category: python-semantic-consumer
+  source: src/features/chat/components/FileBrowserDialog.tsx
+  consumer: renderer-consumer
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: preserve UI behavior and replace Python-specific labels/types with backend-neutral terms
+- id: python-consumer:src/features/code/CodeViewer.tsx
+  category: python-semantic-consumer
+  source: src/features/code/CodeViewer.tsx
+  consumer: renderer-consumer
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: preserve UI behavior and replace Python-specific labels/types with backend-neutral terms
+- id: python-consumer:src/features/map/extensions/host.ts
+  category: python-semantic-consumer
+  source: src/features/map/extensions/host.ts
+  consumer: transport-client
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: rename to backendClient only after Java protocol parity; behavior remains JSON-RPC
+- id: python-consumer:src/features/operations/OperationEditorView.tsx
+  category: python-semantic-consumer
+  source: src/features/operations/OperationEditorView.tsx
+  consumer: transport-client
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: rename to backendClient only after Java protocol parity; behavior remains JSON-RPC
+- id: python-consumer:src/features/operations/OperationsPanel.tsx
+  category: python-semantic-consumer
+  source: src/features/operations/OperationsPanel.tsx
+  consumer: transport-client
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: rename to backendClient only after Java protocol parity; behavior remains JSON-RPC
+- id: python-consumer:src/features/pivot/pivotAnalysis.ts
+  category: python-semantic-consumer
+  source: src/features/pivot/pivotAnalysis.ts
+  consumer: transport-client
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: rename to backendClient only after Java protocol parity; behavior remains JSON-RPC
+- id: python-consumer:src/features/runs/RunsPanel.tsx
+  category: python-semantic-consumer
+  source: src/features/runs/RunsPanel.tsx
+  consumer: renderer-consumer
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: preserve UI behavior and replace Python-specific labels/types with backend-neutral terms
+- id: python-consumer:src/features/script-runner/ScriptRunnerView.tsx
+  category: python-semantic-consumer
+  source: src/features/script-runner/ScriptRunnerView.tsx
+  consumer: code-execution-ui
+  decision: migrate
+  java_target: opengis-platform/opengis-ui
+  phase: owning-module
+  verification: retain protocol initially; change language metadata and labels from Python to Java
+- id: python-consumer:src/features/script-runner/useScriptRunner.ts
+  category: python-semantic-consumer
+  source: src/features/script-runner/useScriptRunner.ts
+  consumer: code-execution-ui
+  decision: migrate
+  java_target: opengis-platform/opengis-ui
+  phase: owning-module
+  verification: retain protocol initially; change language metadata and labels from Python to Java
+- id: python-consumer:src/features/settings/SettingsView.tsx
+  category: python-semantic-consumer
+  source: src/features/settings/SettingsView.tsx
+  consumer: transport-client
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: rename to backendClient only after Java protocol parity; behavior remains JSON-RPC
+- id: python-consumer:src/features/tool-catalog/ToolAndSkillPanel.tsx
+  category: python-semantic-consumer
+  source: src/features/tool-catalog/ToolAndSkillPanel.tsx
+  consumer: transport-client
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: rename to backendClient only after Java protocol parity; behavior remains JSON-RPC
+- id: python-consumer:src/features/workers/WorkerCard.tsx
+  category: python-semantic-consumer
+  source: src/features/workers/WorkerCard.tsx
+  consumer: renderer-consumer
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: preserve UI behavior and replace Python-specific labels/types with backend-neutral terms
+- id: python-consumer:src/features/workers/WorkersPanel.tsx
+  category: python-semantic-consumer
+  source: src/features/workers/WorkersPanel.tsx
+  consumer: transport-client
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: rename to backendClient only after Java protocol parity; behavior remains JSON-RPC
+- id: python-consumer:src/features/workers/workerUtils.ts
+  category: python-semantic-consumer
+  source: src/features/workers/workerUtils.ts
+  consumer: renderer-consumer
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: preserve UI behavior and replace Python-specific labels/types with backend-neutral terms
+- id: python-consumer:src/features/workflows/workflow-schema.ts
+  category: python-semantic-consumer
+  source: src/features/workflows/workflow-schema.ts
+  consumer: renderer-consumer
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: preserve UI behavior and replace Python-specific labels/types with backend-neutral terms
+- id: python-consumer:src/features/workflows/WorkflowsPanel.tsx
+  category: python-semantic-consumer
+  source: src/features/workflows/WorkflowsPanel.tsx
+  consumer: renderer-consumer
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: preserve UI behavior and replace Python-specific labels/types with backend-neutral terms
+- id: python-consumer:src/layouts/MainLayout.tsx
+  category: python-semantic-consumer
+  source: src/layouts/MainLayout.tsx
+  consumer: renderer-consumer
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: preserve UI behavior and replace Python-specific labels/types with backend-neutral terms
+- id: python-consumer:src/services/__tests__/pythonClient.test.ts
+  category: python-semantic-consumer
+  source: src/services/__tests__/pythonClient.test.ts
+  consumer: transport-client
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: rename to backendClient only after Java protocol parity; behavior remains JSON-RPC
+- id: python-consumer:src/services/commandBus.ts
+  category: python-semantic-consumer
+  source: src/services/commandBus.ts
+  consumer: transport-client
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: rename to backendClient only after Java protocol parity; behavior remains JSON-RPC
+- id: python-consumer:src/services/events.ts
+  category: python-semantic-consumer
+  source: src/services/events.ts
+  consumer: transport-client
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: rename to backendClient only after Java protocol parity; behavior remains JSON-RPC
+- id: python-consumer:src/services/pythonClient.ts
+  category: python-semantic-consumer
+  source: src/services/pythonClient.ts
+  consumer: transport-client
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: rename to backendClient only after Java protocol parity; behavior remains JSON-RPC
+- id: python-consumer:src/services/rpc/handlers/map/style.ts
+  category: python-semantic-consumer
+  source: src/services/rpc/handlers/map/style.ts
+  consumer: renderer-consumer
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: preserve UI behavior and replace Python-specific labels/types with backend-neutral terms
+- id: python-consumer:src/services/rpc/handlers/map/view.ts
+  category: python-semantic-consumer
+  source: src/services/rpc/handlers/map/view.ts
+  consumer: renderer-consumer
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: preserve UI behavior and replace Python-specific labels/types with backend-neutral terms
+- id: python-consumer:src/stores/chatStore.ts
+  category: python-semantic-consumer
+  source: src/stores/chatStore.ts
+  consumer: transport-client
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: rename to backendClient only after Java protocol parity; behavior remains JSON-RPC
+- id: python-consumer:src/stores/runsStore.ts
+  category: python-semantic-consumer
+  source: src/stores/runsStore.ts
+  consumer: transport-client
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: rename to backendClient only after Java protocol parity; behavior remains JSON-RPC
+- id: python-consumer:src/stores/v3/__tests__/stores.test.ts
+  category: python-semantic-consumer
+  source: src/stores/v3/__tests__/stores.test.ts
+  consumer: renderer-consumer
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: preserve UI behavior and replace Python-specific labels/types with backend-neutral terms
+- id: python-consumer:src/stores/v3/scriptStore.ts
+  category: python-semantic-consumer
+  source: src/stores/v3/scriptStore.ts
+  consumer: renderer-consumer
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: preserve UI behavior and replace Python-specific labels/types with backend-neutral terms
+- id: python-consumer:src/types/chat.ts
+  category: python-semantic-consumer
+  source: src/types/chat.ts
+  consumer: renderer-consumer
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: preserve UI behavior and replace Python-specific labels/types with backend-neutral terms
+- id: python-consumer:src/types/protocol.ts
+  category: python-semantic-consumer
+  source: src/types/protocol.ts
+  consumer: renderer-consumer
+  decision: migrate
+  java_target: opengis-ui
+  phase: owning-module
+  verification: preserve UI behavior and replace Python-specific labels/types with backend-neutral terms
+- id: runtime:python-interpreter
+  category: external-runtime
+  source: Python >=3.11 and project venv
+  consumer: backend
+  decision: migrate
+  java_target: opengis-server bundled JRE
+  phase: 10
+  verification: platform-specific integration/packaging test
+- id: runtime:pip
+  category: external-runtime
+  source: pip/requirements dynamic installation
+  consumer: backend
+  decision: migrate
+  java_target: opengis-platform Maven Resolver
+  phase: 8
+  verification: platform-specific integration/packaging test
+- id: runtime:generated-code
+  category: external-runtime
+  source: Python subprocess executor
+  consumer: backend
+  decision: migrate
+  java_target: opengis-platform isolated Java runner
+  phase: 8
+  verification: platform-specific integration/packaging test
+- id: runtime:resident-worker
+  category: external-runtime
+  source: Python Worker process
+  consumer: backend
+  decision: migrate
+  java_target: opengis-worker child JVM
+  phase: 8
+  verification: platform-specific integration/packaging test
+- id: runtime:qgis
+  category: external-runtime
+  source: QGIS MCP localhost service
+  consumer: backend
+  decision: migrate
+  java_target: opengis-gis QGIS adapter
+  phase: 7
+  verification: platform-specific integration/packaging test
+- id: runtime:osm
+  category: external-runtime
+  source: Nominatim/Overpass
+  consumer: backend
+  decision: migrate
+  java_target: opengis-gis OSM adapter
+  phase: 7
+  verification: platform-specific integration/packaging test
+- id: runtime:native-gis
+  category: external-runtime
+  source: GDAL/PROJ wheels
+  consumer: backend
+  decision: migrate
+  java_target: opengis-gis GeoTools/JTS/optional GDAL JNI
+  phase: 7
+  verification: platform-specific integration/packaging test
+- id: user-asset:local-gis-files
+  category: user-asset
+  source: user workspace/settings
+  consumer: OpenGIS user
+  decision: migrate
+  java_target: owning module + migration inspector
+  phase: owning-module
+  verification: backup, inspect, migrate, rollback fixture
+- id: user-asset:workspace-python-operation
+  category: user-asset
+  source: user workspace/settings
+  consumer: OpenGIS user
+  decision: migrate
+  java_target: owning module + migration inspector
+  phase: owning-module
+  verification: backup, inspect, migrate, rollback fixture
+- id: user-asset:workspace-python-worker
+  category: user-asset
+  source: user workspace/settings
+  consumer: OpenGIS user
+  decision: migrate
+  java_target: owning module + migration inspector
+  phase: owning-module
+  verification: backup, inspect, migrate, rollback fixture
+- id: user-asset:user-skill
+  category: user-asset
+  source: user workspace/settings
+  consumer: OpenGIS user
+  decision: migrate
+  java_target: owning module + migration inspector
+  phase: owning-module
+  verification: backup, inspect, migrate, rollback fixture
+- id: user-asset:workflow
+  category: user-asset
+  source: user workspace/settings
+  consumer: OpenGIS user
+  decision: migrate
+  java_target: owning module + migration inspector
+  phase: owning-module
+  verification: backup, inspect, migrate, rollback fixture
+- id: user-asset:run-history
+  category: user-asset
+  source: user workspace/settings
+  consumer: OpenGIS user
+  decision: migrate
+  java_target: owning module + migration inspector
+  phase: owning-module
+  verification: backup, inspect, migrate, rollback fixture
+- id: user-asset:model-preset
+  category: user-asset
+  source: user workspace/settings
+  consumer: OpenGIS user
+  decision: migrate
+  java_target: owning module + migration inspector
+  phase: owning-module
+  verification: backup, inspect, migrate, rollback fixture

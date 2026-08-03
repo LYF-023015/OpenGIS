@@ -1,0 +1,42 @@
+{
+  "captured_at": "2026-08-02",
+  "source_commit": "1e59165373fecb4f8cc7b58d74de2733905f4044",
+  "os": {
+    "name": "Microsoft Windows 11 Professional",
+    "version": "10.0.26200",
+    "architecture": "64-bit"
+  },
+  "hardware": {
+    "cpu": "AMD Ryzen 9 8945HX with Radeon Graphics",
+    "logical_processors": 32,
+    "visible_memory_gb": 15.22
+  },
+  "node": "22.23.1",
+  "npm": "10.9.8",
+  "python": {
+    "version": "3.13.5",
+    "executable": "python-backend/.venv/Scripts/python.exe",
+    "isolation": "project-local virtual environment; ignored by git"
+  },
+  "python_packages": {
+    "opengis-backend": "0.1.0",
+    "pytest": "9.1.1",
+    "fastapi": "0.141.1",
+    "uvicorn": "0.52.1",
+    "websockets": "17.0.1",
+    "litellm": "1.95.0",
+    "pydantic": "2.13.4",
+    "geopandas": "1.1.4",
+    "rasterio": "1.5.0",
+    "fiona": "1.10.1",
+    "shapely": "2.1.2",
+    "pyproj": "3.7.2",
+    "numpy": "2.5.1",
+    "pandas": "3.0.5",
+    "scipy": "1.18.0",
+    "scikit-learn": "1.9.0",
+    "hdbscan": "0.8.44",
+    "matplotlib": "3.11.1",
+    "lxml": "6.1.1"
+  }
+}

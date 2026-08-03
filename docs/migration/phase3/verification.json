@@ -1,0 +1,75 @@
+{
+  "captured_at": "2026-08-02",
+  "phase": 3,
+  "workspace_compatibility": {
+    "persistent_families": 15,
+    "readable_families": 15,
+    "regenerable_cache_families": 1,
+    "phase0_fixture_compatible": true,
+    "sparse_workspace_compatible": true
+  },
+  "round_trip": {
+    "python_writer_to_java_reader": "passed",
+    "java_writer_to_python_reader": "passed",
+    "python_interpreter": "python-backend/.venv/Scripts/python.exe",
+    "golden_fixture_mutated": false
+  },
+  "java": {
+    "working_directory": "java-backend",
+    "command": "mvnw.cmd verify",
+    "exit_code": 0,
+    "tests": 26,
+    "failures": 0,
+    "errors": 0,
+    "phase3_integration_tests": 7,
+    "quality_gates": [
+      "Maven Enforcer",
+      "Surefire",
+      "Failsafe",
+      "JaCoCo",
+      "Spotless",
+      "Checkstyle",
+      "ArchUnit"
+    ]
+  },
+  "run_archive": {
+    "streams": 6,
+    "append": "passed",
+    "close": "passed",
+    "open_tool_call_repair": "passed",
+    "open_message_part_repair": "passed",
+    "load_and_list": "passed"
+  },
+  "electron": {
+    "settings_schema_version": 2,
+    "projects_schema_version": 2,
+    "unknown_field_preservation": "passed",
+    "typecheck_exit_code": 0
+  },
+  "git": {
+    "snapshot": "passed",
+    "revert_hard_in_temporary_repository": "passed",
+    "missing_git_error": "passed"
+  },
+  "migration": {
+    "target_version": "3.0-java",
+    "inspect": "passed",
+    "apply": "passed",
+    "idempotency": "passed",
+    "rollback": "passed",
+    "source_file_byte_preservation": "passed"
+  },
+  "phase3_rpc_methods": 13,
+  "bundled_runtime": {
+    "build_command": "java-backend/opengis-server/scripts/build-runtime.ps1",
+    "build_exit_code": 0,
+    "files": 192,
+    "bytes": 51669972,
+    "executable_jar_bytes": 21039727,
+    "electron_smoke_command": "npm run smoke:java-sidecar",
+    "electron_smoke_exit_code": 0,
+    "health": "ok",
+    "protocol_ping": "ok",
+    "phase3_runs_list": "run-phase0-001"
+  }
+}

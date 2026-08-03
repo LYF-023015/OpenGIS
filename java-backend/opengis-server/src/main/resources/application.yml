@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: opengis-server
+  lifecycle:
+    timeout-per-shutdown-phase: 10s
+
+server:
+  address: 127.0.0.1
+  port: 8765
+  shutdown: graceful
+
+opengis:
+  runtime:
+    version: 0.1.0
+    log-dir: ${logging.file.path}
+
+logging:
+  file:
+    path: ${OPENGIS_LOG_DIR:${java.io.tmpdir}/opengis/logs}
+  level:
+    root: INFO
+    org.opengis: INFO

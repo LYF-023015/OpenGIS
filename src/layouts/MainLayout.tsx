@@ -432,15 +432,15 @@ function StatusBar() {
       )}
       <div className="flex-1" />
       <span className="mr-3">{layers.length} {t.layout.layers}</span>
-      <PythonStatusIndicator />
+      <BackendStatusIndicator />
     </div>
   )
 }
 
 /**
- * Python backend status indicator in the status bar.
+ * Runtime-neutral backend status indicator in the status bar.
  */
-function PythonStatusIndicator() {
+function BackendStatusIndicator() {
   const statusColors = {
     ready: 'bg-accent-success',
     starting: 'bg-accent-warning animate-pulse-soft',
@@ -455,12 +455,12 @@ function PythonStatusIndicator() {
     if (!api) return
 
     // Get initial status
-    api.getPythonStatus().then((s: any) => {
+    api.getBackendStatus().then((s: any) => {
       if (s?.status) setStatus(s.status)
     }).catch(() => {})
 
     // Subscribe to status changes
-    const unsubscribe = api.onPythonStatusChanged((s: any) => {
+    const unsubscribe = api.onBackendStatusChanged((s: any) => {
       if (s?.status) setStatus(s.status)
     })
     return unsubscribe
@@ -469,7 +469,7 @@ function PythonStatusIndicator() {
   return (
     <div className="flex items-center gap-1.5">
       <div className={`w-1.5 h-1.5 rounded-full ${statusColors[status]}`} />
-      <span>Python: {status}</span>
+      <span>Java: {status}</span>
     </div>
   )
 }
@@ -554,7 +554,7 @@ function PrimaryPanel({
 /**
  * Pick the right view for a code/text tab.
  *
- * Python files get the full Script Runner (Monaco + Run + stdout) so the
+ * Java files get the full Script Runner (Monaco + Run + stdout) so the
  * user can edit and execute the same file they just double-clicked in
  * the Asset Explorer. CSV / TSV files get the spreadsheet-style grid
  * viewer. Everything else (including GeoJSON) falls back to the
@@ -578,8 +578,8 @@ function CodeTabContent({ tab }: { tab: ViewTab }) {
     return <OperationEditorView tab={tab} />
   }
 
-  const isPython = lang === 'python' || path.endsWith('.py')
-  if (isPython) {
+  const isJava = lang === 'java' || path.endsWith('.java')
+  if (isJava) {
     return <ScriptRunnerView tab={tab} />
   }
 

@@ -1,0 +1,17 @@
+{
+  "run_id": "operation-run-phase0-001",
+  "operation_id": "legacy-sample",
+  "status": "success",
+  "returncode": 0,
+  "started_at": "2026-01-01T00:00:00Z",
+  "finished_at": "2026-01-01T00:00:01Z",
+  "scope": "builtin",
+  "input_path": ".opengis/operation-runs/legacy-sample/operation-run-phase0-001/input.json",
+  "output_path": ".opengis/operation-runs/legacy-sample/operation-run-phase0-001/output.json",
+  "stdout_path": ".opengis/operation-runs/legacy-sample/operation-run-phase0-001/stdout.log",
+  "stderr_path": ".opengis/operation-runs/legacy-sample/operation-run-phase0-001/stderr.log",
+  "output": {
+    "success": true,
+    "summary": "Synthetic operation output"
+  }
+}

@@ -56,7 +56,7 @@ export interface PivotAgentResult {
   distributions: PivotFieldDistribution[]
   summary: string
   durationMs?: number | null
-  engine: 'python' | 'typescript'
+  engine: 'java' | 'typescript'
 }
 
 export function targetFromLayer(layer: MapLayerDefinition): PivotTarget {

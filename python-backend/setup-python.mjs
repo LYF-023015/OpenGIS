@@ -1,7 +1,6 @@
 /**
- * Cross-platform Python backend setup script.
- * Creates a virtual environment in the user data directory
- * and installs dependencies. Shared between dev mode and packaged app.
+ * Explicit recovery/development setup for the retained Python backup.
+ * This script is never called by the Java-default desktop startup or package.
  */
 
 import { existsSync, mkdirSync } from 'node:fs'

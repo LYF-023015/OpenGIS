@@ -1,0 +1,26 @@
+[
+  {
+    "id": "china-provinces",
+    "name": "中国省级行政区",
+    "description": "DataV 中国省级行政区边界 GeoJSON",
+    "url": "https://geo.datav.aliyun.com/areas_v3/bound/100000_full.json"
+  },
+  {
+    "id": "natural-earth-countries-110m",
+    "name": "全球国家边界 110m",
+    "description": "Natural Earth 全球国家边界轻量数据",
+    "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_admin_0_countries.geojson"
+  },
+  {
+    "id": "natural-earth-cities",
+    "name": "全球主要城市",
+    "description": "Natural Earth 全球主要城市和首都点数据",
+    "url": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_110m_populated_places_simple.geojson"
+  },
+  {
+    "id": "usgs-earthquakes-day",
+    "name": "USGS 近24小时地震",
+    "description": "USGS 过去 24 小时全球地震 GeoJSON",
+    "url": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson"
+  }
+]

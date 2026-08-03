@@ -1,0 +1,10 @@
+{
+  "run_id": "run-phase0-001",
+  "status": "completed",
+  "created_at": "2026-01-01T00:00:00Z",
+  "completed_at": "2026-01-01T00:00:01Z",
+  "workspace_path": "${WORKSPACE}",
+  "conversation_id": "conversation-phase0-001",
+  "pre_sha": "0000000000000000000000000000000000000000",
+  "post_sha": "1111111111111111111111111111111111111111"
+}

@@ -1,0 +1,97 @@
+{
+  "schema_version": "1.0",
+  "protocol": "openai",
+  "request": {
+    "method": "POST",
+    "path_suffix": "/chat/completions",
+    "headers": {
+      "Authorization": "Bearer ${API_KEY}",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "model": "${MODEL}",
+      "messages": [
+        {
+          "role": "system",
+          "content": "You are OpenGIS."
+        },
+        {
+          "role": "user",
+          "content": "List layers."
+        }
+      ],
+      "tools": [
+        {
+          "type": "function",
+          "function": {
+            "name": "list_layers",
+            "description": "List map layers",
+            "parameters": {
+              "type": "object",
+              "properties": {}
+            }
+          }
+        }
+      ],
+      "tool_choice": "auto",
+      "stream": true
+    }
+  },
+  "stream_examples": [
+    {
+      "choices": [
+        {
+          "delta": {
+            "role": "assistant",
+            "content": null
+          },
+          "finish_reason": null
+        }
+      ]
+    },
+    {
+      "choices": [
+        {
+          "delta": {
+            "tool_calls": [
+              {
+                "index": 0,
+                "id": "call_fixture",
+                "type": "function",
+                "function": {
+                  "name": "list_layers",
+                  "arguments": "{}"
+                }
+              }
+            ]
+          },
+          "finish_reason": null
+        }
+      ]
+    },
+    {
+      "choices": [
+        {
+          "delta": {},
+          "finish_reason": "tool_calls"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 10,
+        "completion_tokens": 4,
+        "total_tokens": 14
+      }
+    }
+  ],
+  "normalized_expectation": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "call_fixture",
+        "name": "list_layers",
+        "arguments": {}
+      }
+    ],
+    "finish_reason": "tool_calls"
+  }
+}

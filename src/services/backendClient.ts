@@ -1,4 +1,4 @@
-/** Python backend client. 通过 WebSocket 连接 Python 后端的 JSON-RPC 客户端。 */
+/** Runtime-neutral backend client. Connects to the Java sidecar JSON-RPC endpoint. */
 import { v4 as uuid } from 'uuid'
 import {
   getMethodChannel,
@@ -12,6 +12,10 @@ type NotificationHandler = (method: string, params: any) => void
 
 const DYNAMIC_LAYER_UPDATE_METHOD = 'rpc.ui.map.dynamic_layer_update'
 const DYNAMIC_LAYER_FRAME_MS = 100
+// The WebSocket OPEN state is defined as 1 by the platform specification.
+// Keeping the value local also lets this runtime-neutral client work in Node
+// tests where the browser's global `WebSocket` constructor may not exist.
+const WEBSOCKET_OPEN_STATE = 1
 
 /**
  * Minimal surface of the Dispatcher that the client needs. Avoids a hard
@@ -23,7 +27,7 @@ export interface DispatcherLike {
    * Route a notification (no `id`) to the handler registry. Returns void;
    * any handler error is swallowed by the dispatcher's `onError` hook.
    *
-   * Route Python-pushed notifications through both the handler registry and
+   * Route backend-pushed notifications through both the handler registry and
    * external listeners. This keeps map/worker/chat side effects centralized
    * while preserving subscription hooks for UI code.
    */
@@ -31,14 +35,14 @@ export interface DispatcherLike {
 }
 
 /**
- * WebSocket client for JSON-RPC 2.0 communication with the Python backend.
+ * WebSocket client for JSON-RPC 2.0 communication with the application backend.
  *
  * Supports:
  * - Request/response with automatic ID matching
  * - Server-push notifications (streaming, progress)
  * - Auto-reconnect with exponential backoff
  */
-export class PythonClient {
+export class BackendClient {
   private ws: WebSocket | null = null
   private url: string = ''
   private pendingRequests: Map<string, JsonRpcCallback> = new Map()
@@ -61,14 +65,14 @@ export class PythonClient {
    */
   private waitForConnection(timeoutMs: number = 10000): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      if (this.ws && this.ws.readyState === WEBSOCKET_OPEN_STATE) {
         resolve()
         return
       }
 
       let timer: ReturnType<typeof setTimeout>
       const check = setInterval(() => {
-        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        if (this.ws && this.ws.readyState === WEBSOCKET_OPEN_STATE) {
           clearInterval(check)
           clearTimeout(timer)
           resolve()
@@ -84,7 +88,7 @@ export class PythonClient {
 
   /**
    * Register the RPC dispatcher used to service inbound requests from the
-   * Python backend (methods with ``rpc.`` / ``chat.`` / ``event.`` prefix
+   * application backend (methods with ``rpc.`` / ``chat.`` / ``event.`` prefix
    * and an ``id`` field). Notifications are also broadcast through
    * ``onNotification`` for stores and extension hosts that subscribe to the
    * shared event stream.
@@ -94,11 +98,15 @@ export class PythonClient {
   }
 
   /**
-   * Connect to the Python backend WebSocket server.
-   * Supports token-based authentication via query parameter.
-   */
+   * Connect to the backend WebSocket server.
+  * Supports token-based authentication via query parameter.
+  */
   connect(port: number, token?: string): void {
-    let url = `ws://localhost:${port}/ws`
+    // The Java sidecar is deliberately bound to the IPv4 loopback address.
+    // On Windows, `localhost` commonly resolves to `::1` first; Chromium then
+    // tries IPv6 while the sidecar only listens on 127.0.0.1, leaving the
+    // process healthy but the renderer permanently disconnected.
+    let url = `ws://127.0.0.1:${port}/ws`
     if (token) {
       url += `?token=${encodeURIComponent(token)}`
     }
@@ -132,7 +140,7 @@ export class PythonClient {
       try {
         callback(null, error)
       } catch (e) {
-        console.error(`[PythonClient] Error rejecting pending request ${id}:`, e)
+        console.error(`[BackendClient] Error rejecting pending request ${id}:`, e)
       }
     }
     this.pendingRequests.clear()
@@ -159,7 +167,7 @@ export class PythonClient {
     }
 
     return new Promise((resolve, reject) => {
-      if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+      if (!this.ws || this.ws.readyState !== WEBSOCKET_OPEN_STATE) {
         reject(new Error('WebSocket not connected'))
         return
       }
@@ -200,10 +208,10 @@ export class PythonClient {
       //    the backend agent keeps running, chat state becomes inconsistent.
       //    Backend cancellation, websocket close, or stream_end/error events
       //    are the source of truth for ending the visible run.
-      //  - rpc.code.run_script is user-authored Python inside the
+      //  - rpc.code.run_script is user-authored Java inside the
       //    subprocess sandbox; a heavy training script can easily take
       //    minutes. Match chat's 10-min ceiling so the TS side doesn't
-      //    time out before the Python-side executor's own exec_timeout
+      //    time out before the Java executor's own exec_timeout
       //    kicks in.
       //  - rpc.tool.execute can run heavy GIS ops; give it a generous budget.
       //  - everything else (config, ping, metadata lookups) is fast.
@@ -256,7 +264,7 @@ export class PythonClient {
           const data = JSON.parse(event.data)
           this._handleMessage(data)
         } catch (error) {
-          console.error('[PythonClient] Failed to parse message:', error)
+          console.error('[BackendClient] Failed to parse message:', error)
         }
       }
 
@@ -267,10 +275,10 @@ export class PythonClient {
       }
 
       this.ws.onerror = (error) => {
-        console.error('[PythonClient] WebSocket error:', error)
+        console.error('[BackendClient] WebSocket error:', error)
       }
     } catch (error) {
-      console.error('[PythonClient] Connection failed:', error)
+      console.error('[BackendClient] Connection failed:', error)
       this._scheduleReconnect()
     }
   }
@@ -284,7 +292,7 @@ export class PythonClient {
       return
     }
 
-    // JSON-RPC Request from Python → TS (has id + method + routable prefix).
+    // JSON-RPC Request from backend → Renderer (has id + method + routable prefix).
     if (data.id !== undefined && typeof data.method === 'string') {
       const channel = getMethodChannel(data.method)
       if (this.dispatcher && channel !== null) {
@@ -297,16 +305,16 @@ export class PythonClient {
         this.dispatcher
           .handleRequest(req)
           .then((response) => {
-            if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            if (this.ws && this.ws.readyState === WEBSOCKET_OPEN_STATE) {
               this.ws.send(JSON.stringify(response))
             }
           })
           .catch((err) => {
-            console.error('[PythonClient] Dispatcher threw unexpectedly:', err)
+            console.error('[BackendClient] Dispatcher threw unexpectedly:', err)
             // Dispatcher is supposed to catch RpcError itself; this is
             // purely defensive so a rogue exception does not tear down
             // the client.
-            if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            if (this.ws && this.ws.readyState === WEBSOCKET_OPEN_STATE) {
               this.ws.send(
                 JSON.stringify({
                   jsonrpc: '2.0',
@@ -398,7 +406,7 @@ export class PythonClient {
     if (this.dispatcher && channel !== null) {
       this.dispatcher.handleNotification(notif).catch((err) => {
         console.error(
-          '[PythonClient] Dispatcher.handleNotification rejected unexpectedly:',
+          '[BackendClient] Dispatcher.handleNotification rejected unexpectedly:',
           err,
         )
       })
@@ -408,14 +416,14 @@ export class PythonClient {
       try {
         handler(notif.method, notif.params)
       } catch (error) {
-        console.error('[PythonClient] Notification handler error:', error)
+        console.error('[BackendClient] Notification handler error:', error)
       }
     }
   }
 
   private _scheduleReconnect(): void {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.error('[PythonClient] Max reconnect attempts reached')
+      console.error('[BackendClient] Max reconnect attempts reached')
       return
     }
 
@@ -429,4 +437,4 @@ export class PythonClient {
 }
 
 // Singleton instance
-export const pythonClient = new PythonClient()
+export const backendClient = new BackendClient()

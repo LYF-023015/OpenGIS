@@ -24,10 +24,6 @@ interface SettingsState {
     reasoningEffort: 'low' | 'medium' | 'high'
     presets: ModelPreset[]
   }
-  python: {
-    mode: 'auto' | 'manual'
-    path: string
-  }
   appearance: {
     theme: 'dark' | 'light' | 'system'
     language: 'en' | 'zh'
@@ -48,7 +44,6 @@ interface SettingsState {
 
   // 操作方法
   updateModel: (updates: Partial<SettingsState['model']>) => void
-  updatePython: (updates: Partial<SettingsState['python']>) => void
   updateAppearance: (updates: Partial<SettingsState['appearance']>) => void
   updateAgent: (updates: Partial<SettingsState['agent']>) => void
   loadFromElectron: () => Promise<void>
@@ -66,10 +61,6 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     maxTokens: 4096,
     reasoningEffort: 'medium' as const,
     presets: [] as ModelPreset[],
-  },
-  python: {
-    mode: 'auto',
-    path: '',
   },
   appearance: {
     theme: 'system',
@@ -93,11 +84,6 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   updateModel: (updates) =>
     set((state) => ({
       model: { ...state.model, ...updates },
-    })),
-
-  updatePython: (updates) =>
-    set((state) => ({
-      python: { ...state.python, ...updates },
     })),
 
   updateAppearance: (updates) =>
@@ -132,7 +118,6 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
         delete (agentSettings as { maxIterations?: unknown }).maxIterations
         set({
           model: { ...get().model, ...settings.model },
-          python: { ...get().python, ...settings.python },
           appearance: { ...get().appearance, ...settings.appearance },
           agent: { ...get().agent, ...agentSettings },
         })
@@ -147,7 +132,6 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
       const state = get()
       try {
         await window.electronAPI.setSetting('model', state.model)
-        await window.electronAPI.setSetting('python', state.python)
         await window.electronAPI.setSetting('appearance', state.appearance)
         await window.electronAPI.setSetting('agent', state.agent)
       } catch (error) {

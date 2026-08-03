@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "id": "workflow-phase0",
+  "name": "Synthetic workflow",
+  "nodes": [
+    {
+      "id": "node-a",
+      "task": "Read fixture",
+      "output": "summary"
+    },
+    {
+      "id": "node-b",
+      "task": "Report fixture",
+      "input": "summary"
+    }
+  ],
+  "edges": [
+    {
+      "source": "node-a",
+      "target": "node-b"
+    }
+  ]
+}

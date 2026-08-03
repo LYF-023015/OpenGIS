@@ -1,0 +1,90 @@
+{
+  "type": "FeatureCollection",
+  "name": "phase0-fixture",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "EPSG:4326"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "id": 1,
+      "properties": {
+        "name": "origin",
+        "unicode": "中文",
+        "nullable": null
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          0.0,
+          0.0
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 2,
+      "properties": {
+        "name": "null-geometry",
+        "unicode": "空几何",
+        "nullable": null
+      },
+      "geometry": null
+    },
+    {
+      "type": "Feature",
+      "id": 3,
+      "properties": {
+        "name": "self-intersection",
+        "unicode": "无效面",
+        "nullable": 1
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              0.0,
+              0.0
+            ],
+            [
+              1.0,
+              1.0
+            ],
+            [
+              1.0,
+              0.0
+            ],
+            [
+              0.0,
+              1.0
+            ],
+            [
+              0.0,
+              0.0
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 4,
+      "properties": {
+        "name": "edge",
+        "unicode": "日期变更线",
+        "nullable": 2
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          179.9,
+          85.0
+        ]
+      }
+    }
+  ]
+}

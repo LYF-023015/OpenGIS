@@ -1,0 +1,1 @@
+{"id":"memory-fact-001","kind":"fact","scope":"project","title":"Fixture CRS","content":"Synthetic inputs use EPSG:4326.","tags":["fixture"],"confidence":1.0,"created_at":1767225600.0,"last_used_at":0.0,"metadata":{}}

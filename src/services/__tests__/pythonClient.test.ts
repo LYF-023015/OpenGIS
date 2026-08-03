@@ -21,7 +21,7 @@ import type {
   JsonRpcRequest,
   JsonRpcResponse,
 } from '@/types/protocol';
-import { PythonClient, type DispatcherLike } from '../pythonClient';
+import { BackendClient as PythonClient, type DispatcherLike } from '../backendClient';
 
 /** Access the private ``_handleMessage`` without going through the real socket. */
 function feed(client: PythonClient, msg: unknown): void {

@@ -2,6 +2,8 @@
 out/
 dist/
 build/
+target/
+**/target/
 *.tsbuildinfo
 
 # ===== Dependencies =====
@@ -121,6 +123,8 @@ Internal-Agent-Projects.md
 
 # ===== Scripts (smoke tests, prechecks) =====
 scripts/
+!electron/scripts/
+!electron/scripts/**
 
 # ===== Test Data & Scripts =====
 test/
@@ -141,3 +145,14 @@ python-backend/pytest_out.txt
 
 # Local experiments / external repos
 local/
+
+# Versioned Python-to-Java migration contracts and anonymous golden fixtures.
+# Keep the rest of test/ ignored; Phase 0 is an intentional compatibility asset.
+!test/
+test/*
+!test/phase0/
+!test/phase0/**
+
+# Phase 1 reproducible jlink build entrypoint.
+!java-backend/opengis-server/scripts/
+!java-backend/opengis-server/scripts/**

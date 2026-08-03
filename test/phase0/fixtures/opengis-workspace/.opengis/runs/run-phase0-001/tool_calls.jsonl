@@ -1,0 +1,1 @@
+{"id":"call-phase0-001","tool":"read_file","arguments":{"file_path":"${WORKSPACE}/input.geojson"},"status":"completed","result":{"output":"synthetic"}}

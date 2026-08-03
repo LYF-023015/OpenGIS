@@ -1,0 +1,114 @@
+{
+  "type": "FeatureCollection",
+  "name": "phase0-fixture",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "EPSG:4326"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "id": 1,
+      "properties": {
+        "name": "北京",
+        "category": "capital",
+        "value": 100.0,
+        "weight": 2.0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          116.391,
+          39.907
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 2,
+      "properties": {
+        "name": "上海",
+        "category": "municipality",
+        "value": 90.5,
+        "weight": 1.8
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          121.474,
+          31.23
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 3,
+      "properties": {
+        "name": "广州",
+        "category": "city",
+        "value": 70.0,
+        "weight": 1.2
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          113.264,
+          23.129
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 4,
+      "properties": {
+        "name": "深圳",
+        "category": "city",
+        "value": 80.0,
+        "weight": 1.4
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          114.057,
+          22.543
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 5,
+      "properties": {
+        "name": "成都",
+        "category": "city",
+        "value": 60.5,
+        "weight": 1.0
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          104.066,
+          30.572
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 6,
+      "properties": {
+        "name": "乌鲁木齐",
+        "category": null,
+        "value": 40.0,
+        "weight": 0.8
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          87.617,
+          43.826
+        ]
+      }
+    }
+  ]
+}

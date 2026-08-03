@@ -8,7 +8,7 @@
  *   侧边栏列表；完整文档在用户打开工作流选项卡时
  *   按需加载。
  * - 所有变更操作都通过此 store 进行，以便画布编辑器、
- *   侧边栏列表和任何未来的 Python 调用者保持一致。
+ *   侧边栏列表和 Java Workflow v2 运行时保持一致。
  */
 import { create } from 'zustand'
 import {

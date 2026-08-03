@@ -20,7 +20,7 @@ describe('Handler registration', () => {
   it('registers expected method count', () => {
     const reg = new HandlerRegistry();
     const names = registerAllHandlers(reg);
-    expect(names.length).toBe(53);
+    expect(names.length).toBe(56);
     // 抽样检查关键 method 在册
     expect(names).toContain('rpc.ui.map.add_layer');
     expect(names).toContain('rpc.ui.map.get_state');
@@ -107,7 +107,7 @@ describe('Handler contract: invalid params → -32602 invalidParams', () => {
     ['rpc.ui.ask.choose', { question: 'x', options: [] }], // options 空
     ['rpc.ui.ask.approve_code', { run_id: 'r', step: -1, code: '', risky_operations: [] }], // step < 0
     ['rpc.agent.hello', { python_version: 0, supported_protocol: '3.0' }], // version 类型错
-    ['rpc.ui.map.add_raster_from_url', { url: 'not-a-url', name: 'x', tile_type: 'xyz' }],
+    ['rpc.ui.map.add_raster_from_url', { url: '', name: 'x', tile_type: 'xyz' }],
   ];
 
   it.each(invalidCases)('%s with invalid params returns -32602', async (method, params) => {

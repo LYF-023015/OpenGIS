@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useMemo } from 'react'
 import { ChevronDown, ChevronRight, Zap, Search, FileText, Map, HelpCircle, Terminal, BookOpen, Bot, BarChart3 } from 'lucide-react'
-import { pythonClient } from '@/services/pythonClient'
+import { backendClient } from '@/services/backendClient'
 import { useAssetStore } from '@/stores/assetStore'
 import { useT } from '@/i18n'
 
@@ -92,8 +92,8 @@ export function ToolAndSkillPanel() {
     setError(null)
     try {
       const [toolResp, userSkillResp] = await Promise.all([
-        pythonClient.send('rpc.tool.list', {}),
-        pythonClient.send('rpc.user_skill.list', { workspace_path: workspacePath || undefined }),
+        backendClient.send('rpc.tool.list', {}),
+        backendClient.send('rpc.user_skill.list', { workspace_path: workspacePath || undefined }),
       ])
       const list: ToolSchemaDict[] = (toolResp as any)?.tools ?? []
       setTools(list)
