@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <strong>Agent 驱动的开源 GIS 桌面应用 — 用自然语言完成地理空间分析、制图、自动化与知识沉淀</strong>
+  <strong>Java 驱动的开源 GIS Agent 桌面应用 — 用自然语言完成地理空间分析、制图、自动化与知识沉淀</strong>
 </p>
 
 <p align="center">
@@ -24,15 +24,31 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/platform-Windows%20%7C%20macOS%20%7C%20Linux-blue" alt="Platform" />
+  <img src="https://img.shields.io/badge/platform-Windows-blue" alt="Platform" />
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License" />
   <img src="https://img.shields.io/badge/electron-30.x-47848F?logo=electron" alt="Electron" />
-  <img src="https://img.shields.io/badge/python-3.11+-3776AB?logo=python&logoColor=white" alt="Python" />
+  <img src="https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white" alt="Java 21" />
+  <img src="https://img.shields.io/badge/Spring%20Boot-4.1-6DB33F?logo=springboot&logoColor=white" alt="Spring Boot 4.1" />
   <img src="https://img.shields.io/badge/react-18.x-61DAFB?logo=react" alt="React" />
   <img src="https://img.shields.io/badge/maplibre-4.x-396CB2" alt="MapLibre" />
 </p>
 
 ---
+
+> [!NOTE]
+> **Java 版说明：** 本仓库为 [LYF-023015/OpenGIS](https://github.com/LYF-023015/OpenGIS)，是在原项目 [ATFfang/OpenGIS](https://github.com/ATFfang/OpenGIS) 基础上演进的 Java 后端版本。桌面应用的生产运行时现已切换为随包分发的 Java 21 / Spring Boot Sidecar；原 Python 后端仅作为显式恢复与兼容备份保留在仓库中。当前完成验证的发布目标为 Windows。
+
+### Java 版快速开始
+
+需要 Windows、Node.js 18+、JDK 21 和 Git；Maven 已通过 Wrapper 随仓库提供。
+
+```powershell
+npm install
+java-backend\mvnw.cmd --batch-mode verify
+npm run dev:electron
+```
+
+使用 `npm run dist:win` 构建 Windows 安装包。模块结构参见 [`java-backend/README.md`](java-backend/README.md)，迁移与发布验证记录参见 [`docs/migration/phase10/README.md`](docs/migration/phase10/README.md)。
 
 <p align="center">
   <a href="https://youtu.be/F5lVRs_XXjU">

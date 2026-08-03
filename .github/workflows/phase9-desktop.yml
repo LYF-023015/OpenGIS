@@ -1,0 +1,65 @@
+name: Windows desktop Java runtime
+
+on:
+  push:
+    paths:
+      - 'electron/**'
+      - 'src/**'
+      - 'java-backend/**'
+      - 'electron-builder.yml'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/phase9-desktop.yml'
+  pull_request:
+    paths:
+      - 'electron/**'
+      - 'src/**'
+      - 'java-backend/**'
+      - 'electron-builder.yml'
+      - 'package.json'
+      - 'package-lock.json'
+      - '.github/workflows/phase9-desktop.yml'
+  workflow_dispatch:
+
+jobs:
+  desktop-java:
+    name: Windows bundled Java
+    runs-on: windows-latest
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: microsoft
+          java-version: 21.0.11
+          cache: maven
+      - name: Install renderer dependencies
+        run: npm ci
+      - name: Verify Java reactor
+        working-directory: java-backend
+        run: .\mvnw.cmd --batch-mode verify
+      - name: Build platform JRE
+        run: npm run build:java-runtime
+      - name: Verify renderer and production package policy
+        run: npm run typecheck; if ($LASTEXITCODE) { exit $LASTEXITCODE }; npm test -- --run; if ($LASTEXITCODE) { exit $LASTEXITCODE }; npm run audit:phase9-package
+      - name: Java sidecar smoke
+        run: npm run smoke:java-sidecar
+      - name: Build renderer and unpacked desktop application
+        run: npm run build; if ($LASTEXITCODE) { exit $LASTEXITCODE }; npx electron-builder --dir --publish never
+      - name: Packaged startup and graceful exit
+        run: npm run smoke:packaged
+      - name: Verify Phase 10 freeze evidence
+        run: npm run audit:phase10
+      - name: Upload unpacked application
+        uses: actions/upload-artifact@v4
+        with:
+          name: opengis-phase9-windows
+          path: dist/**
+          if-no-files-found: error

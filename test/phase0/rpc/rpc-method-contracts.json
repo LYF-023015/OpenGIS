@@ -1,0 +1,1973 @@
+{
+  "schema_version": "1.0",
+  "source": "python-backend/opengis_backend/rpc/handler.py",
+  "method_count": 47,
+  "methods": [
+    {
+      "method": "chat.user_message",
+      "handler": "_handle_agent_chat",
+      "source_line": 746,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "workspace_path",
+            "default": "${WORKSPACE}"
+          }
+        ],
+        "example": {
+          "workspace_path": "${WORKSPACE}"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "$type": "any"
+        },
+        "may_be_non_object": true
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.agent.artifacts.list",
+      "handler": "_handle_agent_artifacts_list",
+      "source_line": 1553,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "limit",
+            "default": 100
+          },
+          {
+            "name": "workspace_path",
+            "default": "${WORKSPACE}"
+          }
+        ],
+        "example": {
+          "limit": 100,
+          "workspace_path": "${WORKSPACE}"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "artifacts": {
+            "$type": "array"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.agent.inbox.list",
+      "handler": "_handle_agent_inbox_list",
+      "source_line": 1398,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "limit",
+            "default": 100
+          },
+          {
+            "name": "status",
+            "default": {
+              "$type": "string"
+            }
+          },
+          {
+            "name": "workspace_path",
+            "default": "${WORKSPACE}"
+          }
+        ],
+        "example": {
+          "limit": 100,
+          "status": {
+            "$type": "string"
+          },
+          "workspace_path": "${WORKSPACE}"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "items": {
+            "$type": "array"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.agent.interrupt",
+      "handler": "_handle_agent_cancel",
+      "source_line": 1049,
+      "params": {
+        "required": [],
+        "optional": [],
+        "example": {}
+      },
+      "result": {
+        "example_or_matcher": {
+          "status": {
+            "$type": "array"
+          }
+        },
+        "may_be_non_object": true
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.agent.permissions.list",
+      "handler": "_handle_agent_permissions_list",
+      "source_line": 1559,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "limit",
+            "default": 100
+          },
+          {
+            "name": "status",
+            "default": {
+              "$type": "string"
+            }
+          }
+        ],
+        "example": {
+          "limit": 100,
+          "status": {
+            "$type": "string"
+          }
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "requests": {
+            "$type": "array"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.agent.permissions.rules.add",
+      "handler": "_handle_agent_permission_rules_add",
+      "source_line": 1578,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "action",
+            "default": {
+              "$type": "string"
+            }
+          },
+          {
+            "name": "pattern",
+            "default": {
+              "$type": "string"
+            }
+          },
+          {
+            "name": "profile_name",
+            "default": {
+              "$type": "string"
+            }
+          },
+          {
+            "name": "reason",
+            "default": {
+              "$type": "string"
+            }
+          },
+          {
+            "name": "scope",
+            "default": {
+              "$type": "string"
+            }
+          },
+          {
+            "name": "tool",
+            "default": {
+              "$type": "string"
+            }
+          },
+          {
+            "name": "workspace_path",
+            "default": "${WORKSPACE}"
+          }
+        ],
+        "example": {
+          "action": {
+            "$type": "string"
+          },
+          "pattern": {
+            "$type": "string"
+          },
+          "profile_name": {
+            "$type": "string"
+          },
+          "reason": {
+            "$type": "string"
+          },
+          "scope": {
+            "$type": "string"
+          },
+          "tool": {
+            "$type": "string"
+          },
+          "workspace_path": "${WORKSPACE}"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "status": "ok",
+          "rule": {
+            "$type": "any"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.agent.permissions.rules.list",
+      "handler": "_handle_agent_permission_rules_list",
+      "source_line": 1571,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "workspace_path",
+            "default": "${WORKSPACE}"
+          }
+        ],
+        "example": {
+          "workspace_path": "${WORKSPACE}"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "rules": {
+            "$type": "array"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.agent.permissions.rules.remove",
+      "handler": "_handle_agent_permission_rules_remove",
+      "source_line": 1600,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "id",
+            "default": "phase0-id"
+          },
+          {
+            "name": "rule_id",
+            "default": "phase0-rule-id"
+          },
+          {
+            "name": "workspace_path",
+            "default": "${WORKSPACE}"
+          }
+        ],
+        "example": {
+          "id": "phase0-id",
+          "rule_id": "phase0-rule-id",
+          "workspace_path": "${WORKSPACE}"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "status": {
+            "$type": "array"
+          },
+          "removed": {
+            "$type": "any"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.agent.profiles.install_defaults",
+      "handler": "_handle_agent_profiles_install_defaults",
+      "source_line": 1382,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "workspace_path",
+            "default": "${WORKSPACE}"
+          }
+        ],
+        "example": {
+          "workspace_path": "${WORKSPACE}"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "status": "ok",
+          "path": {
+            "$type": "any"
+          },
+          "message": "failed to install default profiles"
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.agent.profiles.list",
+      "handler": "_handle_agent_profiles_list",
+      "source_line": 1371,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "workspace_path",
+            "default": "${WORKSPACE}"
+          }
+        ],
+        "example": {
+          "workspace_path": "${WORKSPACE}"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "profiles": {
+            "$type": "array"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.agent.queue.cancel",
+      "handler": "_handle_agent_queue_cancel",
+      "source_line": 1488,
+      "params": {
+        "required": [],
+        "optional": [],
+        "example": {}
+      },
+      "result": {
+        "example_or_matcher": {
+          "status": "invalid_state",
+          "message": {
+            "$type": "any"
+          },
+          "item": {
+            "$type": "any"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.agent.queue.get",
+      "handler": "_handle_agent_queue_get",
+      "source_line": 1452,
+      "params": {
+        "required": [],
+        "optional": [],
+        "example": {}
+      },
+      "result": {
+        "example_or_matcher": {
+          "status": "ok",
+          "item": {
+            "$type": "any"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.agent.queue.list",
+      "handler": "_handle_agent_queue_list",
+      "source_line": 1542,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "limit",
+            "default": 100
+          },
+          {
+            "name": "status",
+            "default": {
+              "$type": "string"
+            }
+          }
+        ],
+        "example": {
+          "limit": 100,
+          "status": {
+            "$type": "string"
+          }
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "items": {
+            "$type": "array"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.agent.queue.process",
+      "handler": "_handle_agent_queue_process",
+      "source_line": 1510,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "limit",
+            "default": 1
+          },
+          {
+            "name": "workspace_path",
+            "default": "${WORKSPACE}"
+          }
+        ],
+        "example": {
+          "limit": 1,
+          "workspace_path": "${WORKSPACE}"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "status": "ok",
+          "processed": {
+            "$type": "any"
+          },
+          "message": "queue processor is already running"
+        },
+        "may_be_non_object": true
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.agent.queue.resume",
+      "handler": "_handle_agent_queue_resume",
+      "source_line": 1459,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "limit",
+            "default": 100
+          },
+          {
+            "name": "workspace_path",
+            "default": "${WORKSPACE}"
+          }
+        ],
+        "example": {
+          "limit": 100,
+          "workspace_path": "${WORKSPACE}"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "status": "ok",
+          "items": {
+            "$type": "array"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.agent.queue.retry",
+      "handler": "_handle_agent_queue_retry",
+      "source_line": 1468,
+      "params": {
+        "required": [],
+        "optional": [],
+        "example": {}
+      },
+      "result": {
+        "example_or_matcher": {
+          "status": "queued",
+          "item": {
+            "$type": "any"
+          },
+          "message": {
+            "$type": "any"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.agent.queue.run",
+      "handler": "_handle_agent_queue_run",
+      "source_line": 1422,
+      "params": {
+        "required": [],
+        "optional": [],
+        "example": {}
+      },
+      "result": {
+        "example_or_matcher": {
+          "status": "not_found",
+          "message": "no queue item found",
+          "item": {
+            "$type": "any"
+          }
+        },
+        "may_be_non_object": true
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.agent.queue.submit",
+      "handler": "_handle_agent_queue_submit",
+      "source_line": 1412,
+      "params": {
+        "required": [],
+        "optional": [],
+        "example": {}
+      },
+      "result": {
+        "example_or_matcher": {
+          "status": "queued",
+          "queue_id": {
+            "$type": "any"
+          },
+          "inbox_id": {
+            "$type": "any"
+          },
+          "item": {
+            "$type": "any"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.agent.sessions.list",
+      "handler": "_handle_agent_sessions_list",
+      "source_line": 1392,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "limit",
+            "default": 100
+          },
+          {
+            "name": "workspace_path",
+            "default": "${WORKSPACE}"
+          }
+        ],
+        "example": {
+          "limit": 100,
+          "workspace_path": "${WORKSPACE}"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "sessions": {
+            "$type": "array"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.agent.set_llm_config",
+      "handler": "_handle_agent_configure",
+      "source_line": 668,
+      "params": {
+        "required": [
+          "api_key",
+          "base_url",
+          "model",
+          "protocol"
+        ],
+        "optional": [],
+        "example": {
+          "api_key": {
+            "$type": "string"
+          },
+          "base_url": {
+            "$type": "string"
+          },
+          "model": {
+            "$type": "string"
+          },
+          "protocol": {
+            "$type": "string"
+          }
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "status": "configured",
+          "model": {
+            "$type": "any"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.agent.test_connection",
+      "handler": "_handle_agent_test_connection",
+      "source_line": 709,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "api_key",
+            "default": {
+              "$type": "string"
+            }
+          },
+          {
+            "name": "base_url",
+            "default": {
+              "$type": "string"
+            }
+          },
+          {
+            "name": "model",
+            "default": {
+              "$type": "string"
+            }
+          },
+          {
+            "name": "protocol",
+            "default": {
+              "$type": "string"
+            }
+          }
+        ],
+        "example": {
+          "api_key": {
+            "$type": "string"
+          },
+          "base_url": {
+            "$type": "string"
+          },
+          "model": {
+            "$type": "string"
+          },
+          "protocol": {
+            "$type": "string"
+          }
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "ok": false,
+          "error": "API key is required"
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.code.cancel_script",
+      "handler": "_handle_cancel_script",
+      "source_line": 661,
+      "params": {
+        "required": [],
+        "optional": [],
+        "example": {}
+      },
+      "result": {
+        "example_or_matcher": {
+          "status": {
+            "$type": "array"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.code.run_script",
+      "handler": "_handle_run_script",
+      "source_line": 606,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "code",
+            "default": {
+              "$type": "string"
+            }
+          },
+          {
+            "name": "exec_timeout",
+            "default": {
+              "$type": "string"
+            }
+          },
+          {
+            "name": "run_id",
+            "default": "phase0-run-id"
+          },
+          {
+            "name": "workspace_path",
+            "default": "${WORKSPACE}"
+          }
+        ],
+        "example": {
+          "code": {
+            "$type": "string"
+          },
+          "exec_timeout": {
+            "$type": "string"
+          },
+          "run_id": "phase0-run-id",
+          "workspace_path": "${WORKSPACE}"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "ok": false,
+          "error": "another_script_running",
+          "message": "A script is already running. Cancel it first via rpc.code.cancel_script before starting another."
+        },
+        "may_be_non_object": true
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.debug.get_log_level",
+      "handler": "_handle_get_log_level",
+      "source_line": 1211,
+      "params": {
+        "required": [],
+        "optional": [],
+        "example": {}
+      },
+      "result": {
+        "example_or_matcher": {
+          "status": "ok",
+          "level": {
+            "$type": "any"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.debug.set_log_level",
+      "handler": "_handle_set_log_level",
+      "source_line": 1195,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "level",
+            "default": {
+              "$type": "string"
+            }
+          }
+        ],
+        "example": {
+          "level": {
+            "$type": "string"
+          }
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "status": "ok",
+          "level": {
+            "$type": "any"
+          },
+          "message": {
+            "$type": "any"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.fs.get_file_info",
+      "handler": "_handle_get_file_info",
+      "source_line": 449,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "path",
+            "default": "${WORKSPACE}/fixture"
+          }
+        ],
+        "example": {
+          "path": "${WORKSPACE}/fixture"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "status": "not_implemented",
+          "message": {
+            "$type": "any"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.fs.load_file",
+      "handler": "_handle_load_file",
+      "source_line": 440,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "path",
+            "default": "${WORKSPACE}/fixture"
+          }
+        ],
+        "example": {
+          "path": "${WORKSPACE}/fixture"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "status": "not_implemented",
+          "message": {
+            "$type": "any"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.operations.get",
+      "handler": "_handle_operations_get",
+      "source_line": 1343,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "include_code",
+            "default": false
+          },
+          {
+            "name": "include_readme",
+            "default": true
+          },
+          {
+            "name": "max_code_chars",
+            "default": {
+              "$type": "string"
+            }
+          },
+          {
+            "name": "operation_id",
+            "default": "phase0-operation-id"
+          }
+        ],
+        "example": {
+          "include_code": false,
+          "include_readme": true,
+          "max_code_chars": {
+            "$type": "string"
+          },
+          "operation_id": "phase0-operation-id"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "status": "ok",
+          "operation": {
+            "$type": "any"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.operations.list",
+      "handler": "_handle_operations_list",
+      "source_line": 1332,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "limit",
+            "default": 20
+          },
+          {
+            "name": "query",
+            "default": {
+              "$type": "string"
+            }
+          }
+        ],
+        "example": {
+          "limit": 20,
+          "query": {
+            "$type": "string"
+          }
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "status": "ok",
+          "operation_root": {
+            "$type": "any"
+          },
+          "operation_roots": {
+            "$type": "array"
+          },
+          "operations": {
+            "$type": "array"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.operations.run",
+      "handler": "_handle_operations_run",
+      "source_line": 1356,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "operation_id",
+            "default": "phase0-operation-id"
+          },
+          {
+            "name": "params",
+            "default": {
+              "$type": "string"
+            }
+          },
+          {
+            "name": "timeout_seconds",
+            "default": {
+              "$type": "string"
+            }
+          }
+        ],
+        "example": {
+          "operation_id": "phase0-operation-id",
+          "params": {
+            "$type": "string"
+          },
+          "timeout_seconds": {
+            "$type": "string"
+          }
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "status": "ok",
+          "success": true
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.runs.get",
+      "handler": "_handle_runs_get",
+      "source_line": 1306,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "run_id",
+            "default": "phase0-run-id"
+          },
+          {
+            "name": "workspace_path",
+            "default": "${WORKSPACE}"
+          }
+        ],
+        "example": {
+          "run_id": "phase0-run-id",
+          "workspace_path": "${WORKSPACE}"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "status": "ok",
+          "meta": {
+            "$type": "any"
+          },
+          "steps": {
+            "$type": "array"
+          },
+          "tool_calls": {
+            "$type": "array"
+          },
+          "tool_call_events": {
+            "$type": "array"
+          },
+          "artifacts": {
+            "$type": "array"
+          },
+          "events": {
+            "$type": "array"
+          },
+          "message_parts": {
+            "$type": "array"
+          },
+          "llm_usage": {
+            "$type": "any"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.runs.list",
+      "handler": "_handle_runs_list",
+      "source_line": 1286,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "limit",
+            "default": 50
+          },
+          {
+            "name": "workspace_path",
+            "default": "${WORKSPACE}"
+          }
+        ],
+        "example": {
+          "limit": 50,
+          "workspace_path": "${WORKSPACE}"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "runs": {
+            "$type": "array"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.runs.replay",
+      "handler": "_handle_runs_replay",
+      "source_line": 1611,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "conversation_id",
+            "default": "phase0-conversation-id"
+          },
+          {
+            "name": "run_id",
+            "default": "phase0-run-id"
+          },
+          {
+            "name": "workspace_path",
+            "default": "${WORKSPACE}"
+          }
+        ],
+        "example": {
+          "conversation_id": "phase0-conversation-id",
+          "run_id": "phase0-run-id",
+          "workspace_path": "${WORKSPACE}"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "status": "not_found"
+        },
+        "may_be_non_object": true
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.tool.execute",
+      "handler": "_handle_tool_execute",
+      "source_line": 462,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "args",
+            "default": {}
+          },
+          {
+            "name": "name",
+            "default": {
+              "$type": "string"
+            }
+          },
+          {
+            "name": "workspace",
+            "default": {
+              "$type": "string"
+            }
+          },
+          {
+            "name": "workspace_path",
+            "default": "${WORKSPACE}"
+          }
+        ],
+        "example": {
+          "args": {},
+          "name": {
+            "$type": "string"
+          },
+          "workspace": {
+            "$type": "string"
+          },
+          "workspace_path": "${WORKSPACE}"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "success": false,
+          "error": {
+            "$type": "any"
+          }
+        },
+        "may_be_non_object": true
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.tool.list",
+      "handler": "_handle_tool_list",
+      "source_line": 458,
+      "params": {
+        "required": [],
+        "optional": [],
+        "example": {}
+      },
+      "result": {
+        "example_or_matcher": {
+          "tools": {
+            "$type": "array"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.user_skill.add_source",
+      "handler": "_handle_user_skill_add_source",
+      "source_line": 585,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "path",
+            "default": "${WORKSPACE}/fixture"
+          },
+          {
+            "name": "scope",
+            "default": {
+              "$type": "string"
+            }
+          },
+          {
+            "name": "source_path",
+            "default": "${WORKSPACE}/fixture"
+          },
+          {
+            "name": "workspace_path",
+            "default": "${WORKSPACE}"
+          }
+        ],
+        "example": {
+          "path": "${WORKSPACE}/fixture",
+          "scope": {
+            "$type": "string"
+          },
+          "source_path": "${WORKSPACE}/fixture",
+          "workspace_path": "${WORKSPACE}"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "skills": {
+            "$type": "array"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.user_skill.list",
+      "handler": "_handle_user_skill_list",
+      "source_line": 572,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "workspace_path",
+            "default": "${WORKSPACE}"
+          }
+        ],
+        "example": {
+          "workspace_path": "${WORKSPACE}"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "skills": {
+            "$type": "array"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.user_skill.load",
+      "handler": "_handle_user_skill_load",
+      "source_line": 577,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "name",
+            "default": {
+              "$type": "string"
+            }
+          },
+          {
+            "name": "workspace_path",
+            "default": "${WORKSPACE}"
+          }
+        ],
+        "example": {
+          "name": {
+            "$type": "string"
+          },
+          "workspace_path": "${WORKSPACE}"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "skill": {
+            "$type": "any"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.worker.delete",
+      "handler": "_handle_worker_delete",
+      "source_line": 558,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "worker_id",
+            "default": "phase0-worker-id"
+          },
+          {
+            "name": "workspace_path",
+            "default": "${WORKSPACE}"
+          }
+        ],
+        "example": {
+          "worker_id": "phase0-worker-id",
+          "workspace_path": "${WORKSPACE}"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "worker": {
+            "$type": "any"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.worker.get",
+      "handler": "_handle_worker_get",
+      "source_line": 504,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "include_logs",
+            "default": true
+          },
+          {
+            "name": "worker_id",
+            "default": "phase0-worker-id"
+          },
+          {
+            "name": "workspace_path",
+            "default": "${WORKSPACE}"
+          }
+        ],
+        "example": {
+          "include_logs": true,
+          "worker_id": "phase0-worker-id",
+          "workspace_path": "${WORKSPACE}"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "worker": {
+            "$type": "any"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.worker.list",
+      "handler": "_handle_worker_list",
+      "source_line": 492,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "include_logs",
+            "default": true
+          },
+          {
+            "name": "workspace_path",
+            "default": "${WORKSPACE}"
+          }
+        ],
+        "example": {
+          "include_logs": true,
+          "workspace_path": "${WORKSPACE}"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "workers": {
+            "$type": "array"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.worker.pause",
+      "handler": "_handle_worker_pause",
+      "source_line": 520,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "reason",
+            "default": {
+              "$type": "string"
+            }
+          },
+          {
+            "name": "worker_id",
+            "default": "phase0-worker-id"
+          },
+          {
+            "name": "workspace_path",
+            "default": "${WORKSPACE}"
+          }
+        ],
+        "example": {
+          "reason": {
+            "$type": "string"
+          },
+          "worker_id": "phase0-worker-id",
+          "workspace_path": "${WORKSPACE}"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "worker": {
+            "$type": "any"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.worker.restart",
+      "handler": "_handle_worker_restart",
+      "source_line": 536,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "code",
+            "default": {
+              "$type": "string"
+            }
+          },
+          {
+            "name": "initial_health_timeout",
+            "default": {
+              "$type": "string"
+            }
+          },
+          {
+            "name": "reason",
+            "default": {
+              "$type": "string"
+            }
+          },
+          {
+            "name": "worker_id",
+            "default": "phase0-worker-id"
+          },
+          {
+            "name": "workspace_path",
+            "default": "${WORKSPACE}"
+          }
+        ],
+        "example": {
+          "code": {
+            "$type": "string"
+          },
+          "initial_health_timeout": {
+            "$type": "string"
+          },
+          "reason": {
+            "$type": "string"
+          },
+          "worker_id": "phase0-worker-id",
+          "workspace_path": "${WORKSPACE}"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "worker": {
+            "$type": "any"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.workspace.install_templates",
+      "handler": "_handle_install_templates",
+      "source_line": 1218,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "workspace_path",
+            "default": "${WORKSPACE}"
+          }
+        ],
+        "example": {
+          "workspace_path": "${WORKSPACE}"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "status": "error",
+          "message": "Missing workspace_path",
+          "workspace": {
+            "$type": "any"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "rpc.workspace.revert_run",
+      "handler": "_handle_workspace_revert_run",
+      "source_line": 1243,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "run_id",
+            "default": "phase0-run-id"
+          },
+          {
+            "name": "workspace_path",
+            "default": "${WORKSPACE}"
+          }
+        ],
+        "example": {
+          "run_id": "phase0-run-id",
+          "workspace_path": "${WORKSPACE}"
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "status": "ok",
+          "reset_to": {
+            "$type": "any"
+          },
+          "run_id": {
+            "$type": "any"
+          },
+          "message": "stop the active run first before reverting."
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "user_instructions.get",
+      "handler": "_handle_ui_get",
+      "source_line": 2041,
+      "params": {
+        "required": [],
+        "optional": [],
+        "example": {}
+      },
+      "result": {
+        "example_or_matcher": {
+          "content": {
+            "$type": "any"
+          }
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    },
+    {
+      "method": "user_instructions.set",
+      "handler": "_handle_ui_set",
+      "source_line": 2046,
+      "params": {
+        "required": [],
+        "optional": [
+          {
+            "name": "content",
+            "default": ""
+          }
+        ],
+        "example": {
+          "content": ""
+        }
+      },
+      "result": {
+        "example_or_matcher": {
+          "status": "ok"
+        },
+        "may_be_non_object": false
+      },
+      "json_rpc_error_codes": [
+        -32602,
+        -32603
+      ],
+      "error_notes": {
+        "-32602": "ValueError or missing required dictionary field",
+        "-32603": "unhandled handler exception"
+      },
+      "extraction": "conservative AST portrait; Phase 2 must replace with shared method-specific JSON Schemas"
+    }
+  ]
+}

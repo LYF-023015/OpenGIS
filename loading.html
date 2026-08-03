@@ -471,9 +471,9 @@
           <span class="step-icon"></span>
           <span class="step-label">Preparing workspace</span>
         </div>
-        <div class="step pending" id="step-python">
+        <div class="step pending" id="step-backend">
           <span class="step-icon"></span>
-          <span class="step-label">Starting Python backend</span>
+          <span class="step-label">Starting Java backend</span>
         </div>
         <div class="step pending" id="step-ready">
           <span class="step-icon"></span>
@@ -486,31 +486,6 @@
         </div>
       </div>
       <div class="status-text" id="statusText"></div>
-    </div>
-
-    <!-- Install Phase (first-launch only) -->
-    <div id="install-phase" style="display:none">
-      <div class="install-title" id="installTitle">正在准备 Python 环境</div>
-      <div class="install-icon-row">
-        <svg class="install-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
-        </svg>
-      </div>
-      <div class="install-progress-bar">
-        <div class="install-progress-track">
-          <div class="install-progress-fill" id="installProgressFill"></div>
-        </div>
-        <span class="install-progress-pct" id="installProgressPct">0%</span>
-      </div>
-      <div class="install-status" id="installStatus"></div>
-      <div class="install-detail" id="installDetail"></div>
-      <details class="install-log-toggle" id="installLogToggle">
-        <summary class="install-log-summary" id="installLogSummary">查看详情</summary>
-        <div class="install-log" id="installLog"></div>
-      </details>
-      <div class="install-actions" id="installActions" style="display:none">
-        <button class="btn btn-primary" id="btnRetryInstall">重试</button>
-      </div>
     </div>
 
     <!-- Project Selector Phase -->
@@ -605,18 +580,9 @@
       zh: {
         initApp: '正在初始化应用',
         prepareWorkspace: '准备工作区',
-        startPython: '启动 Python 后端',
+        startBackend: '启动 Java 后端',
         ready: '就绪',
         initializing: '正在初始化...',
-        installTitle: '正在准备 Python 环境',
-        installChecking: '检查 Python 环境...',
-        installDownloading: '正在下载 Python',
-        installCreatingVenv: '正在创建虚拟环境...',
-        installInstalling: '正在安装依赖...',
-        installDone: '环境准备完成',
-        installError: '安装失败',
-        installRetry: '重试',
-        installDetail: '查看详情',
         selectProject: '选择工程',
         noProjects: '暂无工程，请新建一个工程开始使用。',
         openFolder: '打开文件夹',
@@ -641,18 +607,9 @@
       en: {
         initApp: 'Initializing application',
         prepareWorkspace: 'Preparing workspace',
-        startPython: 'Starting Python backend',
+        startBackend: 'Starting Java backend',
         ready: 'Ready',
         initializing: 'Initializing...',
-        installTitle: 'Preparing Python Environment',
-        installChecking: 'Checking Python environment...',
-        installDownloading: 'Downloading Python',
-        installCreatingVenv: 'Creating virtual environment...',
-        installInstalling: 'Installing dependencies...',
-        installDone: 'Environment ready',
-        installError: 'Installation failed',
-        installRetry: 'Retry',
-        installDetail: 'View details',
         selectProject: 'Select a Project',
         noProjects: 'No projects yet. Create one to get started.',
         openFolder: 'Open Folder',
@@ -680,7 +637,7 @@
     // Apply i18n texts to DOM
     document.getElementById('step-init').querySelector('.step-label').textContent = t.initApp
     document.getElementById('step-window').querySelector('.step-label').textContent = t.prepareWorkspace
-    document.getElementById('step-python').querySelector('.step-label').textContent = t.startPython
+    document.getElementById('step-backend').querySelector('.step-label').textContent = t.startBackend
     document.getElementById('step-ready').querySelector('.step-label').textContent = t.ready
     document.querySelector('.section-title').textContent = t.selectProject
     // Buttons with SVG icons — only replace the text node, keep the SVG
@@ -708,7 +665,7 @@
     })
 
     // ─── Loading progress ───
-    const steps = ['step-init', 'step-window', 'step-python', 'step-ready']
+    const steps = ['step-init', 'step-window', 'step-backend', 'step-ready']
     const progressFill = document.getElementById('progressFill')
     const statusText = document.getElementById('statusText')
     const loadingPhase = document.getElementById('loading-phase')
@@ -749,108 +706,6 @@
     })
 
     updateStep(0, true, t.initializing)
-
-    // ─── Install phase (first-launch) ───
-    const installPhase = document.getElementById('install-phase')
-    const installTitle = document.getElementById('installTitle')
-    const installProgressFill = document.getElementById('installProgressFill')
-    const installProgressPct = document.getElementById('installProgressPct')
-    const installStatus = document.getElementById('installStatus')
-    const installDetail = document.getElementById('installDetail')
-    const installLogToggle = document.getElementById('installLogToggle')
-    const installLogSummary = document.getElementById('installLogSummary')
-    const installLog = document.getElementById('installLog')
-    const installActions = document.getElementById('installActions')
-    const btnRetry = document.getElementById('btnRetryInstall')
-
-    btnRetry.textContent = t.installRetry
-
-    let logLineCount = 0
-    const MAX_LOG_LINES = 200
-
-    function appendLogLine(line) {
-      if (!line) return
-      logLineCount++
-      const el = document.createElement('span')
-      el.className = 'log-line'
-      el.textContent = line
-      installLog.appendChild(el)
-      // Trim old lines
-      while (installLog.children.length > MAX_LOG_LINES) {
-        installLog.removeChild(installLog.firstChild)
-      }
-      // Auto-scroll to bottom
-      installLog.scrollTop = installLog.scrollHeight
-      installLogSummary.textContent = `${t.installDetail} (${logLineCount})`
-    }
-
-    function showInstallPhase() {
-      loadingPhase.style.display = 'none'
-      installPhase.style.display = 'block'
-      installActions.style.display = 'none'
-      installLogToggle.open = false
-      installLog.innerHTML = ''
-      logLineCount = 0
-      installLogSummary.textContent = t.installDetail
-      installTitle.textContent = t.installTitle
-      installStatus.textContent = t.installChecking
-      installDetail.textContent = ''
-      installDetail.style.color = ''
-      installProgressFill.style.width = '0%'
-      installProgressPct.textContent = '0%'
-    }
-
-    function hideInstallPhase() {
-      installPhase.style.display = 'none'
-      loadingPhase.style.display = 'block'
-    }
-
-    ipcRenderer.on('loading:install-start', () => {
-      showInstallPhase()
-    })
-
-    ipcRenderer.on('loading:install-progress', (event, data) => {
-      const phaseLabels = {
-        'checking': t.installChecking,
-        'downloading': t.installDownloading,
-        'creating-venv': t.installCreatingVenv,
-        'installing': t.installInstalling,
-        'done': t.installDone,
-      }
-      installStatus.textContent = phaseLabels[data.phase] || data.phase
-      if (data.percent !== undefined) {
-        installProgressFill.style.width = data.percent + '%'
-        installProgressPct.textContent = data.percent + '%'
-      }
-      if (data.detail) {
-        installDetail.textContent = data.detail
-      }
-      if (data.logLine) {
-        appendLogLine(data.logLine)
-      }
-    })
-
-    ipcRenderer.on('loading:install-done', () => {
-      installStatus.textContent = t.installDone
-      installDetail.textContent = ''
-      installProgressFill.style.width = '100%'
-      installProgressPct.textContent = '100%'
-      setTimeout(() => hideInstallPhase(), 600)
-    })
-
-    ipcRenderer.on('loading:install-error', (event, data) => {
-      installStatus.textContent = t.installError
-      installDetail.textContent = data.error || 'Unknown error'
-      installDetail.style.color = 'var(--danger)'
-      installActions.style.display = 'flex'
-      // Auto-expand log on error
-      installLogToggle.open = true
-    })
-
-    btnRetry.addEventListener('click', () => {
-      showInstallPhase()
-      ipcRenderer.send('loading:install-retry')
-    })
 
     // ─── Project selector ───
     let projects = []

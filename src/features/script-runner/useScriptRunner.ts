@@ -2,14 +2,14 @@
  * useScriptRunner — React hook wrapping the `rpc.code.run_script`
  * request/response + streaming stdout notifications.
  *
- * Protocol (matches opengis_backend/sandbox/script_runner.py):
+ * Protocol (implemented by the Java script runner):
  *
- *   TS -> Python request:
+ *   TS -> Java request:
  *     method: "rpc.code.run_script"
  *     params: { run_id, code, workspace_path?, exec_timeout? }
  *     result: { ok, run_id, output, logs, is_final_answer, duration_ms, error? }
  *
- *   Python -> TS notifications (no id):
+ *   Java -> TS notifications (no id):
  *     "rpc.code.script_started" { run_id }
  *     "rpc.code.stdout"         { run_id, text }
  *     "rpc.code.stderr"         { run_id, text }
@@ -22,7 +22,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { v4 as uuid } from 'uuid'
-import { pythonClient } from '@/services/pythonClient'
+import { backendClient } from '@/services/backendClient'
 
 export type RunnerStatus = 'idle' | 'running' | 'finished'
 
@@ -40,7 +40,7 @@ export interface ScriptResult {
   logs: string | null
   duration_ms: number | null
   error?: string | null
-  /** Present if the Python side reported an error category. */
+  /** Present if the backend reported an error category. */
   error_type?: string | null
 }
 
@@ -75,11 +75,11 @@ export function useScriptRunner(): UseScriptRunner {
     ])
   }, [])
 
-  // Subscribe to pythonClient notifications exactly once per hook instance.
-  // Note: pythonClient fan-outs to every subscriber, so multiple hook
+  // Subscribe to backend notifications exactly once per hook instance.
+  // The client fans out to every subscriber, so multiple hook
   // instances coexist fine — each filters by its own runIdRef.
   useEffect(() => {
-    const off = pythonClient.onNotification((method, params) => {
+    const off = backendClient.onNotification((method, params) => {
       if (!params || typeof params !== 'object') return
       const p = params as Record<string, unknown>
       const incomingRunId = typeof p.run_id === 'string' ? p.run_id : null
@@ -112,7 +112,7 @@ export function useScriptRunner(): UseScriptRunner {
   const run = useCallback(
     async (code: string, opts?: { workspacePath?: string | null; execTimeout?: number }) => {
       if (status === 'running') {
-        // Guard against double-submit. The Python side also rejects
+        // Guard against double-submit. The Java side also rejects
         // with a 'busy' error, but it's nicer to not even send.
         return
       }
@@ -126,7 +126,7 @@ export function useScriptRunner(): UseScriptRunner {
       pushChunk('info', `▶ run started  (run_id=${id.slice(0, 8)})\n`)
 
       try {
-        const reply = await pythonClient.send<ScriptResult & { run_id?: string }>(
+        const reply = await backendClient.send<ScriptResult & { run_id?: string }>(
           'rpc.code.run_script',
           {
             run_id: id,
@@ -174,7 +174,7 @@ export function useScriptRunner(): UseScriptRunner {
     const id = runIdRef.current
     if (!id || status !== 'running') return
     try {
-      await pythonClient.send('rpc.code.cancel_script', { run_id: id })
+      await backendClient.send('rpc.code.cancel_script', { run_id: id })
       pushChunk('info', '⏹ cancel requested…\n')
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)

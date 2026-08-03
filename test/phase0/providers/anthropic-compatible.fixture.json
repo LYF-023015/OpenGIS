@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.0",
+  "protocol": "anthropic",
+  "request": {
+    "method": "POST",
+    "path_suffix": "/v1/messages",
+    "headers": {
+      "x-api-key": "${API_KEY}",
+      "anthropic-version": "${ANTHROPIC_VERSION}",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "model": "${MODEL}",
+      "system": "You are OpenGIS.",
+      "messages": [
+        {
+          "role": "user",
+          "content": "List layers."
+        }
+      ],
+      "tools": [
+        {
+          "name": "list_layers",
+          "description": "List map layers",
+          "input_schema": {
+            "type": "object",
+            "properties": {}
+          }
+        }
+      ],
+      "max_tokens": 1024,
+      "stream": true
+    }
+  },
+  "stream_examples": [
+    {
+      "type": "message_start",
+      "message": {
+        "id": "msg_fixture",
+        "role": "assistant",
+        "usage": {
+          "input_tokens": 10,
+          "output_tokens": 0
+        }
+      }
+    },
+    {
+      "type": "content_block_start",
+      "index": 0,
+      "content_block": {
+        "type": "tool_use",
+        "id": "tool_fixture",
+        "name": "list_layers",
+        "input": {}
+      }
+    },
+    {
+      "type": "content_block_stop",
+      "index": 0
+    },
+    {
+      "type": "message_delta",
+      "delta": {
+        "stop_reason": "tool_use"
+      },
+      "usage": {
+        "output_tokens": 4
+      }
+    },
+    {
+      "type": "message_stop"
+    }
+  ],
+  "normalized_expectation": {
+    "content": null,
+    "tool_calls": [
+      {
+        "id": "tool_fixture",
+        "name": "list_layers",
+        "arguments": {}
+      }
+    ],
+    "finish_reason": "tool_calls"
+  }
+}

@@ -1,0 +1,1296 @@
+{
+  "schema_version": "1.0",
+  "consumer_count": 44,
+  "consumers": [
+    {
+      "file": "docs/adding-a-new-tool.md",
+      "category": "documentation",
+      "matched_semantics": [
+        "python_code_ui",
+        "python_runtime"
+      ],
+      "reference_count": 25,
+      "sample_references": [
+        {
+          "line": 3,
+          "text": "> 适用范围：`python-backend/opengis_backend` 下的 function-call 工具（LLM 可调用的函数）。"
+        },
+        {
+          "line": 13,
+          "text": "tools/builtin/*.py  ──@tool 装饰器──▶  全局 _registry（registry.py:40）"
+        },
+        {
+          "line": 26,
+          "text": "- `ToolRegistry.discover_and_load()`（`tools/registry.py:126-143`）遍历 `tools/builtin/` 下所有模块并 `import`，触发 `@tool` 装饰器把工具塞进全局 `_registry`。"
+        },
+        {
+          "line": 27,
+          "text": "- `tools/builtin/__init__.py` 是空的——**新增工具文件后不需要手动导出或登记**。"
+        },
+        {
+          "line": 28,
+          "text": "- profile 通过 `tool_groups` 过滤工具：`factory_common.build_loop_runtime_bundle` 里 `registered = [s for s in registered if s.schema.group in effective_groups]`（`factory_common.py:128-130`）。"
+        },
+        {
+          "line": 34,
+          "text": "底层由两个 dataclass 描述（`tools/schema.py`）："
+        },
+        {
+          "line": 39,
+          "text": "工具通过 **`@tool` 装饰器**定义并自动注册（`tools/registry.py:43-120`）。装饰器会把函数包成异步 `wrapper`，异常自动包成 `ToolResult(success=False, error=...)`，同步函数自动丢进线程池执行。"
+        },
+        {
+          "line": 47,
+          "text": "在 `python-backend/opengis_backend/tools/builtin/` 下新建 `my_tool.py`，用 `@tool` 装饰器。范式参考 `builtin/glob_tool.py`："
+        }
+      ],
+      "java_target": "docs",
+      "replacement": "update process diagrams, commands and extension examples at the owning migration phase"
+    },
+    {
+      "file": "docs/message-compaction-architecture.md",
+      "category": "documentation",
+      "matched_semantics": [
+        "python_code_ui",
+        "python_runtime"
+      ],
+      "reference_count": 31,
+      "sample_references": [
+        {
+          "line": 3,
+          "text": "> 适用范围：`python-backend/opengis_backend` 的 agent loop 上下文管理。"
+        },
+        {
+          "line": 30,
+          "text": "| `agent/context/context_manager.py` | 对话历史存储、`should_compress` / `compress` / `_prune_outputs`、装配 provider request |"
+        },
+        {
+          "line": 31,
+          "text": "| `agent/context/request_budget.py` | `RequestBudgetManager` / `BudgetLimits` / `RequestBudgetReport`，预算估算与压力分级 |"
+        },
+        {
+          "line": 32,
+          "text": "| `agent/context/provider_projector.py` | `ProviderContextProjector`，把原始历史投影成一份更小的、发给模型的临时消息 |"
+        },
+        {
+          "line": 33,
+          "text": "| `agent/context/summarizer.py` | `llm_summarize` / `simple_summarize`，L1 的摘要实现 |"
+        },
+        {
+          "line": 34,
+          "text": "| `agent/execution/tool_output.py` | `ToolOutputRuntime`，L0 工具输出入库前定界，全量落盘保留 |"
+        },
+        {
+          "line": 35,
+          "text": "| `agent/loop/loop_kernel.py` | `run_turn`，触发 L1/L2 并按预算重建请求的主入口 |"
+        },
+        {
+          "line": 43,
+          "text": "`loop_kernel.py:126-138` —— 每轮开始，先做 L1 压缩判定："
+        }
+      ],
+      "java_target": "docs",
+      "replacement": "update process diagrams, commands and extension examples at the owning migration phase"
+    },
+    {
+      "file": "docs/opengis-agent-loop-termination-report.md",
+      "category": "documentation",
+      "matched_semantics": [
+        "python_code_ui",
+        "python_runtime"
+      ],
+      "reference_count": 13,
+      "sample_references": [
+        {
+          "line": 61,
+          "text": "python-backend/opengis_backend/rpc/handler.py"
+        },
+        {
+          "line": 62,
+          "text": "python-backend/opengis_backend/agent/open_gis_agent.py"
+        },
+        {
+          "line": 63,
+          "text": "python-backend/opengis_backend/agent/session/session_coordinator.py"
+        },
+        {
+          "line": 64,
+          "text": "python-backend/opengis_backend/agent/session/run_session.py"
+        },
+        {
+          "line": 417,
+          "text": "OpenGIS 在 `llm.py` 的 `_extract_xmlish_tool_calls()` 中做边界修复："
+        }
+      ],
+      "java_target": "docs",
+      "replacement": "update process diagrams, commands and extension examples at the owning migration phase"
+    },
+    {
+      "file": "docs/prompt-cache-stable-prefix-architecture.md",
+      "category": "documentation",
+      "matched_semantics": [
+        "python_code_ui",
+        "python_runtime"
+      ],
+      "reference_count": 32,
+      "sample_references": [
+        {
+          "line": 37,
+          "text": "```409:415:python-backend/opengis_backend/agent/loop/loop_kernel.py"
+        },
+        {
+          "line": 64,
+          "text": "早期版本假设\"每轮动态裁工具\"破坏了缓存。实测 `tool_materializer.py` 表明相反："
+        },
+        {
+          "line": 66,
+          "text": "```1:7:python-backend/opengis_backend/agent/execution/tool_materializer.py"
+        },
+        {
+          "line": 392,
+          "text": "- `llm.py` 只接收已构建好的请求，不再承担 section 组织职责。"
+        },
+        {
+          "line": 513,
+          "text": "- **`ContextManager.build_provider_request()`（`context/context_manager.py`）成为唯一装配者。** 它按 3.1.2 契约排布："
+        },
+        {
+          "line": 521,
+          "text": "- **project memory 归入 DYNAMIC TAIL。** `factory_common.compose_system_prompt` 不再把「Retrieved Project Memory」拼进 system prompt；新增 `project_run_memory(ctx)` 单独投影，经 `LoopRuntimeBundle.project_memory` 传给 `AgentLoop` / `WorkflowLoop`，由 loop 注入 tail"
+        },
+        {
+          "line": 525,
+          "text": "- **后端分段 hash。** `provider_request.py` 新增 `ProviderRequest.system_prefix_hash`（历史之前所有 section 的 digest，健康时恒定）与 `dynamic_suffix_hash`（最后一个 history section 之后的尾部）。`loop_kernel` 把 `system_prefix_hash` / `dynamic_suffix_hash` / `tool_schema_has"
+        },
+        {
+          "line": 526,
+          "text": "- **usage 归一化。** `llm.py:_extract_usage` 补齐 DeepSeek 口径（`prompt_cache_hit_tokens` / `prompt_cache_miss_tokens`），并派生 `non_cached_input_tokens`、`cache_status`（`reported` / `provider_not_reported`）、`cache_hit_ratio`——provider 不报缓存时显式标注，避免前端误显示"
+        }
+      ],
+      "java_target": "docs",
+      "replacement": "update process diagrams, commands and extension examples at the owning migration phase"
+    },
+    {
+      "file": "electron/ipc/pythonManager.ts",
+      "category": "electron-launcher",
+      "matched_semantics": [
+        "python_runtime"
+      ],
+      "reference_count": 25,
+      "sample_references": [
+        {
+          "line": 31,
+          "text": "* - Detect Python environment (conda/venv/system)"
+        },
+        {
+          "line": 93,
+          "text": "getVenvPath(): string {"
+        },
+        {
+          "line": 94,
+          "text": "return join(app.getPath('userData'), 'venv')"
+        },
+        {
+          "line": 98,
+          "text": "* Check if the venv exists in the user data directory."
+        },
+        {
+          "line": 101,
+          "text": "hasVenv(): boolean {"
+        },
+        {
+          "line": 102,
+          "text": "const venvPython = this.isWindows"
+        },
+        {
+          "line": 103,
+          "text": "? join(this.getVenvPath(), 'Scripts', 'python.exe')"
+        },
+        {
+          "line": 104,
+          "text": ": join(this.getVenvPath(), 'bin', 'python')"
+        }
+      ],
+      "java_target": "opengis-server/opengis-ui",
+      "replacement": "replace with BackendManager + bundled JRE launcher; keep compatibility flag during migration"
+    },
+    {
+      "file": "electron/ipc/pythonSetup.ts",
+      "category": "electron-launcher",
+      "matched_semantics": [
+        "pip_dependency",
+        "python_code_ui",
+        "python_runtime"
+      ],
+      "reference_count": 58,
+      "sample_references": [
+        {
+          "line": 4,
+          "text": "* Checks for an existing .venv, finds or downloads a Python 3.11+ interpreter,"
+        },
+        {
+          "line": 20,
+          "text": "phase: 'checking' | 'downloading' | 'creating-venv' | 'installing' | 'done' | 'error'"
+        },
+        {
+          "line": 29,
+          "text": "* Ensure the Python environment is ready. Returns the path to the venv Python."
+        },
+        {
+          "line": 30,
+          "text": "* If .venv already exists and is valid, returns immediately."
+        },
+        {
+          "line": 32,
+          "text": "* @param backendPath - Path to python-backend source (read-only in packaged app)"
+        },
+        {
+          "line": 33,
+          "text": "* @param venvPath - Writable path for the venv (e.g. ~/Library/Application Support/opengis/venv)"
+        },
+        {
+          "line": 37,
+          "text": "venvPath: string,"
+        },
+        {
+          "line": 42,
+          "text": "const venvPython = isWin"
+        }
+      ],
+      "java_target": "opengis-server/opengis-ui",
+      "replacement": "replace with BackendManager + bundled JRE launcher; keep compatibility flag during migration"
+    },
+    {
+      "file": "electron/main.ts",
+      "category": "electron-launcher",
+      "matched_semantics": [
+        "python_runtime"
+      ],
+      "reference_count": 6,
+      "sample_references": [
+        {
+          "line": 393,
+          "text": "const needsSetup = !tempManager.hasVenv()"
+        },
+        {
+          "line": 396,
+          "text": "console.log('[loading] No .venv found — running first-launch setup')"
+        },
+        {
+          "line": 399,
+          "text": "console.log('[loading] .venv exists — checking version')"
+        },
+        {
+          "line": 405,
+          "text": "const venvPath = tempManager.getVenvPath()"
+        },
+        {
+          "line": 406,
+          "text": "await ensurePythonEnv(backendPath, venvPath, (progress) => {"
+        }
+      ],
+      "java_target": "opengis-server/opengis-ui",
+      "replacement": "replace with BackendManager + bundled JRE launcher; keep compatibility flag during migration"
+    },
+    {
+      "file": "electron-builder.yml",
+      "category": "electron-launcher",
+      "matched_semantics": [
+        "python_runtime"
+      ],
+      "reference_count": 4,
+      "sample_references": [
+        {
+          "line": 12,
+          "text": "- from: \"python-backend/\""
+        },
+        {
+          "line": 13,
+          "text": "to: \"python-backend/\""
+        },
+        {
+          "line": 18,
+          "text": "- \"!**/.venv\""
+        },
+        {
+          "line": 19,
+          "text": "- \"!**/.venv/**\""
+        }
+      ],
+      "java_target": "opengis-server/opengis-ui",
+      "replacement": "replace with BackendManager + bundled JRE launcher; keep compatibility flag during migration"
+    },
+    {
+      "file": "package.json",
+      "category": "electron-launcher",
+      "matched_semantics": [
+        "python_runtime"
+      ],
+      "reference_count": 2,
+      "sample_references": [
+        {
+          "line": 21,
+          "text": "\"setup:python\": \"node python-backend/setup-python.mjs\","
+        }
+      ],
+      "java_target": "opengis-server/opengis-ui",
+      "replacement": "replace with BackendManager + bundled JRE launcher; keep compatibility flag during migration"
+    },
+    {
+      "file": "README.md",
+      "category": "transport-client",
+      "matched_semantics": [
+        "python_client",
+        "python_code_ui",
+        "python_runtime"
+      ],
+      "reference_count": 42,
+      "sample_references": [
+        {
+          "line": 110,
+          "text": "- **Worker**: Resident Python service packages structured as `main.py + config.json + manifest.json + src/`, suitable for real-time data, API polling, and dynamic rendering."
+        },
+        {
+          "line": 143,
+          "text": "| Python Sidecar | FastAPI + uvicorn + LiteLLM | JSON-RPC, Agent, Tool, Workflow, Worker | `python-backend/opengis_backend/` |"
+        },
+        {
+          "line": 144,
+          "text": "| Python Execution | subprocess runner | Agent-generated Python code execution | `agent/execution/` |"
+        },
+        {
+          "line": 154,
+          "text": "rpc.code.run_script"
+        },
+        {
+          "line": 167,
+          "text": "The frontend `src/services/pythonClient.ts` handles WebSocket connection, request timeouts, notification dispatch, and dynamic map event buffering. Inbound `rpc.ui.*` notifications go to `src/services/rpc/handlers/` and ultimately write to "
+        },
+        {
+          "line": 192,
+          "text": "| `agent/loop/` | AgentLoop, TurnRunner, LoopKernel, RuntimeControl, loop policy | `python-backend/opengis_backend/agent/loop/` |"
+        },
+        {
+          "line": 202,
+          "text": "OpenGIS now uses function calls as the primary Agent path. The model outputs structured tool calls, and the framework executes tools by schema and returns structured results. Python code execution remains a tool but is no longer the loop co"
+        },
+        {
+          "line": 206,
+          "text": "- Agent reply text is no longer mistakenly executed as Python code."
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "rename to backendClient only after Java protocol parity; behavior remains JSON-RPC"
+    },
+    {
+      "file": "README.zh.md",
+      "category": "transport-client",
+      "matched_semantics": [
+        "python_client",
+        "python_code_ui",
+        "python_runtime"
+      ],
+      "reference_count": 37,
+      "sample_references": [
+        {
+          "line": 110,
+          "text": "- **Worker**：常驻 Python 服务包，结构固定为 `main.py + config.json + manifest.json + src/`，适合实时数据、轮询 API、动态渲染。"
+        },
+        {
+          "line": 143,
+          "text": "| Python Sidecar | FastAPI + uvicorn + LiteLLM | JSON-RPC、Agent、Tool、Workflow、Worker | `python-backend/opengis_backend/` |"
+        },
+        {
+          "line": 154,
+          "text": "rpc.code.run_script"
+        },
+        {
+          "line": 167,
+          "text": "前端 `src/services/pythonClient.ts` 负责 WebSocket 连接、请求超时、通知分发和动态地图事件缓冲。入站 `rpc.ui.*` notification 进入 `src/services/rpc/handlers/`，最终写入 Zustand store 或直接调用 MapEngine。"
+        },
+        {
+          "line": 192,
+          "text": "| `agent/loop/` | AgentLoop、TurnRunner、LoopKernel、RuntimeControl、循环策略 | `python-backend/opengis_backend/agent/loop/` |"
+        },
+        {
+          "line": 254,
+          "text": "所有工具集中在 `python-backend/opengis_backend/tools/`："
+        },
+        {
+          "line": 360,
+          "text": "main.py            # 唯一入口"
+        },
+        {
+          "line": 393,
+          "text": "main.py              # 唯一入口"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "rename to backendClient only after Java protocol parity; behavior remains JSON-RPC"
+    },
+    {
+      "file": "src/App.tsx",
+      "category": "transport-client",
+      "matched_semantics": [
+        "python_client"
+      ],
+      "reference_count": 9,
+      "sample_references": [
+        {
+          "line": 7,
+          "text": "import { pythonClient } from '@/services/pythonClient'"
+        },
+        {
+          "line": 25,
+          "text": "pythonClient.setDispatcher(globalDispatcher)"
+        },
+        {
+          "line": 40,
+          "text": "pythonClient.setDispatcher(null)"
+        },
+        {
+          "line": 73,
+          "text": "pythonClient.disconnect()"
+        },
+        {
+          "line": 74,
+          "text": "pythonClient.connect(port, wsToken ?? undefined)"
+        },
+        {
+          "line": 104,
+          "text": "pythonClient.disconnect()"
+        },
+        {
+          "line": 160,
+          "text": "pythonClient.send('rpc.debug.set_log_level', {"
+        },
+        {
+          "line": 168,
+          "text": "pythonClient.send('rpc.workspace.install_templates', {"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "rename to backendClient only after Java protocol parity; behavior remains JSON-RPC"
+    },
+    {
+      "file": "src/features/approval/ApprovalGate.tsx",
+      "category": "transport-client",
+      "matched_semantics": [
+        "python_client",
+        "python_code_ui"
+      ],
+      "reference_count": 4,
+      "sample_references": [
+        {
+          "line": 13,
+          "text": "import { pythonClient } from '@/services/pythonClient'"
+        },
+        {
+          "line": 116,
+          "text": "await pythonClient.send('rpc.agent.permissions.rules.add', {"
+        },
+        {
+          "line": 332,
+          "text": "<span className={`${embedded ? 'text-2xs' : 'text-xs'} font-medium text-text-secondary`}>Python code</span>"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "rename to backendClient only after Java protocol parity; behavior remains JSON-RPC"
+    },
+    {
+      "file": "src/features/assets/AssetExplorer.tsx",
+      "category": "renderer-consumer",
+      "matched_semantics": [
+        "python_code_ui"
+      ],
+      "reference_count": 1,
+      "sample_references": [
+        {
+          "line": 56,
+          "text": "const CODE_EXTS = new Set(['.py', '.js', '.ts', '.tsx', '.jsx', '.r', '.ipynb', '.md'])"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "preserve UI behavior and replace Python-specific labels/types with backend-neutral terms"
+    },
+    {
+      "file": "src/features/chat/components/CodeStepRow.tsx",
+      "category": "code-execution-ui",
+      "matched_semantics": [
+        "python_code_ui"
+      ],
+      "reference_count": 1,
+      "sample_references": [
+        {
+          "line": 93,
+          "text": "const fileName = scriptPath.split('/').pop() || absPath.split(/[\\\\/]/).pop() || 'script.py'"
+        }
+      ],
+      "java_target": "opengis-platform/opengis-ui",
+      "replacement": "retain protocol initially; change language metadata and labels from Python to Java"
+    },
+    {
+      "file": "src/features/chat/components/FileBrowserDialog.tsx",
+      "category": "renderer-consumer",
+      "matched_semantics": [
+        "python_code_ui"
+      ],
+      "reference_count": 2,
+      "sample_references": [
+        {
+          "line": 80,
+          "text": "'.py': FileCode,"
+        },
+        {
+          "line": 102,
+          "text": "if (['.py', '.js', '.ts', '.json'].includes(ext)) return 'text-orange-400'"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "preserve UI behavior and replace Python-specific labels/types with backend-neutral terms"
+    },
+    {
+      "file": "src/features/code/CodeViewer.tsx",
+      "category": "renderer-consumer",
+      "matched_semantics": [
+        "python_code_ui"
+      ],
+      "reference_count": 1,
+      "sample_references": [
+        {
+          "line": 9,
+          "text": "* - Code execution panel (for .py files)"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "preserve UI behavior and replace Python-specific labels/types with backend-neutral terms"
+    },
+    {
+      "file": "src/features/map/extensions/host.ts",
+      "category": "transport-client",
+      "matched_semantics": [
+        "python_client"
+      ],
+      "reference_count": 6,
+      "sample_references": [
+        {
+          "line": 4,
+          "text": "* 职责：把已注册的扩展连接到 pythonClient 的通知流。"
+        },
+        {
+          "line": 5,
+          "text": "* 这是扩展层和 base 层唯一的耦合点：只 import pythonClient + mapEngine。"
+        },
+        {
+          "line": 8,
+          "text": "* 但 pythonClient._handleMessage 总是会 fan-out 到 notificationHandlers。"
+        },
+        {
+          "line": 12,
+          "text": "import { pythonClient } from '@/services/pythonClient'"
+        },
+        {
+          "line": 24,
+          "text": "pythonClient.onNotification((method, params) => {"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "rename to backendClient only after Java protocol parity; behavior remains JSON-RPC"
+    },
+    {
+      "file": "src/features/operations/OperationEditorView.tsx",
+      "category": "transport-client",
+      "matched_semantics": [
+        "python_client",
+        "python_code_ui"
+      ],
+      "reference_count": 4,
+      "sample_references": [
+        {
+          "line": 11,
+          "text": "import { pythonClient } from '@/services/pythonClient'"
+        },
+        {
+          "line": 54,
+          "text": "const result = await pythonClient.send<{ operation?: OperationDetail }>('rpc.operations.get', {"
+        },
+        {
+          "line": 116,
+          "text": "<InfoPill label={t.operations.entry} value={detail.entry || 'main.py'} />"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "rename to backendClient only after Java protocol parity; behavior remains JSON-RPC"
+    },
+    {
+      "file": "src/features/operations/OperationsPanel.tsx",
+      "category": "transport-client",
+      "matched_semantics": [
+        "python_client"
+      ],
+      "reference_count": 3,
+      "sample_references": [
+        {
+          "line": 11,
+          "text": "import { pythonClient } from '@/services/pythonClient'"
+        },
+        {
+          "line": 57,
+          "text": "const result = await pythonClient.send<{"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "rename to backendClient only after Java protocol parity; behavior remains JSON-RPC"
+    },
+    {
+      "file": "src/features/pivot/pivotAnalysis.ts",
+      "category": "transport-client",
+      "matched_semantics": [
+        "python_client",
+        "python_code_ui"
+      ],
+      "reference_count": 11,
+      "sample_references": [
+        {
+          "line": 2,
+          "text": "import { pythonClient } from '@/services/pythonClient'"
+        },
+        {
+          "line": 86,
+          "text": "if (!pythonClient.isConnected) {"
+        },
+        {
+          "line": 107,
+          "text": "const off = pythonClient.onNotification((method, params) => {"
+        },
+        {
+          "line": 111,
+          "text": "if (method === 'rpc.code.script_started') {"
+        },
+        {
+          "line": 113,
+          "text": "} else if (method === 'rpc.code.stdout' && typeof p.text === 'string') {"
+        },
+        {
+          "line": 119,
+          "text": "} else if (method === 'rpc.code.stderr' && typeof p.text === 'string') {"
+        },
+        {
+          "line": 121,
+          "text": "} else if (method === 'rpc.code.script_done') {"
+        },
+        {
+          "line": 139,
+          "text": "emitLog('发送 rpc.code.run_script 请求，等待 response 或 script_done notification。\\n')"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "rename to backendClient only after Java protocol parity; behavior remains JSON-RPC"
+    },
+    {
+      "file": "src/features/runs/RunsPanel.tsx",
+      "category": "renderer-consumer",
+      "matched_semantics": [
+        "python_code_ui"
+      ],
+      "reference_count": 1,
+      "sample_references": [
+        {
+          "line": 390,
+          "text": "language: name.endsWith('.py') ? 'python' : undefined,"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "preserve UI behavior and replace Python-specific labels/types with backend-neutral terms"
+    },
+    {
+      "file": "src/features/script-runner/ScriptRunnerView.tsx",
+      "category": "code-execution-ui",
+      "matched_semantics": [
+        "python_code_ui"
+      ],
+      "reference_count": 6,
+      "sample_references": [
+        {
+          "line": 3,
+          "text": "* author Python scripts and execute them inside the subprocess sandbox"
+        },
+        {
+          "line": 75,
+          "text": "* editor area — opening a .py file via AssetExplorer lands here."
+        },
+        {
+          "line": 147,
+          "text": "? `${workspacePath.replace(/[\\\\/]+$/, '')}/untitled.py`"
+        },
+        {
+          "line": 148,
+          "text": ": 'untitled.py'"
+        },
+        {
+          "line": 200,
+          "text": "// fall back to the filePath leaf, finally \"untitled.py\"."
+        },
+        {
+          "line": 202,
+          "text": "?? (filePath ? (filePath.split(/[\\\\/]/).pop() || filePath) : 'untitled.py')"
+        }
+      ],
+      "java_target": "opengis-platform/opengis-ui",
+      "replacement": "retain protocol initially; change language metadata and labels from Python to Java"
+    },
+    {
+      "file": "src/features/script-runner/useScriptRunner.ts",
+      "category": "code-execution-ui",
+      "matched_semantics": [
+        "python_client",
+        "python_code_ui",
+        "python_runtime"
+      ],
+      "reference_count": 21,
+      "sample_references": [
+        {
+          "line": 2,
+          "text": "* useScriptRunner — React hook wrapping the `rpc.code.run_script`"
+        },
+        {
+          "line": 5,
+          "text": "* Protocol (matches opengis_backend/sandbox/script_runner.py):"
+        },
+        {
+          "line": 8,
+          "text": "*     method: \"rpc.code.run_script\""
+        },
+        {
+          "line": 13,
+          "text": "*     \"rpc.code.script_started\" { run_id }"
+        },
+        {
+          "line": 14,
+          "text": "*     \"rpc.code.stdout\"         { run_id, text }"
+        },
+        {
+          "line": 15,
+          "text": "*     \"rpc.code.stderr\"         { run_id, text }"
+        },
+        {
+          "line": 16,
+          "text": "*     \"rpc.code.script_done\"    { run_id, ok, output, logs, duration_ms, error? }"
+        },
+        {
+          "line": 25,
+          "text": "import { pythonClient } from '@/services/pythonClient'"
+        }
+      ],
+      "java_target": "opengis-platform/opengis-ui",
+      "replacement": "retain protocol initially; change language metadata and labels from Python to Java"
+    },
+    {
+      "file": "src/features/settings/SettingsView.tsx",
+      "category": "transport-client",
+      "matched_semantics": [
+        "python_client",
+        "python_runtime"
+      ],
+      "reference_count": 7,
+      "sample_references": [
+        {
+          "line": 27,
+          "text": "import { pythonClient } from '@/services/pythonClient'"
+        },
+        {
+          "line": 180,
+          "text": "pythonClient.send('user_instructions.get', {})"
+        },
+        {
+          "line": 573,
+          "text": "const result = await pythonClient.send('rpc.agent.test_connection', {"
+        },
+        {
+          "line": 1139,
+          "text": "pythonClient.send('rpc.debug.set_log_level', {"
+        },
+        {
+          "line": 1161,
+          "text": "await pythonClient.send('user_instructions.set', { content: trimmed })"
+        },
+        {
+          "line": 1498,
+          "text": "id=\"python-backend-status\""
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "rename to backendClient only after Java protocol parity; behavior remains JSON-RPC"
+    },
+    {
+      "file": "src/features/tool-catalog/ToolAndSkillPanel.tsx",
+      "category": "transport-client",
+      "matched_semantics": [
+        "python_client"
+      ],
+      "reference_count": 4,
+      "sample_references": [
+        {
+          "line": 3,
+          "text": "import { pythonClient } from '@/services/pythonClient'"
+        },
+        {
+          "line": 95,
+          "text": "pythonClient.send('rpc.tool.list', {}),"
+        },
+        {
+          "line": 96,
+          "text": "pythonClient.send('rpc.user_skill.list', { workspace_path: workspacePath || undefined }),"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "rename to backendClient only after Java protocol parity; behavior remains JSON-RPC"
+    },
+    {
+      "file": "src/features/workers/WorkerCard.tsx",
+      "category": "renderer-consumer",
+      "matched_semantics": [
+        "python_code_ui"
+      ],
+      "reference_count": 1,
+      "sample_references": [
+        {
+          "line": 149,
+          "text": "<WorkerPathRow label={t.workers.entrypoint} value={packageInfo?.entrypoint || manifest?.entrypoint || 'main.py'} mono />"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "preserve UI behavior and replace Python-specific labels/types with backend-neutral terms"
+    },
+    {
+      "file": "src/features/workers/WorkersPanel.tsx",
+      "category": "transport-client",
+      "matched_semantics": [
+        "python_client"
+      ],
+      "reference_count": 7,
+      "sample_references": [
+        {
+          "line": 3,
+          "text": "import { pythonClient } from '@/services/pythonClient'"
+        },
+        {
+          "line": 37,
+          "text": "const result = await pythonClient.send('rpc.worker.list', {"
+        },
+        {
+          "line": 63,
+          "text": "const result = await pythonClient.send('rpc.worker.get', {"
+        },
+        {
+          "line": 133,
+          "text": "await pythonClient.send('rpc.worker.pause', {"
+        },
+        {
+          "line": 147,
+          "text": "await pythonClient.send('rpc.worker.restart', {"
+        },
+        {
+          "line": 163,
+          "text": "await pythonClient.send('rpc.worker.delete', {"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "rename to backendClient only after Java protocol parity; behavior remains JSON-RPC"
+    },
+    {
+      "file": "src/features/workers/workerUtils.ts",
+      "category": "renderer-consumer",
+      "matched_semantics": [
+        "python_code_ui"
+      ],
+      "reference_count": 1,
+      "sample_references": [
+        {
+          "line": 53,
+          "text": "return normalized.split('/').pop() || 'main.py'"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "preserve UI behavior and replace Python-specific labels/types with backend-neutral terms"
+    },
+    {
+      "file": "src/features/workflows/workflow-schema.ts",
+      "category": "renderer-consumer",
+      "matched_semantics": [
+        "python_code_ui"
+      ],
+      "reference_count": 2,
+      "sample_references": [
+        {
+          "line": 6,
+          "text": "*   to a real .py file in `workspace/scripts/` plus a params bag."
+        },
+        {
+          "line": 91,
+          "text": "* Path to the backing Python script, *relative to the workspace root*."
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "preserve UI behavior and replace Python-specific labels/types with backend-neutral terms"
+    },
+    {
+      "file": "src/features/workflows/WorkflowsPanel.tsx",
+      "category": "renderer-consumer",
+      "matched_semantics": [
+        "python_code_ui"
+      ],
+      "reference_count": 1,
+      "sample_references": [
+        {
+          "line": 429,
+          "text": "* Tiny helper to avoid title collisions with a .py file of the same"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "preserve UI behavior and replace Python-specific labels/types with backend-neutral terms"
+    },
+    {
+      "file": "src/layouts/MainLayout.tsx",
+      "category": "renderer-consumer",
+      "matched_semantics": [
+        "python_code_ui"
+      ],
+      "reference_count": 1,
+      "sample_references": [
+        {
+          "line": 581,
+          "text": "const isPython = lang === 'python' || path.endsWith('.py')"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "preserve UI behavior and replace Python-specific labels/types with backend-neutral terms"
+    },
+    {
+      "file": "src/services/__tests__/pythonClient.test.ts",
+      "category": "transport-client",
+      "matched_semantics": [
+        "python_client"
+      ],
+      "reference_count": 9,
+      "sample_references": [
+        {
+          "line": 2,
+          "text": "* Contract tests: PythonClient ↔ Dispatcher wiring."
+        },
+        {
+          "line": 4,
+          "text": "* We bypass WebSocket by constructing a PythonClient instance and driving"
+        },
+        {
+          "line": 24,
+          "text": "import { PythonClient, type DispatcherLike } from '../pythonClient';"
+        },
+        {
+          "line": 27,
+          "text": "function feed(client: PythonClient, msg: unknown): void {"
+        },
+        {
+          "line": 34,
+          "text": "function stubOpenWs(client: PythonClient): { sent: string[] } {"
+        },
+        {
+          "line": 70,
+          "text": "describe('PythonClient inbound message routing', () => {"
+        },
+        {
+          "line": 71,
+          "text": "let client: PythonClient;"
+        },
+        {
+          "line": 74,
+          "text": "client = new PythonClient();"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "rename to backendClient only after Java protocol parity; behavior remains JSON-RPC"
+    },
+    {
+      "file": "src/services/commandBus.ts",
+      "category": "transport-client",
+      "matched_semantics": [
+        "python_client"
+      ],
+      "reference_count": 4,
+      "sample_references": [
+        {
+          "line": 5,
+          "text": "* This is the consumer of pythonClient.onNotification. Every Python-side"
+        },
+        {
+          "line": 17,
+          "text": "import { pythonClient } from './pythonClient'"
+        },
+        {
+          "line": 237,
+          "text": "pythonClient.onNotification((method, params) => {"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "rename to backendClient only after Java protocol parity; behavior remains JSON-RPC"
+    },
+    {
+      "file": "src/services/events.ts",
+      "category": "transport-client",
+      "matched_semantics": [
+        "python_client"
+      ],
+      "reference_count": 3,
+      "sample_references": [
+        {
+          "line": 5,
+          "text": "* tests and renderer-only boot safe until PythonClient wires the real bridge."
+        },
+        {
+          "line": 69,
+          "text": "// Transport: default no-op, replaced by PythonClient during app startup."
+        },
+        {
+          "line": 121,
+          "text": "/** Replace the active transport when PythonClient connects or reconnects. */"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "rename to backendClient only after Java protocol parity; behavior remains JSON-RPC"
+    },
+    {
+      "file": "src/services/pythonClient.ts",
+      "category": "transport-client",
+      "matched_semantics": [
+        "python_client",
+        "python_code_ui"
+      ],
+      "reference_count": 13,
+      "sample_references": [
+        {
+          "line": 41,
+          "text": "export class PythonClient {"
+        },
+        {
+          "line": 135,
+          "text": "console.error(`[PythonClient] Error rejecting pending request ${id}:`, e)"
+        },
+        {
+          "line": 203,
+          "text": "//  - rpc.code.run_script is user-authored Python inside the"
+        },
+        {
+          "line": 212,
+          "text": "const isScriptRun = method === 'rpc.code.run_script'"
+        },
+        {
+          "line": 259,
+          "text": "console.error('[PythonClient] Failed to parse message:', error)"
+        },
+        {
+          "line": 270,
+          "text": "console.error('[PythonClient] WebSocket error:', error)"
+        },
+        {
+          "line": 273,
+          "text": "console.error('[PythonClient] Connection failed:', error)"
+        },
+        {
+          "line": 305,
+          "text": "console.error('[PythonClient] Dispatcher threw unexpectedly:', err)"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "rename to backendClient only after Java protocol parity; behavior remains JSON-RPC"
+    },
+    {
+      "file": "src/services/rpc/handlers/map/style.ts",
+      "category": "renderer-consumer",
+      "matched_semantics": [
+        "python_code_ui"
+      ],
+      "reference_count": 1,
+      "sample_references": [
+        {
+          "line": 119,
+          "text": "// Python display.py::update_layer_style 发来的 paint 里通常只有"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "preserve UI behavior and replace Python-specific labels/types with backend-neutral terms"
+    },
+    {
+      "file": "src/services/rpc/handlers/map/view.ts",
+      "category": "renderer-consumer",
+      "matched_semantics": [
+        "python_code_ui"
+      ],
+      "reference_count": 1,
+      "sample_references": [
+        {
+          "line": 14,
+          "text": "// Python 端（display.py::set_basemap）发来的是 LLM 可读的短名"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "preserve UI behavior and replace Python-specific labels/types with backend-neutral terms"
+    },
+    {
+      "file": "src/stores/chatStore.ts",
+      "category": "transport-client",
+      "matched_semantics": [
+        "python_client"
+      ],
+      "reference_count": 8,
+      "sample_references": [
+        {
+          "line": 5,
+          "text": "import { pythonClient } from '@/services/pythonClient'"
+        },
+        {
+          "line": 423,
+          "text": "await pythonClient.send('rpc.agent.set_llm_config', {"
+        },
+        {
+          "line": 448,
+          "text": "_unsubscribeBridge = pythonClient.onNotification((method, params) => {"
+        },
+        {
+          "line": 570,
+          "text": "// pythonClient 有机会连接。"
+        },
+        {
+          "line": 660,
+          "text": "pythonClient.send('rpc.agent.interrupt', {"
+        },
+        {
+          "line": 781,
+          "text": "await pythonClient.send('chat.user_message', {"
+        },
+        {
+          "line": 842,
+          "text": "const result = await pythonClient.send('rpc.agent.interrupt', {"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "rename to backendClient only after Java protocol parity; behavior remains JSON-RPC"
+    },
+    {
+      "file": "src/stores/runsStore.ts",
+      "category": "transport-client",
+      "matched_semantics": [
+        "python_client"
+      ],
+      "reference_count": 14,
+      "sample_references": [
+        {
+          "line": 2,
+          "text": "import { pythonClient } from '@/services/pythonClient'"
+        },
+        {
+          "line": 223,
+          "text": "const res = await pythonClient.send<{ runs: RunSummary[] }>("
+        },
+        {
+          "line": 247,
+          "text": "await pythonClient.send('rpc.agent.queue.resume', { workspace_path: workspacePath })"
+        },
+        {
+          "line": 250,
+          "text": "pythonClient.send<{ items: AgentInboxItem[] }>("
+        },
+        {
+          "line": 254,
+          "text": "pythonClient.send<{ items: AgentQueueItem[] }>("
+        },
+        {
+          "line": 259,
+          "text": "? pythonClient.send<{ rules: PermissionRule[] }>("
+        },
+        {
+          "line": 279,
+          "text": "await pythonClient.send("
+        },
+        {
+          "line": 290,
+          "text": "await pythonClient.send('rpc.agent.queue.retry', { queue_id: queueId, workspace_path: workspacePath })"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "rename to backendClient only after Java protocol parity; behavior remains JSON-RPC"
+    },
+    {
+      "file": "src/stores/v3/__tests__/stores.test.ts",
+      "category": "renderer-consumer",
+      "matched_semantics": [
+        "python_code_ui"
+      ],
+      "reference_count": 1,
+      "sample_references": [
+        {
+          "line": 58,
+          "text": "script_path: '/runs/run_x/step_0.py',"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "preserve UI behavior and replace Python-specific labels/types with backend-neutral terms"
+    },
+    {
+      "file": "src/stores/v3/scriptStore.ts",
+      "category": "renderer-consumer",
+      "matched_semantics": [
+        "python_code_ui"
+      ],
+      "reference_count": 2,
+      "sample_references": [
+        {
+          "line": 5,
+          "text": "*   - 代码内容写到 `.opengis/scripts/run_xxx/step_N.py`"
+        },
+        {
+          "line": 20,
+          "text": "/** 绝对路径，指向 `.opengis/scripts/run_xxx/step_N.py`。 */"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "preserve UI behavior and replace Python-specific labels/types with backend-neutral terms"
+    },
+    {
+      "file": "src/types/chat.ts",
+      "category": "renderer-consumer",
+      "matched_semantics": [
+        "python_code_ui"
+      ],
+      "reference_count": 1,
+      "sample_references": [
+        {
+          "line": 35,
+          "text": "| 'code'             // A Python code block emitted by the agent"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "preserve UI behavior and replace Python-specific labels/types with backend-neutral terms"
+    },
+    {
+      "file": "src/types/protocol.ts",
+      "category": "renderer-consumer",
+      "matched_semantics": [
+        "python_code_ui",
+        "python_runtime"
+      ],
+      "reference_count": 4,
+      "sample_references": [
+        {
+          "line": 4,
+          "text": "* 通用协议类型定义，与 Python 侧 `python-backend/opengis_backend/protocol.py` 对齐。"
+        },
+        {
+          "line": 9,
+          "text": "* ⚠️ 修改此文件时，必须同步更新 Python 侧的 protocol.py 和 docs/api/INTERFACE.md §0.5/0.6。"
+        }
+      ],
+      "java_target": "opengis-ui",
+      "replacement": "preserve UI behavior and replace Python-specific labels/types with backend-neutral terms"
+    }
+  ]
+}

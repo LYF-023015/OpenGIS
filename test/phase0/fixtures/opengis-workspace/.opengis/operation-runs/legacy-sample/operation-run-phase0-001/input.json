@@ -1,0 +1,5 @@
+{
+  "workspace": "${WORKSPACE}",
+  "operation_id": "legacy-sample",
+  "params": {}
+}

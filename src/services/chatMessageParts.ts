@@ -33,6 +33,18 @@ export function upsertMessagePart(message: ChatMessage, incoming: MessagePart): 
 function mergePartText(existing: MessagePart, incoming: MessagePart): string | undefined {
   const next = incoming.text ?? ''
   if (!next) return existing.text
-  if (incoming.status === 'streaming') return `${existing.text ?? ''}${next}`
+  if (incoming.status === 'streaming') {
+    const current = existing.text ?? ''
+    const textMode = incoming.data?.text_mode
+
+    // Java sends the complete text accumulated so far for every streaming update.
+    // Keep explicit delta support for older/other producers that send only new text.
+    if (textMode === 'snapshot') return next
+    if (textMode === 'delta') return `${current}${next}`
+
+    // Compatibility with archived events created before text_mode was introduced.
+    if (next.startsWith(current)) return next
+    return `${current}${next}`
+  }
   return next
 }

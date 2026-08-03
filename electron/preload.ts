@@ -53,29 +53,29 @@ const electronAPI = {
   ensureDirectory: (path: string) =>
     ipcRenderer.invoke('file:mkdir', path),
 
-  // ---- Python Backend ----
-  getPythonStatus: () =>
-    ipcRenderer.invoke('python:status'),
+  // ---- Application Backend ----
+  getBackendStatus: () =>
+    ipcRenderer.invoke('backend:status'),
 
-  restartPython: () =>
-    ipcRenderer.invoke('python:restart'),
+  restartBackend: () =>
+    ipcRenderer.invoke('backend:restart'),
 
-  getPythonPort: () =>
-    ipcRenderer.invoke('python:get-port'),
+  getBackendPort: () =>
+    ipcRenderer.invoke('backend:get-port'),
 
-  getPythonWsToken: () =>
-    ipcRenderer.invoke('python:get-ws-token'),
+  getBackendWsToken: () =>
+    ipcRenderer.invoke('backend:get-ws-token'),
 
-  onPythonStatusChanged: (callback: (status: any) => void) => {
+  onBackendStatusChanged: (callback: (status: any) => void) => {
     const handler = (_event: any, status: any) => callback(status)
-    ipcRenderer.on('python:status-changed', handler)
-    return () => ipcRenderer.removeListener('python:status-changed', handler)
+    ipcRenderer.on('backend:status-changed', handler)
+    return () => ipcRenderer.removeListener('backend:status-changed', handler)
   },
 
-  onPythonWsToken: (callback: (token: string) => void) => {
+  onBackendWsToken: (callback: (token: string) => void) => {
     const handler = (_event: any, token: string) => callback(token)
-    ipcRenderer.on('python:ws-token', handler)
-    return () => ipcRenderer.removeListener('python:ws-token', handler)
+    ipcRenderer.on('backend:ws-token', handler)
+    return () => ipcRenderer.removeListener('backend:ws-token', handler)
   },
 
   // ---- Settings ----

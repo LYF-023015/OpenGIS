@@ -377,7 +377,7 @@ function AgentPivotView({
             <div className="text-xs font-medium text-text-primary mb-1">
               分析摘要
               <span className="ml-2 text-2xs font-normal text-text-muted">
-                {result.engine === 'python' ? 'Python 后台分析' : '前端统计兜底'}
+                {result.engine === 'java' ? 'Java 后端分析' : '前端统计兜底'}
                 {result.durationMs ? ` · ${result.durationMs}ms` : ''}
               </span>
             </div>

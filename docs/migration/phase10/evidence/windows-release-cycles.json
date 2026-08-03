@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-08-03T03:45:26.674Z",
+  "scope": "windows-local-release-candidate-validation",
+  "platform": "win32",
+  "appVersion": "0.2.0",
+  "serverSha256": "8483aea82afcf2de523267b5b3245961ef589b5d79402fe3e7f13b0510b7f0f9",
+  "cycles": [
+    {
+      "cycle": 1,
+      "durationMs": 6454,
+      "runtime": "java",
+      "appVersion": "0.2.0",
+      "serverSha256": "8483aea82afcf2de523267b5b3245961ef589b5d79402fe3e7f13b0510b7f0f9",
+      "verifiedAt": "2026-08-03T03:45:17.668Z",
+      "upgradedFrom": null,
+      "scenario": "clean-install-first-start",
+      "errors": 0,
+      "gracefulExit": true
+    },
+    {
+      "cycle": 2,
+      "durationMs": 6300,
+      "runtime": "java",
+      "appVersion": "0.2.0",
+      "serverSha256": "8483aea82afcf2de523267b5b3245961ef589b5d79402fe3e7f13b0510b7f0f9",
+      "verifiedAt": "2026-08-03T03:45:23.926Z",
+      "upgradedFrom": "0.1.0-phase9",
+      "scenario": "existing-last-good-upgrade-start",
+      "errors": 0,
+      "gracefulExit": true,
+      "lastGoodRevalidated": true
+    }
+  ],
+  "interpretation": "These are two independent Windows release-candidate cycles on the requested target machine, not long-term production telemetry."
+}

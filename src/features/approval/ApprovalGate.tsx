@@ -10,7 +10,7 @@ import {
   ShieldAlert,
   X,
 } from 'lucide-react'
-import { pythonClient } from '@/services/pythonClient'
+import { backendClient } from '@/services/backendClient'
 import { useApprovalStore, type ApprovalRequest } from '@/stores/approvalStore'
 import { useAssetStore } from '@/stores/assetStore'
 
@@ -113,7 +113,7 @@ function ApprovalCard({
     }
     setBusy('remember')
     try {
-      await pythonClient.send('rpc.agent.permissions.rules.add', {
+      await backendClient.send('rpc.agent.permissions.rules.add', {
         workspace_path: workspacePath,
         tool: request.toolName,
         action: 'allow',
@@ -329,11 +329,11 @@ function CodePreview({
     <div className="approval-muted border border-accent-primary/25 overflow-hidden rounded-md">
       <div className={`${embedded ? 'gap-1.5 px-2.5 py-1.5' : 'gap-2 border-b approval-border px-3 py-2'} flex items-center`}>
         <Code2 className={`${embedded ? 'h-3 w-3' : 'h-3.5 w-3.5'} text-text-muted`} />
-        <span className={`${embedded ? 'text-2xs' : 'text-xs'} font-medium text-text-secondary`}>Python code</span>
+        <span className={`${embedded ? 'text-2xs' : 'text-xs'} font-medium text-text-secondary`}>Java code</span>
         {header && <span className="ml-auto text-2xs font-mono text-text-muted">{header}</span>}
       </div>
       <pre className={`${embedded ? 'max-h-[150px] p-2.5 text-2xs leading-snug' : 'max-h-[320px] p-3 text-xs leading-relaxed'} overflow-auto text-text-primary scrollbar-thin`}>
-        <code>{code || '# empty code'}</code>
+        <code>{code || '// empty code'}</code>
       </pre>
     </div>
   )

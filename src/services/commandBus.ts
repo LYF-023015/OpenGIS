@@ -1,8 +1,8 @@
 /**
- * CommandBus — routes JSON-RPC notifications from the Python backend
+ * CommandBus — routes JSON-RPC notifications from the application backend
  * into the frontend's imperative subsystems (MapEngine, stores, etc.).
  *
- * This is the consumer of pythonClient.onNotification. Every Python-side
+ * This is the consumer of backendClient.onNotification. Every backend-side
  * display tools (add_layer, fly_to, ...) emit `map.*` notifications;
  * this bus dispatches them.
  *
@@ -14,7 +14,7 @@
  *   map.updateLayerStyle{ layer_id, color?, opacity?, visible? }
  */
 
-import { pythonClient } from './pythonClient'
+import { backendClient } from './backendClient'
 import { useMapStore } from '@/stores/mapStore'
 import { mapEngine } from '@/features/map/engine/MapEngine'
 import {
@@ -234,7 +234,7 @@ export function installCommandBus(): void {
   if (installed) return
   installed = true
 
-  pythonClient.onNotification((method, params) => {
+  backendClient.onNotification((method, params) => {
     const handler = handlers[method]
     if (!handler) return  // Not our command; let other consumers (chatStore) handle it.
     try {

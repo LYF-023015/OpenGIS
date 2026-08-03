@@ -1,8 +1,8 @@
 /**
- * EventBus — TS → Python 单向状态变更通知
+ * EventBus — Renderer → backend 单向状态变更通知
  *
  * Sending is routed through a swappable `transport`; the default no-op keeps
- * tests and renderer-only boot safe until PythonClient wires the real bridge.
+ * tests and renderer-only boot safe until BackendClient wires the real bridge.
  *
  * 节流规则：
  *   - `event.viewport.changed` 必须节流（trailing），默认 200ms
@@ -66,7 +66,7 @@ export interface WorkspaceClosedPayload {
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// Transport: default no-op, replaced by PythonClient during app startup.
+// Transport: default no-op, replaced by BackendClient during app startup.
 // ─────────────────────────────────────────────────────────────────────
 
 export type EventTransport = (notif: JsonRpcNotification) => void;
@@ -118,7 +118,7 @@ export class EventBus {
     }, throttleMs);
   }
 
-  /** Replace the active transport when PythonClient connects or reconnects. */
+  /** Replace the active transport when BackendClient connects or reconnects. */
   setTransport(transport: EventTransport): void {
     this.transport = transport;
   }
@@ -159,5 +159,5 @@ export class EventBus {
   }
 }
 
-/** 默认单例。Use `setTransport` to attach the active Python bridge. */
+/** 默认单例。Use `setTransport` to attach the active backend bridge. */
 export const eventBus = new EventBus();

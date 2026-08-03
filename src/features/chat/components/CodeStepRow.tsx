@@ -124,7 +124,7 @@ export const CodeStepRow = memo(({
           <Code2 className={`w-3 h-3 text-accent-primary ${isStreaming ? 'animate-pulse' : ''}`} />
         </div>
         <span className="font-semibold text-[12px] text-text-primary">
-          Python
+          Java
           {isStreaming && (
             <span className="ml-1.5 text-[10px] uppercase tracking-wider font-normal text-accent-primary/70">
               writing…
@@ -193,7 +193,7 @@ export const CodeStepRow = memo(({
               ) : (
                 <SyntaxHighlighter
                   style={codeTheme}
-                  language="python"
+                  language="java"
                   PreTag="div"
                   customStyle={{
                     margin: 0,

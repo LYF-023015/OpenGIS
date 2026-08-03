@@ -1,0 +1,7 @@
+name,category,value,weight,geometry_wkt
+北京,capital,100.0,2.0,POINT (116.391 39.907)
+上海,municipality,90.5,1.8,POINT (121.474 31.23)
+广州,city,70.0,1.2,POINT (113.264 23.129)
+深圳,city,80.0,1.4,POINT (114.057 22.543)
+成都,city,60.5,1.0,POINT (104.066 30.572)
+乌鲁木齐,,40.0,0.8,POINT (87.617 43.826)

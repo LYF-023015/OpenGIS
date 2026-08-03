@@ -1,0 +1,82 @@
+{
+  "type": "FeatureCollection",
+  "name": "phase0-fixture",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "EPSG:4326"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "id": 1,
+      "properties": {
+        "name": "area-a",
+        "population": 10
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              116.2,
+              39.7
+            ],
+            [
+              116.8,
+              39.7
+            ],
+            [
+              116.8,
+              40.1
+            ],
+            [
+              116.2,
+              40.1
+            ],
+            [
+              116.2,
+              39.7
+            ]
+          ]
+        ]
+      }
+    },
+    {
+      "type": "Feature",
+      "id": 2,
+      "properties": {
+        "name": "area-b",
+        "population": 20
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              121.1,
+              30.9
+            ],
+            [
+              121.9,
+              30.9
+            ],
+            [
+              121.9,
+              31.5
+            ],
+            [
+              121.1,
+              31.5
+            ],
+            [
+              121.1,
+              30.9
+            ]
+          ]
+        ]
+      }
+    }
+  ]
+}

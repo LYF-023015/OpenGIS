@@ -387,7 +387,7 @@ function RunDetailView({ detail }: { detail: RunDetail }) {
       title: name,
       type: 'code',
       filePath: absPath,
-      language: name.endsWith('.py') ? 'python' : undefined,
+      language: name.endsWith('.java') ? 'java' : undefined,
     })
   }, [])
 

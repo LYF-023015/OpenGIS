@@ -1,0 +1,12 @@
+{
+  "rules": [
+    {
+      "id": "rule-phase0-001",
+      "tool": "delete_file",
+      "action": "ask",
+      "profile": "*",
+      "reason": "Synthetic migration rule",
+      "created_at": "2026-01-01T00:00:00Z"
+    }
+  ]
+}

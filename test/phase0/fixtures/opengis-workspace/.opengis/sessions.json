@@ -1,0 +1,38 @@
+{
+  "sessions": {
+    "session-phase0-001": {
+      "id": "session-phase0-001",
+      "kind": "chat",
+      "profile_name": "gis-build",
+      "parent_id": null,
+      "run_id": "run-phase0-001",
+      "title": "Synthetic migration fixture",
+      "status": "success",
+      "created_at": 1767225600.0,
+      "updated_at": 1767225601.0,
+      "children": [],
+      "summary": "Fixture ready",
+      "metadata": {
+        "conversation_id": "conversation-phase0-001",
+        "workspace_path": "${WORKSPACE}"
+      }
+    }
+  },
+  "inbox": {
+    "inbox-phase0-001": {
+      "id": "inbox-phase0-001",
+      "prompt": "Synthetic migration fixture",
+      "conversation_id": "conversation-phase0-001",
+      "profile_name": "gis-build",
+      "session_id": "session-phase0-001",
+      "run_id": "run-phase0-001",
+      "status": "success",
+      "error": "",
+      "created_at": 1767225600.0,
+      "updated_at": 1767225601.0,
+      "metadata": {
+        "queue_id": "queue-phase0-001"
+      }
+    }
+  }
+}

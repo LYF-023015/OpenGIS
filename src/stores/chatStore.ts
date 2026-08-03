@@ -2,7 +2,7 @@
 import { create } from 'zustand'
 import { v4 as uuid } from 'uuid'
 import type { MessagePart, ChatMessage } from '@/types/chat'
-import { pythonClient } from '@/services/pythonClient'
+import { backendClient } from '@/services/backendClient'
 import {
   loadConversations,
   persistConversation,
@@ -68,7 +68,7 @@ interface ChatStore {
   _persistActive: () => void
 }
 
-// ─── 辅助函数：推送当前 LLM 设置到 Python 后端 ──────────────────────
+// ─── 辅助函数：推送当前 LLM 设置到应用后端 ──────────────────────
 // 仅当配置自上次调用后实际更改时才发送。
 let _lastConfigHash: string | null = null
 let _pendingCodePart: MessagePart | null = null
@@ -420,7 +420,7 @@ async function configureBackendAgent(): Promise<void> {
   }
 
   try {
-    await pythonClient.send('rpc.agent.set_llm_config', {
+    await backendClient.send('rpc.agent.set_llm_config', {
       protocol: settings.model.protocol,
       model: settings.model.modelName,
       api_key: settings.model.apiKey,
@@ -445,7 +445,7 @@ function installNotificationBridge(
     _unsubscribeBridge = null
   }
 
-  _unsubscribeBridge = pythonClient.onNotification((method, params) => {
+  _unsubscribeBridge = backendClient.onNotification((method, params) => {
     const state = get()
     if (!state.activeConversationId) return
 
@@ -567,7 +567,7 @@ function installNotificationBridge(
 // ─── Store 实现 ──────────────────────────────────────────────
 export const useChatStore = create<ChatStore>((set, get) => {
   // 延迟桥接安装，直到首次使用 store，以便
-  // pythonClient 有机会连接。
+  // The runtime-neutral backend client may connect after the store initializes.
   setTimeout(() => installNotificationBridge(set, get), 0)
 
   return {
@@ -657,7 +657,7 @@ export const useChatStore = create<ChatStore>((set, get) => {
       if (state.activeConversationId) {
         import('./assetStore').then(({ useAssetStore }) => {
           const workspacePath = useAssetStore.getState().workspacePath
-          pythonClient.send('rpc.agent.interrupt', {
+          backendClient.send('rpc.agent.interrupt', {
             workspace_path: workspacePath || undefined,
           }).catch(() => {})
         })
@@ -778,7 +778,7 @@ export const useChatStore = create<ChatStore>((set, get) => {
         const { useSettingsStore: settingsStore } = await import('./settingsStore')
         const userInstructions = settingsStore.getState().agent.customInstructions || undefined
 
-        await pythonClient.send('chat.user_message', {
+        await backendClient.send('chat.user_message', {
           message: text,
           conversation_id: conversationId,
           workspace_path: workspacePath || undefined,
@@ -800,7 +800,7 @@ export const useChatStore = create<ChatStore>((set, get) => {
         // 人性化常见的前端错误
         let friendlyMsg = rawMsg
         if (rawMsg.includes('WebSocket') || rawMsg.includes('not connected')) {
-          friendlyMsg = '⚠️ 后端服务未连接，请检查 Python 后端是否正常运行。'
+          friendlyMsg = '⚠️ 后端服务未连接，请检查 Java 后端是否正常运行。'
         } else if (rawMsg.includes('timeout')) {
           friendlyMsg = '⚠️ 请求超时，请检查网络连接后重试。'
         } else {
@@ -839,7 +839,7 @@ export const useChatStore = create<ChatStore>((set, get) => {
         const workspacePath = workspacePathOverride !== undefined
           ? workspacePathOverride
           : useAssetStore.getState().workspacePath
-        const result = await pythonClient.send('rpc.agent.interrupt', {
+        const result = await backendClient.send('rpc.agent.interrupt', {
           workspace_path: workspacePath || undefined,
         })
         void result

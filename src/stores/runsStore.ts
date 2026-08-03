@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { pythonClient } from '@/services/pythonClient'
+import { backendClient } from '@/services/backendClient'
 import { useAssetStore } from './assetStore'
 
 /**
@@ -220,7 +220,7 @@ export const useRunsStore = create<RunsStore>((set, get) => ({
       // 目前后端 rpc.runs.list 的"每工作区独立"语义由 workspace_path 参数体现。
       // 不开 workspace 时后端 fallback 到 appData 下的 agent-runs 目录（同 ScriptArchive）。
       const workspacePath = useAssetStore.getState().workspacePath || undefined
-      const res = await pythonClient.send<{ runs: RunSummary[] }>(
+      const res = await backendClient.send<{ runs: RunSummary[] }>(
         'rpc.runs.list',
         { limit, workspace_path: workspacePath },
       )
@@ -244,19 +244,19 @@ export const useRunsStore = create<RunsStore>((set, get) => ({
     set({ controlLoading: true })
     try {
       if (workspacePath) {
-        await pythonClient.send('rpc.agent.queue.resume', { workspace_path: workspacePath })
+        await backendClient.send('rpc.agent.queue.resume', { workspace_path: workspacePath })
       }
       const [inboxRes, queueRes, rulesRes] = await Promise.all([
-        pythonClient.send<{ items: AgentInboxItem[] }>(
+        backendClient.send<{ items: AgentInboxItem[] }>(
           'rpc.agent.inbox.list',
           { workspace_path: workspacePath, limit: 20 },
         ),
-        pythonClient.send<{ items: AgentQueueItem[] }>(
+        backendClient.send<{ items: AgentQueueItem[] }>(
           'rpc.agent.queue.list',
           { limit: 20 },
         ),
         workspacePath
-          ? pythonClient.send<{ rules: PermissionRule[] }>(
+        ? backendClient.send<{ rules: PermissionRule[] }>(
             'rpc.agent.permissions.rules.list',
             { workspace_path: workspacePath },
           )
@@ -276,7 +276,7 @@ export const useRunsStore = create<RunsStore>((set, get) => ({
 
   processQueue: async () => {
     const workspacePath = useAssetStore.getState().workspacePath || undefined
-    await pythonClient.send(
+    await backendClient.send(
       'rpc.agent.queue.process',
       { workspace_path: workspacePath, limit: 1 },
       10 * 60 * 1000,
@@ -287,20 +287,20 @@ export const useRunsStore = create<RunsStore>((set, get) => ({
 
   retryQueueItem: async (queueId) => {
     const workspacePath = useAssetStore.getState().workspacePath || undefined
-    await pythonClient.send('rpc.agent.queue.retry', { queue_id: queueId, workspace_path: workspacePath })
+    await backendClient.send('rpc.agent.queue.retry', { queue_id: queueId, workspace_path: workspacePath })
     await get().refreshControlPlane()
   },
 
   cancelQueueItem: async (queueId) => {
     const workspacePath = useAssetStore.getState().workspacePath || undefined
-    await pythonClient.send('rpc.agent.queue.cancel', { queue_id: queueId, workspace_path: workspacePath })
+    await backendClient.send('rpc.agent.queue.cancel', { queue_id: queueId, workspace_path: workspacePath })
     await get().refreshControlPlane()
   },
 
   removePermissionRule: async (ruleId) => {
     const workspacePath = useAssetStore.getState().workspacePath || undefined
     if (!workspacePath) return
-    await pythonClient.send('rpc.agent.permissions.rules.remove', {
+    await backendClient.send('rpc.agent.permissions.rules.remove', {
       workspace_path: workspacePath,
       rule_id: ruleId,
     })
@@ -312,7 +312,7 @@ export const useRunsStore = create<RunsStore>((set, get) => ({
     if (cached && !forceRefresh) return cached
     try {
       const workspacePath = useAssetStore.getState().workspacePath || undefined
-      const raw = await pythonClient.send<RunDetailResponse>(
+      const raw = await backendClient.send<RunDetailResponse>(
         'rpc.runs.get',
         { run_id: runId, workspace_path: workspacePath },
       )
@@ -329,7 +329,7 @@ export const useRunsStore = create<RunsStore>((set, get) => ({
   revertRun: async (runId) => {
     const workspacePath = useAssetStore.getState().workspacePath || undefined
     // revert 需要 shell out to git，给 2 min 上限
-    await pythonClient.send(
+    await backendClient.send(
       'rpc.workspace.revert_run',
       { run_id: runId, workspace_path: workspacePath },
       120_000,
@@ -339,7 +339,7 @@ export const useRunsStore = create<RunsStore>((set, get) => ({
 
   replayRun: async (runId) => {
     const workspacePath = useAssetStore.getState().workspacePath || undefined
-    await pythonClient.send(
+    await backendClient.send(
       'rpc.runs.replay',
       { run_id: runId, workspace_path: workspacePath },
       10 * 60 * 1000, // 同 chat.user_message 的 10 分钟

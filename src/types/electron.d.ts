@@ -43,11 +43,11 @@ interface Window {
     renameFile: (oldPath: string, newPath: string) => Promise<{ success: boolean; error?: string }>
     showItemInFolder: (path: string) => Promise<{ success: boolean; error?: string }>
     ensureDirectory: (path: string) => Promise<{ success: boolean; error?: string }>
-    // Python
-    getPythonStatus: () => Promise<{ status: 'stopped' | 'starting' | 'ready' | 'error'; port?: number; error?: string; pythonPath?: string }>
-    restartPython: () => Promise<{ status: 'stopped' | 'starting' | 'ready' | 'error'; port?: number; error?: string; pythonPath?: string }>
-    getPythonPort: () => Promise<number | null>
-    onPythonStatusChanged: (callback: (status: { status: 'stopped' | 'starting' | 'ready' | 'error'; port?: number; error?: string; pythonPath?: string }) => void) => () => void
+    // Application backend (Java in production)
+    getBackendStatus: () => Promise<{ status: 'stopped' | 'starting' | 'ready' | 'error'; runtime: 'java' | 'python'; port?: number; error?: string; executablePath?: string; serverPath?: string; diagnostics?: string[] }>
+    restartBackend: () => Promise<{ status: 'stopped' | 'starting' | 'ready' | 'error'; runtime: 'java' | 'python'; port?: number; error?: string; executablePath?: string; serverPath?: string; diagnostics?: string[] }>
+    getBackendPort: () => Promise<number | null>
+    onBackendStatusChanged: (callback: (status: { status: 'stopped' | 'starting' | 'ready' | 'error'; runtime: 'java' | 'python'; port?: number; error?: string; executablePath?: string; serverPath?: string; diagnostics?: string[] }) => void) => () => void
     // Settings
     getSettings: () => Promise<any>
     setSetting: (key: string, value: any) => Promise<void>
@@ -63,9 +63,9 @@ interface Window {
     // App info
     getAppVersion: () => Promise<string>
     getPlatform: () => string
-    // Python WebSocket auth
-    getPythonWsToken: () => Promise<string>
-    onPythonWsToken: (callback: (token: string) => void) => () => void
+    // Backend WebSocket auth
+    getBackendWsToken: () => Promise<string>
+    onBackendWsToken: (callback: (token: string) => void) => () => void
     // Logging
     getLogDir: () => Promise<string | null>
     openLogDir: () => void

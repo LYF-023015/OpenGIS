@@ -1,6 +1,6 @@
 /**
  * ScriptRunnerView — a code editor + runner panel that lets the user
- * author Python scripts and execute them inside the subprocess sandbox
+ * author Java scripts and execute them inside an isolated child JVM
  * *without* going through the LLM. Same executor, same tool bindings,
  * same workspace cwd. Think: "Jupyter cell" for OpenGIS.
  *
@@ -10,7 +10,7 @@
  *   │ toolbar  ▶ Run  ⏹ Stop  💾 Save  📂 Open  ✨ Clear  │
  *   ├──────────────────────────────────────────────────────┤
  *   │                                                      │
- *   │                Monaco editor (Python)                │
+ *   │                 Monaco editor (Java)                 │
  *   │                                                      │
  *   ├──────────────────────────────────────────────────────┤
  *   │ ▶ Output  (stdout / stderr streamed live)           │
@@ -43,36 +43,24 @@ import { useSettingsStore } from '@/stores/settingsStore'
 import { useViewStore, type ViewTab } from '@/stores/viewStore'
 import { useScriptRunner, type OutputChunk } from './useScriptRunner'
 
-const DEFAULT_SCRIPT = `# OpenGIS Script Runner
-# ----------------------------------------------------------------------
-# This script runs in the same subprocess sandbox that the AI agent uses.
-# All registered tools are available as top-level functions.
-#
-# Example: load a CSV-derived GeoJSON and add it to the map.
-#
-# from pathlib import Path
-# import json
-#
-# points = {
-#     "type": "FeatureCollection",
-#     "features": [
-#         {
-#             "type": "Feature",
-#             "geometry": {"type": "Point", "coordinates": [116.40, 39.90]},
-#             "properties": {"name": "Beijing"},
-#         },
-#     ],
-# }
-# layer_id = add_layer_from_geojson(name="demo", geojson=points)
-# print("added", layer_id)
+const DEFAULT_SCRIPT = `import java.util.Map;
+import org.opengis.script.sdk.OpenGisScript;
+import org.opengis.script.sdk.ScriptContext;
 
-print("hello from opengis script runner")
+public final class OpenGisDemoScript implements OpenGisScript {
+  @Override
+  public Object run(ScriptContext context, Map<String, Object> params) throws Exception {
+    System.out.println("hello from OpenGIS Java Script Runner");
+    context.progress().emit(1.0, "done");
+    return Map.of("message", "Java script completed");
+  }
+}
 `
 
 export interface ScriptRunnerViewProps {
   /**
    * When provided, this view is bound to a ViewTab from the main
-   * editor area — opening a .py file via AssetExplorer lands here.
+   * editor area — opening a .java file via AssetExplorer lands here.
    * Code buffer lives in the ViewTab (so tab switches preserve it);
    * Save writes to the tab's filePath.
    *
@@ -123,7 +111,7 @@ export function ScriptRunnerView({ tab }: ScriptRunnerViewProps = {}) {
   const handleOpen = useCallback(async () => {
     if (!electronAPI) return
     const paths = await electronAPI.openFileDialog([
-      { name: 'Python', extensions: ['py'] },
+      { name: 'Java', extensions: ['java'] },
       { name: 'All Files', extensions: ['*'] },
     ])
     if (!paths || paths.length === 0) return
@@ -144,8 +132,8 @@ export function ScriptRunnerView({ tab }: ScriptRunnerViewProps = {}) {
       // Save-As. Prefer the workspace as defaultPath so new scripts
       // land in the same place the AI agent persists its own scripts.
       const defaultName = workspacePath
-        ? `${workspacePath.replace(/[\\/]+$/, '')}/untitled.py`
-        : 'untitled.py'
+        ? `${workspacePath.replace(/[\\/]+$/, '')}/OpenGisScript.java`
+        : 'OpenGisScript.java'
       target = await electronAPI.saveFileDialog(defaultName)
       if (!target) return
     }
@@ -277,7 +265,7 @@ export function ScriptRunnerView({ tab }: ScriptRunnerViewProps = {}) {
           <Panel defaultSize={65} minSize={25}>
             <Editor
               height="100%"
-              language="python"
+              language="java"
               theme={isDarkMode ? 'vs-dark' : 'light'}
               value={code}
               onChange={handleChange}

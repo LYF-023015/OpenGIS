@@ -73,7 +73,7 @@ export function extractGroupText(items: ChatMessage[]): string {
         if (part.type === 'text' && part.text?.trim()) {
           parts.push(part.text.trim())
         } else if (part.type === 'code' && part.text?.trim()) {
-          parts.push('```python\n' + part.text.trim() + '\n```')
+          parts.push('```java\n' + part.text.trim() + '\n```')
         } else if (part.type === 'tool_output' && part.text?.trim() && !isCodeExecutionOutput(part) && !isOperationToolOutput(part)) {
           parts.push(part.text.trim())
         }

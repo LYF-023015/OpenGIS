@@ -18,12 +18,27 @@ export interface ProjectEntry {
 interface ProjectsData {
   projects: ProjectEntry[]
   lastProjectId?: string
+  schemaVersion?: number
+  backend?: {
+    storageOwner: 'electron-main'
+    javaCompatible: boolean
+  }
 }
 
-const DEFAULT_PROJECTS: ProjectsData = { projects: [] }
+const DEFAULT_PROJECTS: ProjectsData = {
+  projects: [],
+  schemaVersion: 2,
+  backend: { storageOwner: 'electron-main', javaCompatible: true },
+}
 
 // ─── Settings types ────────────────────────────────────────────
 interface AppSettings {
+  schemaVersion?: number
+  backend?: {
+    runtime: 'java'
+    protocolVersion: '3.0'
+    pythonBackup: 'retained'
+  }
   model: {
     provider: string
     modelName: string
@@ -31,10 +46,6 @@ interface AppSettings {
     baseURL?: string
     temperature: number
     maxTokens: number
-  }
-  python: {
-    mode: 'auto' | 'manual'
-    path?: string
   }
   appearance: {
     theme: 'dark' | 'light' | 'system'
@@ -51,14 +62,17 @@ interface AppSettings {
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
+  schemaVersion: 3,
+  backend: {
+    runtime: 'java',
+    protocolVersion: '3.0',
+    pythonBackup: 'retained',
+  },
   model: {
     provider: 'openai',
     modelName: 'gpt-4o',
     temperature: 0.7,
     maxTokens: 4096,
-  },
-  python: {
-    mode: 'auto',
   },
   appearance: {
     theme: 'dark',
@@ -92,7 +106,11 @@ async function loadSettings(): Promise<AppSettings> {
   try {
     const content = await readFile(settingsPath, 'utf-8')
     const saved = JSON.parse(content)
-    return deepMerge(DEFAULT_SETTINGS, saved)
+    const merged = deepMerge(DEFAULT_SETTINGS, saved)
+    delete merged.python
+    merged.schemaVersion = 3
+    merged.backend = { runtime: 'java', protocolVersion: '3.0', pythonBackup: 'retained' }
+    return merged
   } catch {
     return { ...DEFAULT_SETTINGS }
   }
@@ -106,7 +124,11 @@ async function saveSettings(settings: AppSettings): Promise<void> {
     await mkdir(dir, { recursive: true })
   }
 
-  await writeFile(settingsPath, JSON.stringify(settings, null, 2), 'utf-8')
+  const upgraded = deepMerge(DEFAULT_SETTINGS, settings)
+  delete upgraded.python
+  upgraded.schemaVersion = 3
+  upgraded.backend = { runtime: 'java', protocolVersion: '3.0', pythonBackup: 'retained' }
+  await writeFile(settingsPath, JSON.stringify(upgraded, null, 2), 'utf-8')
 }
 
 // ─── Projects persistence ──────────────────────────────────────
@@ -117,7 +139,13 @@ export async function loadProjects(): Promise<ProjectsData> {
   }
   try {
     const content = await readFile(projectsPath, 'utf-8')
-    return JSON.parse(content) as ProjectsData
+    const saved = JSON.parse(content) as ProjectsData
+    return {
+      ...saved,
+      projects: Array.isArray(saved.projects) ? saved.projects : [],
+      schemaVersion: 2,
+      backend: { storageOwner: 'electron-main', javaCompatible: true },
+    }
   } catch {
     return { ...DEFAULT_PROJECTS }
   }
@@ -125,7 +153,12 @@ export async function loadProjects(): Promise<ProjectsData> {
 
 export async function saveProjects(data: ProjectsData): Promise<void> {
   const projectsPath = getProjectsPath()
-  await writeFile(projectsPath, JSON.stringify(data, null, 2), 'utf-8')
+  const upgraded: ProjectsData = {
+    ...data,
+    schemaVersion: 2,
+    backend: { storageOwner: 'electron-main', javaCompatible: true },
+  }
+  await writeFile(projectsPath, JSON.stringify(upgraded, null, 2), 'utf-8')
 }
 
 function deepMerge(target: any, source: any): any {

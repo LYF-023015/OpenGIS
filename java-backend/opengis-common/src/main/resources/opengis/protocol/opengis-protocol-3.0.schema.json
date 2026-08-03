@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://opengis.local/schema/opengis-protocol-3.0.schema.json",
+  "title": "OpenGIS Protocol 3.0",
+  "description": "Canonical contract shared by the Renderer, Python backend and Java backend.",
+  "oneOf": [
+    { "$ref": "#/$defs/jsonRpcRequest" },
+    { "$ref": "#/$defs/jsonRpcNotification" },
+    { "$ref": "#/$defs/jsonRpcSuccessResponse" },
+    { "$ref": "#/$defs/jsonRpcErrorResponse" }
+  ],
+  "$defs": {
+    "protocolVersion": { "const": "3.0" },
+    "jsonRpcVersion": { "const": "2.0" },
+    "jsonRpcId": { "type": ["string", "number", "null"] },
+    "params": { "type": ["object", "array", "null"] },
+    "bbox": {
+      "type": "array",
+      "prefixItems": [
+        { "type": "number" },
+        { "type": "number" },
+        { "type": "number" },
+        { "type": "number" }
+      ],
+      "items": false,
+      "minItems": 4,
+      "maxItems": 4
+    },
+    "crs": { "type": "string", "pattern": "^EPSG:[0-9]+$" },
+    "geometryType": {
+      "enum": [
+        "Point",
+        "MultiPoint",
+        "LineString",
+        "MultiLineString",
+        "Polygon",
+        "MultiPolygon",
+        "GeometryCollection",
+        "Raster"
+      ]
+    },
+    "layerSource": { "enum": ["file", "memory", "url", "postgis"] },
+    "layerStyleType": { "enum": ["circle", "line", "fill", "raster", "symbol"] },
+    "layerStyle": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "$ref": "#/$defs/layerStyleType" },
+        "paint": { "type": "object" },
+        "layout": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "jsonRpcRequest": {
+      "type": "object",
+      "required": ["jsonrpc", "id", "method", "params"],
+      "properties": {
+        "jsonrpc": { "$ref": "#/$defs/jsonRpcVersion" },
+        "id": { "$ref": "#/$defs/jsonRpcId" },
+        "method": { "type": "string", "minLength": 1 },
+        "params": { "$ref": "#/$defs/params" }
+      },
+      "additionalProperties": false
+    },
+    "jsonRpcNotification": {
+      "type": "object",
+      "required": ["jsonrpc", "method", "params"],
+      "properties": {
+        "jsonrpc": { "$ref": "#/$defs/jsonRpcVersion" },
+        "method": { "type": "string", "minLength": 1 },
+        "params": { "$ref": "#/$defs/params" }
+      },
+      "additionalProperties": false
+    },
+    "jsonRpcErrorObject": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": { "type": "integer" },
+        "message": { "type": "string" },
+        "data": {}
+      },
+      "additionalProperties": false
+    },
+    "jsonRpcSuccessResponse": {
+      "type": "object",
+      "required": ["jsonrpc", "id", "result"],
+      "properties": {
+        "jsonrpc": { "$ref": "#/$defs/jsonRpcVersion" },
+        "id": { "$ref": "#/$defs/jsonRpcId" },
+        "result": {}
+      },
+      "additionalProperties": false
+    },
+    "jsonRpcErrorResponse": {
+      "type": "object",
+      "required": ["jsonrpc", "id", "error"],
+      "properties": {
+        "jsonrpc": { "$ref": "#/$defs/jsonRpcVersion" },
+        "id": { "$ref": "#/$defs/jsonRpcId" },
+        "error": { "$ref": "#/$defs/jsonRpcErrorObject" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

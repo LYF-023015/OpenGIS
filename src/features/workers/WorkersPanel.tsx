@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Activity, RefreshCw } from 'lucide-react'
-import { pythonClient } from '@/services/pythonClient'
+import { backendClient } from '@/services/backendClient'
 import { useT } from '@/i18n'
 import { useAssetStore } from '@/stores/assetStore'
 import { useViewStore } from '@/stores/viewStore'
@@ -34,7 +34,7 @@ export function WorkersPanel({ onOpenScriptTab }: { onOpenScriptTab?: () => void
       setError(null)
     }
     try {
-      const result = await pythonClient.send('rpc.worker.list', {
+      const result = await backendClient.send('rpc.worker.list', {
         include_logs: false,
         workspace_path: workspacePath || undefined,
       }, 15000)
@@ -60,7 +60,7 @@ export function WorkersPanel({ onOpenScriptTab }: { onOpenScriptTab?: () => void
 
   const refreshWorkerLogs = useCallback(async (id: string) => {
     try {
-      const result = await pythonClient.send('rpc.worker.get', {
+      const result = await backendClient.send('rpc.worker.get', {
         worker_id: id,
         include_logs: true,
         workspace_path: workspacePath || undefined,
@@ -130,7 +130,7 @@ export function WorkersPanel({ onOpenScriptTab }: { onOpenScriptTab?: () => void
   const pauseWorker = async (id: string) => {
     setBusyId(id)
     try {
-      await pythonClient.send('rpc.worker.pause', {
+      await backendClient.send('rpc.worker.pause', {
         worker_id: id,
         reason: 'ui_pause',
         workspace_path: workspacePath || undefined,
@@ -144,7 +144,7 @@ export function WorkersPanel({ onOpenScriptTab }: { onOpenScriptTab?: () => void
   const restartWorker = async (id: string) => {
     setBusyId(id)
     try {
-      await pythonClient.send('rpc.worker.restart', {
+      await backendClient.send('rpc.worker.restart', {
         worker_id: id,
         reason: 'ui_restart',
         initial_health_timeout: 1.5,
@@ -160,7 +160,7 @@ export function WorkersPanel({ onOpenScriptTab }: { onOpenScriptTab?: () => void
     if (!window.confirm(t.workers.deleteConfirm)) return
     setBusyId(id)
     try {
-      await pythonClient.send('rpc.worker.delete', {
+      await backendClient.send('rpc.worker.delete', {
         worker_id: id,
         workspace_path: workspacePath || undefined,
       })
@@ -188,7 +188,7 @@ export function WorkersPanel({ onOpenScriptTab }: { onOpenScriptTab?: () => void
         worker.script_path,
         fileNameFromPath(worker.script_path),
         result.content,
-        'python',
+        'java',
       )
       onOpenScriptTab?.()
     } catch (err: any) {

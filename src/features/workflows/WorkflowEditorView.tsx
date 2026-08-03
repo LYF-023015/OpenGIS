@@ -7,12 +7,11 @@
  *   - A title (what this step does)
  *   - A description (detailed instructions for the LLM)
  *   - Input/output contracts (what this step receives and hands off)
- *   - Optional hooks (Python assertions to validate the step)
+ *   - Safe JSON conditions (never executable source code)
  *   - Optional params (key/value config passed to the step)
  *
- * The workflow is executed by the WorkflowLoop in the backend:
- * the LLM receives each step's description as a constrained prompt
- * and must call tools, using execute_code only when Python is needed.
+ * The workflow is executed by the Java Workflow v2 engine through
+ * structured Agent, tool, operation, Java, or sub-workflow references.
  *
  * Design: Guided / wizard-style UI that makes it easy for non-
  * programmers to define repeatable GIS pipelines.
@@ -40,9 +39,11 @@ import {
 import type { ViewTab } from '@/stores/viewStore'
 import { useWorkflowStore } from '@/stores/workflowStore'
 import { useChatStore } from '@/stores/chatStore'
+import { useAssetStore } from '@/stores/assetStore'
+import { backendClient } from '@/services/backendClient'
 import { useT } from '@/i18n'
 import type {
-  StepHook,
+  WorkflowCondition,
   WorkflowEdge,
   WorkflowNode,
 } from '@/features/workflows/workflow-schema'
@@ -125,7 +126,6 @@ function GuidedWorkflowEditor({ path }: { path: string }) {
   const removeEdge = useWorkflowStore((s) => s.removeEdge)
   const saveWorkflow = useWorkflowStore((s) => s.saveWorkflow)
   const updateLoaded = useWorkflowStore((s) => s.updateLoaded)
-  const sendMessage = useChatStore((s) => s.sendMessage)
 
   const doc = loaded!.doc
   const isDirty = loaded!.dirty
@@ -191,13 +191,14 @@ function GuidedWorkflowEditor({ path }: { path: string }) {
       description: '',
       inputContract: '',
       outputContract: '',
-      scriptPath: '',
+      type: 'agent_task',
+      execution: { kind: 'agent_task', ref: 'gis-build' },
       inputs: [],
       outputs: [],
       params: {},
       position: { x: 0, y: stepNum * 100 },
-      hooks: [],
-      maxRetries: 3,
+      conditions: [],
+      retryPolicy: { maxAttempts: 1, backoffMs: 0 },
     }
 
     addNode(path, newNode)
@@ -387,19 +388,22 @@ function GuidedWorkflowEditor({ path }: { path: string }) {
 
     setIsRunning(true)
     try {
-      // Send the workflow file as an attachment to the chat
-      const workflowName = doc.name || 'Workflow'
-      await sendMessage(
-        `Run the workflow "${workflowName}"`,
-        undefined,
-        [{ name: `${workflowName}.flow.json`, path, type: 'workflow' as const }]
-      )
+      const workspacePath = useAssetStore.getState().workspacePath
+      if (!workspacePath) throw new Error('Open a workspace before running a workflow')
+      const chat = useChatStore.getState()
+      const conversationId = chat.activeConversationId ?? chat.createConversation()
+      await backendClient.send('rpc.workflow.save', { workspace_path: workspacePath, workflow: doc })
+      await backendClient.send('rpc.workflow.run', {
+        workspace_path: workspacePath,
+        workflow_id: doc.id,
+        conversation_id: conversationId,
+      })
     } catch (err) {
       console.error('Failed to run workflow:', err)
     } finally {
       setIsRunning(false)
     }
-  }, [isRunning, isDirty, path, doc.name, saveWorkflow, sendMessage])
+  }, [isRunning, isDirty, path, doc, saveWorkflow])
 
   return (
     <div className="w-full h-full flex bg-bg-primary">
@@ -564,7 +568,7 @@ function StepCard({
   const t = useT()
   const hasDescription = !!step.description?.trim()
   const hasContract = !!step.inputContract?.trim() || !!step.outputContract?.trim()
-  const hasHooks = (step.hooks?.length ?? 0) > 0
+  const hasConditions = (step.conditions?.length ?? 0) > 0
   const hasParams = Object.keys(step.params || {}).length > 0
 
   return (
@@ -608,8 +612,8 @@ function StepCard({
             </span>
             {/* Status badges */}
             <div className="flex items-center gap-1">
-              {hasHooks && (
-                <span className="w-4 h-4 rounded flex items-center justify-center bg-emerald-500/10" title="Has validation hooks">
+              {hasConditions && (
+                <span className="w-4 h-4 rounded flex items-center justify-center bg-emerald-500/10" title="Has safe validation conditions">
                   <Shield className="w-2.5 h-2.5 text-emerald-500" />
                 </span>
               )}
@@ -694,7 +698,7 @@ interface StepInspectorProps {
 
 function StepInspector({ step, stepIndex, totalSteps, onUpdate, onRemove }: StepInspectorProps) {
   const t = useT()
-  const [showHooks, setShowHooks] = useState(false)
+  const [showConditions, setShowConditions] = useState(false)
   const [showParams, setShowParams] = useState(false)
 
   return (
@@ -765,29 +769,54 @@ function StepInspector({ step, stepIndex, totalSteps, onUpdate, onRemove }: Step
           />
         </Field>
 
+        <Field label="Execution type" hint="Choose the Java runtime boundary used by this node.">
+          <div className="grid grid-cols-2 gap-2">
+            <select
+              value={step.type}
+              onChange={(e) => {
+                const type = e.target.value as WorkflowNode['type']
+                onUpdate({ type, execution: { kind: type, ref: type === 'agent_task' ? 'gis-build' : '' } })
+              }}
+              className="bg-bg-tertiary border border-border rounded-lg px-2 py-1.5 text-xs text-text-primary outline-none"
+            >
+              <option value="agent_task">Agent task</option>
+              <option value="tool_call">Tool call</option>
+              <option value="operation">Operation</option>
+              <option value="java_script">Java script</option>
+              <option value="subworkflow">Sub-workflow</option>
+            </select>
+            <input
+              value={step.execution.ref}
+              onChange={(e) => onUpdate({ execution: { ...step.execution, ref: e.target.value } })}
+              placeholder="profile / tool / operation / .java / workflow id"
+              className="bg-bg-tertiary border border-border rounded-lg px-2 py-1.5 text-xs text-text-primary outline-none focus:border-accent-primary"
+            />
+          </div>
+        </Field>
+
         {/* Max retries */}
         <Field label={t.workflow.inspector.maxRetries} hint={t.workflow.inspector.maxRetriesHint}>
           <input
             type="number"
             min={1}
             max={10}
-            value={step.maxRetries ?? 3}
-            onChange={(e) => onUpdate({ maxRetries: parseInt(e.target.value) || 3 })}
+            value={step.retryPolicy?.maxAttempts ?? 1}
+            onChange={(e) => onUpdate({ retryPolicy: { maxAttempts: parseInt(e.target.value) || 1, backoffMs: step.retryPolicy?.backoffMs ?? 0 } })}
             className="w-20 bg-bg-tertiary border border-border rounded-lg px-2.5 py-1.5 text-xs text-text-primary outline-none focus:border-accent-primary transition-colors"
           />
         </Field>
 
         {/* Validation Hooks */}
         <CollapsibleSection
-          title={t.workflow.hooks.title}
+          title="Safe conditions"
           icon={<Shield className="w-3.5 h-3.5 text-emerald-500" />}
-          count={step.hooks?.length ?? 0}
-          open={showHooks}
-          onToggle={() => setShowHooks(!showHooks)}
+          count={step.conditions?.length ?? 0}
+          open={showConditions}
+          onToggle={() => setShowConditions(!showConditions)}
         >
-          <HookEditor
-            hooks={step.hooks ?? []}
-            onChange={(hooks) => onUpdate({ hooks })}
+          <ConditionEditor
+            conditions={step.conditions ?? []}
+            onChange={(conditions) => onUpdate({ conditions })}
           />
         </CollapsibleSection>
 
@@ -892,7 +921,7 @@ function WorkflowOverview({ path, steps }: WorkflowOverviewProps) {
             <StatCard label={t.workflow.stats.steps} value={steps.length} />
             <StatCard
               label={t.workflow.stats.withHooks}
-              value={steps.filter((s) => (s.hooks?.length ?? 0) > 0).length}
+              value={steps.filter((s) => (s.conditions?.length ?? 0) > 0).length}
             />
             <StatCard
               label={t.workflow.stats.configured}
@@ -929,45 +958,37 @@ function StatCard({ label, value }: { label: string; value: number }) {
 
 // ─── Hook Editor ─────────────────────────────────────────────────
 
-function HookEditor({
-  hooks,
+function ConditionEditor({
+  conditions,
   onChange,
 }: {
-  hooks: StepHook[]
-  onChange: (hooks: StepHook[]) => void
+  conditions: WorkflowCondition[]
+  onChange: (conditions: WorkflowCondition[]) => void
 }) {
-  const t = useT()
-  const addHook = () => {
-    onChange([...hooks, { expression: '', description: '', onFail: 'retry' }])
+  const addCondition = () => {
+    onChange([...conditions, { expression: { exists: { var: 'output' } }, description: '', onFalse: 'fail' }])
   }
 
-  const updateHook = (i: number, patch: Partial<StepHook>) => {
-    const next = [...hooks]
+  const updateCondition = (i: number, patch: Partial<WorkflowCondition>) => {
+    const next = [...conditions]
     next[i] = { ...next[i], ...patch }
     onChange(next)
-  }
-
-  const removeHook = (i: number) => {
-    onChange(hooks.filter((_, j) => j !== i))
   }
 
   return (
     <div className="space-y-2">
       <p className="text-2xs text-text-muted/70 leading-relaxed">
-        {t.workflow.hooks.description}
+        JSON Logic subset: var, exists, ==, !=, &gt;, &gt;=, &lt;, &lt;=, and, or, !, in. No source code is evaluated.
       </p>
-
-      {hooks.map((hook, i) => (
+      {conditions.map((condition, i) => (
         <div key={i} className="bg-bg-primary rounded-lg p-2.5 space-y-1.5 border border-border/50">
           <div className="flex items-start gap-1.5">
-            <input
-              value={hook.expression}
-              onChange={(e) => updateHook(i, { expression: e.target.value })}
-              placeholder={t.workflow.hooks.expressionPlaceholder}
-              className="flex-1 bg-bg-tertiary border border-border rounded px-2 py-1 text-2xs text-text-primary outline-none focus:border-accent-primary font-mono"
+            <ConditionExpressionInput
+              expression={condition.expression}
+              onChange={(expression) => updateCondition(i, { expression })}
             />
             <button
-              onClick={() => removeHook(i)}
+              onClick={() => onChange(conditions.filter((_, index) => index !== i))}
               className="w-5 h-5 rounded flex items-center justify-center text-text-muted hover:text-accent-danger hover:bg-accent-danger/10 transition-colors shrink-0"
             >
               <X className="w-3 h-3" />
@@ -975,32 +996,57 @@ function HookEditor({
           </div>
           <div className="flex items-center gap-2">
             <input
-              value={hook.description ?? ''}
-              onChange={(e) => updateHook(i, { description: e.target.value })}
-              placeholder={t.workflow.hooks.descriptionPlaceholder}
+              value={condition.description ?? ''}
+              onChange={(e) => updateCondition(i, { description: e.target.value })}
+              placeholder="What this condition verifies"
               className="flex-1 bg-bg-tertiary border border-border rounded px-2 py-1 text-2xs text-text-secondary outline-none focus:border-accent-primary"
             />
             <select
-              value={hook.onFail ?? 'retry'}
-              onChange={(e) => updateHook(i, { onFail: e.target.value as StepHook['onFail'] })}
+              value={condition.onFalse ?? 'fail'}
+              onChange={(e) => updateCondition(i, { onFalse: e.target.value as WorkflowCondition['onFalse'] })}
               className="bg-bg-tertiary border border-border rounded px-1.5 py-1 text-2xs text-text-secondary outline-none"
             >
-              <option value="retry">{t.workflow.hooks.onFailRetry}</option>
-              <option value="ask_user">{t.workflow.hooks.onFailAskUser}</option>
-              <option value="skip">{t.workflow.hooks.onFailSkip}</option>
+              <option value="fail">Fail</option>
+              <option value="retry">Retry</option>
+              <option value="skip">Skip</option>
             </select>
           </div>
         </div>
       ))}
-
       <button
-        onClick={addHook}
+        onClick={addCondition}
         className="w-full text-2xs text-text-muted hover:text-accent-primary border border-dashed border-border hover:border-accent-primary/50 rounded-lg py-1.5 transition-colors flex items-center justify-center gap-1"
       >
         <Plus className="w-3 h-3" />
-        {t.workflow.hooks.addHook}
+        Add safe condition
       </button>
     </div>
+  )
+}
+
+function ConditionExpressionInput({ expression, onChange }: {
+  expression: WorkflowCondition['expression']
+  onChange: (expression: WorkflowCondition['expression']) => void
+}) {
+  const [raw, setRaw] = useState(() => JSON.stringify(expression))
+  const [valid, setValid] = useState(true)
+  useEffect(() => setRaw(JSON.stringify(expression)), [expression])
+  return (
+    <input
+      value={raw}
+      onChange={(event) => {
+        setRaw(event.target.value)
+        try {
+          onChange(JSON.parse(event.target.value))
+          setValid(true)
+        } catch {
+          setValid(false)
+        }
+      }}
+      title={valid ? 'Valid safe condition JSON' : 'Invalid JSON'}
+      placeholder={'{"exists":{"var":"output"}}'}
+      className={`flex-1 bg-bg-tertiary border rounded px-2 py-1 text-2xs text-text-primary outline-none font-mono ${valid ? 'border-border focus:border-accent-primary' : 'border-accent-danger'}`}
+    />
   )
 }
 
