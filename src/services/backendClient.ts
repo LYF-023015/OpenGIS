@@ -12,6 +12,10 @@ type NotificationHandler = (method: string, params: any) => void
 
 const DYNAMIC_LAYER_UPDATE_METHOD = 'rpc.ui.map.dynamic_layer_update'
 const DYNAMIC_LAYER_FRAME_MS = 100
+// The WebSocket OPEN state is defined as 1 by the platform specification.
+// Keeping the value local also lets this runtime-neutral client work in Node
+// tests where the browser's global `WebSocket` constructor may not exist.
+const WEBSOCKET_OPEN_STATE = 1
 
 /**
  * Minimal surface of the Dispatcher that the client needs. Avoids a hard
@@ -61,14 +65,14 @@ export class BackendClient {
    */
   private waitForConnection(timeoutMs: number = 10000): Promise<void> {
     return new Promise((resolve, reject) => {
-      if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      if (this.ws && this.ws.readyState === WEBSOCKET_OPEN_STATE) {
         resolve()
         return
       }
 
       let timer: ReturnType<typeof setTimeout>
       const check = setInterval(() => {
-        if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+        if (this.ws && this.ws.readyState === WEBSOCKET_OPEN_STATE) {
           clearInterval(check)
           clearTimeout(timer)
           resolve()
@@ -163,7 +167,7 @@ export class BackendClient {
     }
 
     return new Promise((resolve, reject) => {
-      if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+      if (!this.ws || this.ws.readyState !== WEBSOCKET_OPEN_STATE) {
         reject(new Error('WebSocket not connected'))
         return
       }
@@ -301,7 +305,7 @@ export class BackendClient {
         this.dispatcher
           .handleRequest(req)
           .then((response) => {
-            if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            if (this.ws && this.ws.readyState === WEBSOCKET_OPEN_STATE) {
               this.ws.send(JSON.stringify(response))
             }
           })
@@ -310,7 +314,7 @@ export class BackendClient {
             // Dispatcher is supposed to catch RpcError itself; this is
             // purely defensive so a rogue exception does not tear down
             // the client.
-            if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+            if (this.ws && this.ws.readyState === WEBSOCKET_OPEN_STATE) {
               this.ws.send(
                 JSON.stringify({
                   jsonrpc: '2.0',
