@@ -9,6 +9,7 @@ const server = join(javaBackend, 'opengis-server')
 const target = join(server, 'target')
 const runtime = join(target, 'runtime')
 const libraries = join(target, 'jlink-libs')
+const dependencyList = join(target, 'phase10-dependencies.txt')
 const wrapper = join(javaBackend, process.platform === 'win32' ? 'mvnw.cmd' : 'mvnw')
 
 if (!existsSync(wrapper)) throw new Error(`Maven Wrapper is missing: ${wrapper}`)
@@ -16,6 +17,16 @@ if (!resolve(runtime).startsWith(`${resolve(target)}${sep}`)) throw new Error(`U
 
 run(wrapper, ['-q', '-f', join(javaBackend, 'pom.xml'), '-pl', 'opengis-server', '-am', 'install', '-DskipTests'])
 run(wrapper, ['-q', '-f', join(javaBackend, 'pom.xml'), '-pl', 'opengis-server', 'dependency:copy-dependencies', '-DincludeScope=runtime', '-DoutputDirectory=target/jlink-libs'])
+run(wrapper, [
+  '-q',
+  '-f', join(javaBackend, 'pom.xml'),
+  '-pl', 'opengis-server',
+  'dependency:list',
+  '-DincludeScope=runtime',
+  `-DoutputFile=${dependencyList}`,
+  '-DappendOutput=false',
+  '-DoutputAbsoluteArtifactFilename=true',
+])
 
 const javaCommand = process.platform === 'win32' ? 'java.exe' : 'java'
 const javaSettings = spawnSync(javaCommand, ['-XshowSettings:properties', '-version'], { encoding: 'utf8' })
