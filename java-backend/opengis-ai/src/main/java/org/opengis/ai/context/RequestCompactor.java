@@ -3,6 +3,7 @@ package org.opengis.ai.context;
 import java.util.ArrayList;
 import java.util.List;
 import org.opengis.ai.model.LlmMessage;
+import org.opengis.ai.model.LlmRole;
 
 /** Request-aware history compaction which never mutates the stable prefix or tool schemas. */
 public final class RequestCompactor {
@@ -25,7 +26,8 @@ public final class RequestCompactor {
         continue;
       }
       List<LlmMessage> kept =
-          keepNewest(section.messages(), Math.max(256, availableForMessages / 2));
+          dropDanglingLeadingTools(
+              keepNewest(section.messages(), Math.max(256, availableForMessages / 2)));
       int removed = section.messages().size() - kept.size();
       if (removed > 0) {
         compacted.add(
@@ -75,5 +77,17 @@ public final class RequestCompactor {
     }
     java.util.Collections.reverse(reversed);
     return List.copyOf(reversed);
+  }
+
+  /**
+   * The newest-only suffix can start mid-turn (a tool message whose answering assistant was
+   * dropped). Providers reject orphan tool messages, so drop them from the head.
+   */
+  private static List<LlmMessage> dropDanglingLeadingTools(List<LlmMessage> messages) {
+    int first = 0;
+    while (first < messages.size() && messages.get(first).role() == LlmRole.TOOL) {
+      first++;
+    }
+    return first == 0 ? messages : messages.subList(first, messages.size());
   }
 }

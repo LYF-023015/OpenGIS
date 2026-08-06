@@ -40,7 +40,7 @@ public record AgentProfile(
         12,
         false,
         "",
-        Map.of("max_provider_turns", 12, "max_tool_steps", 24, "max_work_steps", 24));
+        Map.of("max_provider_turns", 30, "max_tool_steps", 60, "max_work_steps", 60));
   }
 
   public static AgentProfile gisPlan() {

@@ -144,12 +144,20 @@ export function MapView({
     // 还在".)
     map.on('load', () => {
       const currentLayers = useMapStore.getState().layers.filter((l) => !l.extension)
+      const syncedIds: string[] = []
       for (const layer of currentLayers) {
-        mapEngine.syncLayer(layer)
-        prevRenderTypeRef.current.set(layer.id, layer.style.renderType)
-        prevLayerDataRef.current.set(layer.id, layer.data)
+        try {
+          mapEngine.syncLayer(layer)
+          prevRenderTypeRef.current.set(layer.id, layer.style.renderType)
+          prevLayerDataRef.current.set(layer.id, layer.data)
+          syncedIds.push(layer.id)
+        } catch (err) {
+          // 单层失败不能中断整个 seed：否则后续图层全部丢失，且
+          // prevLayerIdsRef 不会更新，diff 会认为这些图层已同步。
+          console.error('[MapView] initial seed sync failed, layer:', layer.id, layer.name, err)
+        }
       }
-      prevLayerIdsRef.current = currentLayers.map((l) => l.id)
+      prevLayerIdsRef.current = syncedIds
       
       // 新增：应用 showMapLabels 设置（从持久化存储读取）
       // 这确保地图初始化时就能正确应用用户的 label 显示偏好
@@ -165,13 +173,21 @@ export function MapView({
     mapEngine.setOnStyleReload(() => {
       const currentLayers = useMapStore.getState().layers.filter((l) => !l.extension)
       prevRenderTypeRef.current.clear()
+      const syncedIds: string[] = []
       for (const layer of currentLayers) {
-        mapEngine.syncLayer(layer)
-        mapEngine.setLayerVisibility(layer.id, layer.visible)
-        prevRenderTypeRef.current.set(layer.id, layer.style.renderType)
-        prevLayerDataRef.current.set(layer.id, layer.data)
+        try {
+          mapEngine.syncLayer(layer)
+          mapEngine.setLayerVisibility(layer.id, layer.visible)
+          prevRenderTypeRef.current.set(layer.id, layer.style.renderType)
+          prevLayerDataRef.current.set(layer.id, layer.data)
+          syncedIds.push(layer.id)
+        } catch (err) {
+          // 与 seed 相同：style reload 后单层失败不能中断整体重挂，
+          // 否则 refs 与地图脱节，后续 diff 永远不再补挂。
+          console.error('[MapView] style reload sync failed, layer:', layer.id, layer.name, err)
+        }
       }
-      prevLayerIdsRef.current = currentLayers.map((l) => l.id)
+      prevLayerIdsRef.current = syncedIds
       mapEngine.applyLayerOrder(currentLayers.map((l) => l.id))
     })
 
@@ -184,6 +200,7 @@ export function MapView({
       prevLayerIdsRef.current = []
       prevRenderTypeRef.current.clear()
       prevLayerDataRef.current.clear()
+      pendingStyleLoadRef.current = false
     }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -334,7 +351,11 @@ export function MapView({
       // Remove layers that are no longer in the store
       for (const id of prevIds) {
         if (!currentIds.has(id)) {
-          mapEngine.removeMapLayer(id)
+          try {
+            mapEngine.removeMapLayer(id)
+          } catch (err) {
+            console.error('[MapView] remove layer failed:', id, err)
+          }
           prevRenderTypeRef.current.delete(id)
           prevLayerDataRef.current.delete(id)
         }
@@ -342,31 +363,46 @@ export function MapView({
 
       // Add or update layers
       for (const layer of currentLayers) {
-        const prevRenderType = prevRenderTypeRef.current.get(layer.id)
-        if (!prevIds.has(layer.id)) {
-          // New layer — add to map
-          mapEngine.syncLayer(layer)
-          prevRenderTypeRef.current.set(layer.id, layer.style.renderType)
-          prevLayerDataRef.current.set(layer.id, layer.data)
-        } else if (prevRenderType && prevRenderType !== layer.style.renderType) {
-          // renderType switched (e.g. fill → graduated, circle → cluster).
-          // MapLibre layer types are immutable, so we MUST remove + re-add;
-          // renderer.update() is for paint-only hot patches.
-          mapEngine.removeRenderLayersOnly(layer.id)
-          mapEngine.syncLayer(layer)
-          mapEngine.setLayerVisibility(layer.id, layer.visible)
-          prevRenderTypeRef.current.set(layer.id, layer.style.renderType)
-          prevLayerDataRef.current.set(layer.id, layer.data)
-        } else {
-          // Existing layer, same renderType. Worker-driven dynamic updates
-          // replace layer.data while keeping renderType stable; the GeoJSON
-          // source still needs setData/updateData before paint hot patches.
-          if (prevLayerDataRef.current.get(layer.id) !== layer.data) {
+        try {
+          const prevRenderType = prevRenderTypeRef.current.get(layer.id)
+          if (!prevIds.has(layer.id)) {
+            // New layer — add to map
             mapEngine.syncLayer(layer)
+            prevRenderTypeRef.current.set(layer.id, layer.style.renderType)
             prevLayerDataRef.current.set(layer.id, layer.data)
+          } else if (prevRenderType && prevRenderType !== layer.style.renderType) {
+            // renderType switched (e.g. fill → graduated, circle → cluster).
+            // MapLibre layer types are immutable, so we MUST remove + re-add;
+            // renderer.update() is for paint-only hot patches.
+            mapEngine.removeRenderLayersOnly(layer.id)
+            mapEngine.syncLayer(layer)
+            mapEngine.setLayerVisibility(layer.id, layer.visible)
+            prevRenderTypeRef.current.set(layer.id, layer.style.renderType)
+            prevLayerDataRef.current.set(layer.id, layer.data)
+          } else {
+            // Existing layer, same renderType. Worker-driven dynamic updates
+            // replace layer.data while keeping renderType stable; the GeoJSON
+            // source still needs setData/updateData before paint hot patches.
+            //
+            // Self-heal: refs may claim the layer is synced while the map has
+            // actually lost it (e.g. style reload or a previous sync crashed
+            // mid-loop and left refs out of date). Re-attach instead of
+            // hot-patching a layer that isn't there.
+            if (
+              prevLayerDataRef.current.get(layer.id) !== layer.data ||
+              !mapEngine.hasRenderLayers(layer.id)
+            ) {
+              mapEngine.syncLayer(layer)
+              prevLayerDataRef.current.set(layer.id, layer.data)
+            }
+            mapEngine.setLayerVisibility(layer.id, layer.visible)
+            mapEngine.updateLayerPaint(layer)
           }
-          mapEngine.setLayerVisibility(layer.id, layer.visible)
-          mapEngine.updateLayerPaint(layer)
+        } catch (err) {
+          // 单层失败不能中断整个 diff：否则该层之后的图层全部跳过，
+          // 且 prevLayerIdsRef 无法更新，permanently 卡在"已同步"状态，
+          // 后续任何 store 变更都不会再补挂。
+          console.error('[MapView] sync layer failed, layer:', layer.id, layer.name, err)
         }
       }
 
