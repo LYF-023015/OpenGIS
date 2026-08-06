@@ -546,6 +546,23 @@ export class MapEngine {
   }
 
   /**
+   * 判断图层 def 是否已经真实挂载在地图上（至少一个 render 子层存在）。
+   *
+   * 用于同步时的自愈：style reload 或 syncLayer 异常中断会让
+   * MapView 的 prevLayerIdsRef 与真实地图脱节（refs 里"有"、地图上
+   * "没有"）。diff 发现 refs 有记录但地图上缺失时，应当重新挂载
+   * 而不是走 update 热补丁路径。
+   */
+  hasRenderLayers(layerId: string): boolean {
+    if (!this.map) return false
+    const prefix = `layer-${layerId}-`
+    for (const id of this.managedLayerIds) {
+      if (id.startsWith(prefix) && this.map.getLayer(id)) return true
+    }
+    return false
+  }
+
+  /**
    * 设置地图中图层的可见性
    */
   setLayerVisibility(layerId: string, visible: boolean): void {

@@ -119,7 +119,7 @@ public final class Phase5RpcMethods {
             text(params, "user_instructions", ""),
             Math.max(4096, params.path("context_window").asInt(128_000)),
             Duration.ofSeconds(Math.max(10, params.path("agent_timeout_seconds").asLong(600))),
-            Duration.ofSeconds(Math.max(1, params.path("tool_timeout_seconds").asLong(120))));
+            Duration.ofSeconds(Math.max(1, params.path("tool_timeout_seconds").asLong(600))));
     return agents.start(command);
   }
 

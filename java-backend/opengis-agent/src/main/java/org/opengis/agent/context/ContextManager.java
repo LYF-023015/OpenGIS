@@ -4,8 +4,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import org.opengis.ai.context.CanonicalRequest;
 import org.opengis.ai.context.CanonicalRequestBuilder;
@@ -117,12 +119,58 @@ public final class ContextManager {
         .add(
             "history",
             PromptSectionKind.HISTORY,
-            state.messages,
+            repairedHistory(state.messages),
             PromptStability.SESSION_STATIC,
             PromptCachePolicy.NONE)
         .tools(tools)
         .options(temperature, maxTokens, timeout, Map.of("cache_stable_prefix", true))
         .build();
+  }
+
+  /**
+   * Drops incomplete tool-call turns so provider history always passes OpenAI-style validation (an
+   * assistant tool_calls message must be fully answered by the tool messages that follow it). Runs
+   * interrupted mid-settlement leave a dangling assistant tool_calls message; this repair is
+   * idempotent and also heals already-broken persisted conversations.
+   */
+  private static List<LlmMessage> repairedHistory(List<LlmMessage> messages) {
+    List<LlmMessage> repaired = new ArrayList<>(messages.size());
+    int index = 0;
+    while (index < messages.size()) {
+      LlmMessage message = messages.get(index);
+      if (message.role() == LlmRole.ASSISTANT && !message.toolCalls().isEmpty()) {
+        Set<String> pending = new HashSet<>();
+        for (LlmToolCall call : message.toolCalls()) {
+          pending.add(call.id());
+        }
+        int next = index + 1;
+        while (next < messages.size() && messages.get(next).role() == LlmRole.TOOL) {
+          LlmMessage tool = messages.get(next);
+          if (!tool.toolCallId().isBlank() && pending.remove(tool.toolCallId())) {
+            next++;
+          } else {
+            break;
+          }
+        }
+        if (pending.isEmpty()) {
+          repaired.add(message);
+          for (int t = index + 1; t < next; t++) {
+            repaired.add(messages.get(t));
+          }
+          index = next;
+          continue;
+        }
+        index = next;
+        continue;
+      }
+      if (message.role() == LlmRole.TOOL) {
+        index++;
+        continue;
+      }
+      repaired.add(message);
+      index++;
+    }
+    return repaired;
   }
 
   private ConversationState state(String conversationId) {

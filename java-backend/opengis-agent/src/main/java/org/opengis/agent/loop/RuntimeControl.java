@@ -29,7 +29,7 @@ public final class RuntimeControl {
     maxToolSteps = profile.limit("max_tool_steps", profile.maxSteps() * 2);
     this.repeatedFailureLimit = Math.max(2, repeatedFailureLimit);
     this.maxDuration = maxDuration == null ? Duration.ofMinutes(10) : maxDuration;
-    this.toolTimeout = toolTimeout == null ? Duration.ofMinutes(2) : toolTimeout;
+    this.toolTimeout = toolTimeout == null ? Duration.ofMinutes(10) : toolTimeout;
     this.cancellation = cancellation;
     failures = new FailureMemory(32);
   }

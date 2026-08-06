@@ -28,6 +28,6 @@ public record AgentLoopRequest(
     contextWindow = contextWindow <= 0 ? 128_000 : contextWindow;
     providerTimeout = providerTimeout == null ? Duration.ofMinutes(5) : providerTimeout;
     maxRuntime = maxRuntime == null ? Duration.ofMinutes(10) : maxRuntime;
-    toolTimeout = toolTimeout == null ? Duration.ofMinutes(2) : toolTimeout;
+    toolTimeout = toolTimeout == null ? Duration.ofMinutes(10) : toolTimeout;
   }
 }

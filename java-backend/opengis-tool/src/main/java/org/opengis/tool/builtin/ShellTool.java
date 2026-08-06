@@ -49,7 +49,7 @@ final class ShellTool extends FunctionalTool {
   private static JsonNode executeProcess(JsonNode args, ToolExecutionContext context) {
     List<String> argv = args.path("argv").valueStream().map(JsonNode::asText).toList();
     Path workdir = WorkspacePaths.resolve(context, args.path("workdir").asText("."));
-    long timeoutMillis = args.path("timeout").asLong(Duration.ofMinutes(2).toMillis());
+    long timeoutMillis = args.path("timeout").asLong(Duration.ofMinutes(10).toMillis());
     Process process = null;
     try {
       process =

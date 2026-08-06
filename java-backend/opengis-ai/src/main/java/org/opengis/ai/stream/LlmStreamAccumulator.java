@@ -87,7 +87,7 @@ public final class LlmStreamAccumulator {
           new LlmError(
               "malformed_tool_arguments",
               "Provider returned malformed JSON arguments for tool call index " + index,
-              false,
+              true,
               0);
       return cause == null ? new LlmException(error) : new LlmException(error, cause);
     }
