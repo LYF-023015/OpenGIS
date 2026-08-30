@@ -12,9 +12,7 @@ public final class ToolSchemaProjector {
   public List<LlmToolDefinition> project(ToolRegistry registry, AgentProfile profile) {
     Set<String> groups = Set.copyOf(profile.toolGroups());
     return registry.definitions().stream()
-        .filter(
-            definition ->
-                groups.isEmpty() || groups.contains(definition.group()) || groups.contains("core"))
+        .filter(definition -> groups.isEmpty() || groups.contains(definition.group()))
         .map(ToolSchemaProjector::project)
         .toList();
   }

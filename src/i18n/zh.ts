@@ -320,6 +320,8 @@ export const zh = {
     temperatureDesc: '控制随机性。较低的值使输出更加确定。',
     maxTokens: '最大 Token 数',
     maxTokensDesc: '响应中最大 token 数量。',
+    contextWindow: '上下文窗口',
+    contextWindowDesc: '本地上下文预算，必须设置为不高于当前模型真实支持的窗口；支持配置为 1000000。',
     reasoningEffort: '推理强度',
     reasoningEffortDesc: '控制模型在回答前进行多少推理。',
     reasoningLow: '低',

@@ -21,9 +21,9 @@ class OsmAdapterTest {
         """);
     var result = new OsmAdapter(mapper).osmToGeoJson(response, new CancellationToken());
     var feature = result.path("features").get(0);
-    assertThat(feature.path("geometry").path("type").asText()).isEqualTo("Polygon");
+    assertThat(feature.path("geometry").path("type").asString()).isEqualTo("Polygon");
     assertThat(feature.path("geometry").path("coordinates")).hasSize(2);
-    assertThat(feature.path("properties").path("_osm_type").asText()).isEqualTo("relation");
+    assertThat(feature.path("properties").path("_osm_type").asString()).isEqualTo("relation");
   }
 
   @Test

@@ -14,9 +14,10 @@ import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.opengis.agent.persistence.RunArchive;
+import org.opengis.platform.persistence.JsonTypeReferences;
 import org.opengis.server.agent.AgentApplicationService;
-import org.opengis.server.phase8.Phase8ExecutionBridge;
-import org.opengis.server.phase8.Phase8Services;
+import org.opengis.server.execution.ExecutionServices;
+import org.opengis.server.execution.ScriptExecutionBridge;
 import org.opengis.server.transport.UiRpcGateway;
 import org.opengis.tool.api.ToolCall;
 import org.opengis.tool.api.ToolResult;
@@ -44,8 +45,8 @@ public final class WorkflowApplicationService {
   private final ToolRuntime tools;
   private final UiRpcGateway ui;
   private final ObjectMapper mapper;
-  private final Phase8Services phase8;
-  private final Phase8ExecutionBridge phase8Bridge;
+  private final ExecutionServices executionServices;
+  private final ScriptExecutionBridge executionBridge;
   private final Map<String, ActiveRun> active = new ConcurrentHashMap<>();
 
   public WorkflowApplicationService(
@@ -63,15 +64,15 @@ public final class WorkflowApplicationService {
       ToolRuntime tools,
       UiRpcGateway ui,
       ObjectMapper mapper,
-      Phase8Services phase8,
-      Phase8ExecutionBridge phase8Bridge) {
+      ExecutionServices executionServices,
+      ScriptExecutionBridge executionBridge) {
     this.executor = executor;
     this.agents = agents;
     this.tools = tools;
     this.ui = ui;
     this.mapper = mapper;
-    this.phase8 = phase8;
-    this.phase8Bridge = phase8Bridge;
+    this.executionServices = executionServices;
+    this.executionBridge = executionBridge;
   }
 
   public Map<String, Object> start(
@@ -219,15 +220,15 @@ public final class WorkflowApplicationService {
 
   private WorkflowNodeRunner.NodeResult runOperationNode(
       WorkflowNodeRunner.NodeRequest request, String conversationId, String connectionId) {
-    if (phase8 == null || phase8Bridge == null)
-      return WorkflowNodeRunner.NodeResult.failed("Phase 8 Operation executor is unavailable", "");
-    ToolExecutionContext context = phase8Context(request, conversationId, connectionId);
+    if (executionServices == null || executionBridge == null)
+      return WorkflowNodeRunner.NodeResult.failed("Operation executor is unavailable", "");
+    ToolExecutionContext context = executionContext(request, conversationId, connectionId);
     Thread cancellationWatcher = watchCancellation(request, context.cancellation());
     try {
       ObjectNode parameters = mapper.createObjectNode();
       request.node().params().forEach(parameters::set);
       ObjectNode result =
-          phase8
+          executionServices
               .operations()
               .run(
                   request.workspace(),
@@ -236,10 +237,10 @@ public final class WorkflowApplicationService {
                   Duration.ofMinutes(10),
                   true,
                   context.cancellation(),
-                  phase8Bridge.callbacks(context));
-      return "success".equals(result.path("status").asText())
-          ? WorkflowNodeRunner.NodeResult.completed(result, result.path("run_id").asText(), true)
-          : WorkflowNodeRunner.NodeResult.failed(result.path("status").asText("failed"), "");
+                  executionBridge.callbacks(context));
+      return "success".equals(result.path("status").asString())
+          ? WorkflowNodeRunner.NodeResult.completed(result, result.path("run_id").asString(), true)
+          : WorkflowNodeRunner.NodeResult.failed(result.path("status").asString("failed"), "");
     } catch (RuntimeException exception) {
       return WorkflowNodeRunner.NodeResult.failed(exception.getMessage(), "");
     } finally {
@@ -249,10 +250,9 @@ public final class WorkflowApplicationService {
 
   private WorkflowNodeRunner.NodeResult runJavaScriptNode(
       WorkflowNodeRunner.NodeRequest request, String conversationId, String connectionId) {
-    if (phase8 == null)
-      return WorkflowNodeRunner.NodeResult.failed(
-          "Phase 8 Java Script executor is unavailable", "");
-    ToolExecutionContext context = phase8Context(request, conversationId, connectionId);
+    if (executionServices == null)
+      return WorkflowNodeRunner.NodeResult.failed("Java Script executor is unavailable", "");
+    ToolExecutionContext context = executionContext(request, conversationId, connectionId);
     Thread cancellationWatcher = watchCancellation(request, context.cancellation());
     try {
       Path sourcePath = request.workspace().resolve(request.node().execution().ref()).normalize();
@@ -268,10 +268,10 @@ public final class WorkflowApplicationService {
           "run_id", request.workflowRunId() + "-" + request.node().id() + "-" + request.attempt());
       ObjectNode parameters = arguments.putObject("params");
       request.node().params().forEach(parameters::set);
-      ObjectNode result = phase8.runScript(context, arguments);
+      ObjectNode result = executionServices.runScript(context, arguments);
       return result.path("ok").asBoolean()
-          ? WorkflowNodeRunner.NodeResult.completed(result, result.path("runId").asText(), false)
-          : WorkflowNodeRunner.NodeResult.failed(result.path("error").asText("failed"), "");
+          ? WorkflowNodeRunner.NodeResult.completed(result, result.path("runId").asString(), false)
+          : WorkflowNodeRunner.NodeResult.failed(result.path("error").asString("failed"), "");
     } catch (Exception exception) {
       return WorkflowNodeRunner.NodeResult.failed(exception.getMessage(), "");
     } finally {
@@ -313,7 +313,7 @@ public final class WorkflowApplicationService {
             });
   }
 
-  private ToolExecutionContext phase8Context(
+  private ToolExecutionContext executionContext(
       WorkflowNodeRunner.NodeRequest request, String conversationId, String connectionId) {
     CancellationToken token = new CancellationToken();
     if (request.cancellation().isCancelled()) token.cancel();
@@ -354,7 +354,7 @@ public final class WorkflowApplicationService {
     while (!request.cancellation().isCancelled()) {
       var archive = RunArchive.load(request.workspace(), childRunId);
       if (archive.isPresent()) {
-        String status = archive.get().meta().path("status").asText();
+        String status = archive.get().meta().path("status").asString();
         if ("completed".equals(status) || "success".equals(status)) {
           ObjectNode output = mapper.createObjectNode();
           output.put("run_id", childRunId);
@@ -364,7 +364,7 @@ public final class WorkflowApplicationService {
         }
         if ("error".equals(status) || "cancelled".equals(status)) {
           return WorkflowNodeRunner.NodeResult.failed(
-              archive.get().meta().path("error").asText(status), childRunId);
+              archive.get().meta().path("error").asString(status), childRunId);
         }
       }
       try {
@@ -437,7 +437,10 @@ public final class WorkflowApplicationService {
 
       @Override
       public void notify(String method, JsonNode params) {
-        ui.notify(connectionId, method, mapper.convertValue(params, Map.class));
+        ui.notify(
+            connectionId,
+            method,
+            mapper.convertValue(params, JsonTypeReferences.STRING_OBJECT_MAP));
       }
     };
   }

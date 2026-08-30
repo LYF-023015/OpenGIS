@@ -17,6 +17,7 @@ import tools.jackson.databind.ObjectMapper;
 
 class WebSocketAgentCancellationTest {
   @Test
+  @SuppressWarnings("try") // The acquired session is a lifetime guard for this test.
   void closingRendererConnectionCancelsItsAgentRun(@TempDir Path workspace) {
     SessionCoordinator coordinator = new SessionCoordinator();
     CancellationToken cancellation = new CancellationToken();

@@ -67,14 +67,20 @@ class WorkflowMessagePartProjectionTest {
 
       assertThat(service.status(workspace, runId)).isEqualTo("completed");
       RunArchive archive = RunArchive.load(workspace, runId).orElseThrow();
-      assertThat(archive.meta().path("status").asText()).isEqualTo("completed");
+      assertThat(archive.meta().path("status").asString()).isEqualTo("completed");
       assertThat(archive.read("message_parts.jsonl"))
           .isNotEmpty()
-          .allSatisfy(part -> assertThat(part.path("type").asText()).isEqualTo("plan"));
+          .allSatisfy(part -> assertThat(part.path("type").asString()).isEqualTo("plan"));
       JsonNode finalPart = archive.read("message_parts.jsonl").getLast();
-      assertThat(finalPart.path("status").asText()).isEqualTo("completed");
+      assertThat(finalPart.path("status").asString()).isEqualTo("completed");
       assertThat(
-              finalPart.path("data").path("planData").path("steps").get(0).path("status").asText())
+              finalPart
+                  .path("data")
+                  .path("planData")
+                  .path("steps")
+                  .get(0)
+                  .path("status")
+                  .asString())
           .isEqualTo("completed");
       verify(ui, atLeastOnce()).notify(eq("connection"), eq("chat.message_part"), anyMap());
     }

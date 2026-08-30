@@ -8,7 +8,6 @@ import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 import org.opengis.ai.model.LlmMessage;
-import org.opengis.ai.model.LlmRequest;
 import org.opengis.ai.model.LlmToolDefinition;
 import tools.jackson.databind.ObjectMapper;
 
@@ -30,10 +29,6 @@ public record CanonicalRequest(
 
   public List<LlmMessage> messages() {
     return sections.stream().flatMap(section -> section.messages().stream()).toList();
-  }
-
-  public LlmRequest toLlmRequest() {
-    return new LlmRequest(model, messages(), tools, temperature, maxTokens, timeout, metadata);
   }
 
   public String cacheablePrefixHash(ObjectMapper mapper) {

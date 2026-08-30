@@ -11,6 +11,42 @@
   <name>OpenGIS AI</name>
   <dependencies>
     <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-openai</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>com.github.victools</groupId>
+          <artifactId>jsonschema-generator</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.github.victools</groupId>
+          <artifactId>jsonschema-module-jackson</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.github.victools</groupId>
+          <artifactId>jsonschema-module-swagger-2</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-anthropic</artifactId>
+      <exclusions>
+        <exclusion>
+          <groupId>com.github.victools</groupId>
+          <artifactId>jsonschema-generator</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.github.victools</groupId>
+          <artifactId>jsonschema-module-jackson</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.github.victools</groupId>
+          <artifactId>jsonschema-module-swagger-2</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
@@ -18,11 +54,6 @@
     <dependency>
       <groupId>org.opengis</groupId>
       <artifactId>opengis-common</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.opengis</groupId>
-      <artifactId>opengis-framework</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>

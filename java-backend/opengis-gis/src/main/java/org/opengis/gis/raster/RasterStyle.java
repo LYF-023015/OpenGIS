@@ -63,7 +63,10 @@ public record RasterStyle(
   }
 
   private static Double decimal(Object value, Double fallback) {
-    return value instanceof Number number ? number.doubleValue() : fallback;
+    if (value instanceof Number number) {
+      return Double.valueOf(number.doubleValue());
+    }
+    return fallback;
   }
 
   private static boolean bool(Object value, boolean fallback) {

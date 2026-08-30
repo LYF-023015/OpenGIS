@@ -17,6 +17,14 @@ class CanonicalRequestTest {
   private final TokenEstimator estimator = new TokenEstimator(mapper);
 
   @Test
+  void tokenEstimatorTreatsCjkTextMoreConservativelyThanAsciiText() {
+    int ascii = estimator.messages(List.of(LlmMessage.user("a".repeat(400))));
+    int cjk = estimator.messages(List.of(LlmMessage.user("中".repeat(400))));
+
+    assertThat(cjk).isGreaterThan(ascii * 3);
+  }
+
+  @Test
   void stablePrefixIgnoresAppendOnlyHistory() {
     CanonicalRequest first = request(List.of(LlmMessage.user("one")));
     CanonicalRequest second =

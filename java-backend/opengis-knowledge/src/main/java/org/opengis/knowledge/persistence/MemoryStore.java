@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Locale;
 import org.opengis.platform.persistence.JsonFileStore;
 import org.opengis.platform.persistence.WorkspaceLayout;
+import org.opengis.platform.security.SensitiveDataRedactor;
 import tools.jackson.databind.node.ObjectNode;
 
 /** Python-compatible structured and legacy workspace memory store. */
@@ -22,7 +23,9 @@ public class MemoryStore {
   }
 
   public void append(ObjectNode record) {
-    files.append(layout.resolve("memory/" + filename(record.path("kind").asText())), record);
+    files.append(
+        layout.resolve("memory/" + filename(record.path("kind").asString())),
+        SensitiveDataRedactor.redact(record));
   }
 
   public List<ObjectNode> list() {
@@ -43,7 +46,7 @@ public class MemoryStore {
   }
 
   public void writeLegacyMarkdown(String markdown) {
-    files.writeText(layout.resolve("memory.md"), markdown);
+    files.writeText(layout.resolve("memory.md"), SensitiveDataRedactor.redactText(markdown));
   }
 
   private static String filename(String kind) {

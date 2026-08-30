@@ -13,6 +13,12 @@ opengis:
   runtime:
     version: 0.1.0
     log-dir: ${logging.file.path}
+  skills:
+    max-skill-bytes: ${OPENGIS_SKILL_MAX_BYTES:262144}
+    max-resource-bytes: ${OPENGIS_SKILL_RESOURCE_MAX_BYTES:10485760}
+    max-resource-read-chars: ${OPENGIS_SKILL_RESOURCE_READ_CHARS:50000}
+    max-resources: ${OPENGIS_SKILL_MAX_RESOURCES:512}
+    max-run-resource-chars: ${OPENGIS_SKILL_RUN_RESOURCE_CHARS:200000}
 
 logging:
   file:

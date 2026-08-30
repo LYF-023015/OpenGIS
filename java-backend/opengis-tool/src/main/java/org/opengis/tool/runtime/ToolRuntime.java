@@ -81,7 +81,7 @@ public final class ToolRuntime {
     try {
       context.cancellation().throwIfCancelled();
       validator.validate(tool.definition().inputSchema(), arguments);
-      PermissionDecision decision = permissions.decide(tool.definition(), context);
+      PermissionDecision decision = permissions.decide(tool.definition(), arguments, context);
       emit(call, context, "tool.permission_decided", objectMapper.valueToTree(decision));
       if (decision.action() == PermissionAction.DENY) {
         return failure(

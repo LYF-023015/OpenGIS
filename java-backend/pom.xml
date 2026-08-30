@@ -31,6 +31,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <spring-boot.version>4.1.0</spring-boot.version>
+    <spring-ai.version>2.0.0</spring-ai.version>
     <archunit.version>1.4.1</archunit.version>
     <maven.compiler.version>3.14.1</maven.compiler.version>
     <maven.surefire.version>3.5.5</maven.surefire.version>
@@ -45,6 +46,13 @@
 
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>org.springframework.ai</groupId>
+        <artifactId>spring-ai-bom</artifactId>
+        <version>${spring-ai.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <dependency>
         <groupId>org.geotools</groupId>
         <artifactId>gt-bom</artifactId>
@@ -61,6 +69,11 @@
         <groupId>com.google.guava</groupId>
         <artifactId>guava</artifactId>
         <version>33.5.0-jre</version>
+      </dependency>
+      <dependency>
+        <groupId>com.google.errorprone</groupId>
+        <artifactId>error_prone_annotations</artifactId>
+        <version>2.41.0</version>
       </dependency>
       <dependency>
         <groupId>com.google.re2j</groupId>
@@ -95,6 +108,9 @@
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-maven-plugin</artifactId>
           <version>${spring-boot.version}</version>
+          <configuration>
+            <skip>true</skip>
+          </configuration>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -103,6 +119,10 @@
           <configuration>
             <release>${maven.compiler.release}</release>
             <parameters>${maven.compiler.parameters}</parameters>
+            <showWarnings>true</showWarnings>
+            <compilerArgs>
+              <arg>-Xlint:all</arg>
+            </compilerArgs>
           </configuration>
         </plugin>
         <plugin>

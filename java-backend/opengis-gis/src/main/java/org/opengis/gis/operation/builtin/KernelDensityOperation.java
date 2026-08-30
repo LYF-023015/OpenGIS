@@ -76,7 +76,7 @@ public final class KernelDensityOperation implements BuiltinOperation {
 
   @Override
   public JsonNode run(Path workspace, JsonNode parameters, CancellationToken cancellation) {
-    Path input = WorkspaceGisPaths.input(workspace, parameters.path("input_path").asText());
+    Path input = WorkspaceGisPaths.input(workspace, parameters.path("input_path").asString());
     GeoJsonFeatureSet dataset = GeoJsonFeatureSet.load(mapper, input, cancellation);
     if (dataset.features().isEmpty())
       throw new IllegalArgumentException("Input contains no valid geometry");
@@ -87,7 +87,7 @@ public final class KernelDensityOperation implements BuiltinOperation {
     if (project) outputCrs = "EPSG:3857";
     double[][] points = new double[dataset.features().size()][2];
     double[] weights = new double[points.length];
-    String weightField = parameters.path("weight_field").asText("");
+    String weightField = parameters.path("weight_field").asString("");
     for (int index = 0; index < points.length; index++) {
       cancellation.throwIfCancelled();
       var feature = dataset.features().get(index);
@@ -103,7 +103,7 @@ public final class KernelDensityOperation implements BuiltinOperation {
     double cellSize = parameters.path("cell_size_meters").asDouble(bandwidth / 4);
     if (!(bandwidth > 0) || !(cellSize > 0))
       throw new IllegalArgumentException("Bandwidth and cell size must be positive");
-    String kernel = parameters.path("kernel").asText("gaussian").toLowerCase(Locale.ROOT);
+    String kernel = parameters.path("kernel").asString("gaussian").toLowerCase(Locale.ROOT);
     if (!KERNELS.contains(kernel))
       throw new IllegalArgumentException("Unsupported kernel: " + kernel);
     int maxCells =
@@ -129,7 +129,7 @@ public final class KernelDensityOperation implements BuiltinOperation {
     Path directory =
         WorkspaceGisPaths.output(
                 workspace,
-                parameters.path("output_dir").asText("kde_output/.keep"),
+                parameters.path("output_dir").asString("kde_output/.keep"),
                 "kde_output/.keep")
             .getParent();
     Path rasterPath = directory.resolve(stem(input) + "_density.tif");

@@ -19,8 +19,8 @@ class ProtocolSchemaTest {
       JsonNode schema = new ObjectMapper().readTree(stream);
       JsonNode definitions = schema.path("$defs");
 
-      assertThat(definitions.path("protocolVersion").path("const").asText()).isEqualTo("3.0");
-      assertThat(definitions.path("jsonRpcVersion").path("const").asText()).isEqualTo("2.0");
+      assertThat(definitions.path("protocolVersion").path("const").asString()).isEqualTo("3.0");
+      assertThat(definitions.path("jsonRpcVersion").path("const").asString()).isEqualTo("2.0");
       assertThat(definitions.path("bbox").path("minItems").asInt()).isEqualTo(4);
       assertThat(definitions.path("bbox").path("maxItems").asInt()).isEqualTo(4);
       assertThat(definitions.path("geometryType").path("enum")).hasSize(8);

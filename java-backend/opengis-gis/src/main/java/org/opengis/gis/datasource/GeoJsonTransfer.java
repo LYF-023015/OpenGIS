@@ -26,7 +26,7 @@ public final class GeoJsonTransfer {
     try {
       JsonNode value = mapper.readTree(bytes);
       if (!value.isObject()
-          || !"FeatureCollection".equals(value.path("type").asText())
+          || !"FeatureCollection".equals(value.path("type").asString())
           || !value.path("features").isArray()) {
         throw new ToolException("invalid_geojson", "Response is not a GeoJSON FeatureCollection");
       }
@@ -76,7 +76,7 @@ public final class GeoJsonTransfer {
     Set<String> types = new LinkedHashSet<>();
     for (JsonNode feature : collection.path("features")) {
       JsonNode geometry = feature.path("geometry");
-      if (geometry.path("type").isTextual()) types.add(geometry.path("type").asText());
+      if (geometry.path("type").isString()) types.add(geometry.path("type").asString());
       visit(geometry.path("coordinates"), bounds);
     }
     return new Summary(collection.path("features").size(), bounds.value(), List.copyOf(types));

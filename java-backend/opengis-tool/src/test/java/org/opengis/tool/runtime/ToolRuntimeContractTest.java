@@ -129,14 +129,14 @@ class ToolRuntimeContractTest {
   private ObjectNode validArguments(JsonNode schema) {
     ObjectNode arguments = mapper.createObjectNode();
     for (JsonNode required : schema.path("required")) {
-      String name = required.asText();
+      String name = required.asString();
       arguments.set(name, validValue(schema.path("properties").path(name)));
     }
     return arguments;
   }
 
   private JsonNode validValue(JsonNode schema) {
-    return switch (schema.path("type").asText()) {
+    return switch (schema.path("type").asString()) {
       case "string" ->
           schema.path("enum").isArray() && !schema.path("enum").isEmpty()
               ? schema.path("enum").get(0)

@@ -10,6 +10,7 @@ import org.opengis.tool.context.CancellationToken;
 
 class SessionCoordinatorTest {
   @Test
+  @SuppressWarnings("try") // Acquired sessions are closed for their lifetime, not read directly.
   void preventsConcurrentSessionAndWorkspaceOwners(@TempDir Path workspace) {
     SessionCoordinator coordinator = new SessionCoordinator();
     try (var ignored =
@@ -26,6 +27,7 @@ class SessionCoordinatorTest {
   }
 
   @Test
+  @SuppressWarnings("try") // Acquired sessions are closed for their lifetime, not read directly.
   void websocketDisconnectCancelsOnlyOwnedRuns(@TempDir Path workspace) {
     SessionCoordinator coordinator = new SessionCoordinator();
     CancellationToken first = new CancellationToken();

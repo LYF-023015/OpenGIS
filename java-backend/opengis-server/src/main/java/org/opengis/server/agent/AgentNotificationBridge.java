@@ -46,6 +46,9 @@ final class AgentNotificationBridge implements AgentEventSink {
       notify("chat.cancelled", Map.of("run_id", runId, "conversation_id", conversationId));
       part("turn-" + runId, "turn", "cancelled", "", Map.of("kind", "stream_end"));
     } else {
+      if (answer != null && !answer.isBlank()) {
+        part("answer-" + runId, "text", "completed", answer, Map.of("role", "assistant"));
+      }
       part("error-" + runId, "error", "failed", error, Map.of("run_id", runId));
       part("turn-" + runId, "turn", "failed", "", Map.of("kind", "stream_end"));
     }

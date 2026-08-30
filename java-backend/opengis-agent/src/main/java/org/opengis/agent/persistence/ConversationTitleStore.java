@@ -20,7 +20,7 @@ public class ConversationTitleStore {
     Set<String> conversationIds = new LinkedHashSet<>();
     var root = files.read(path);
     if (root.isArray()) {
-      root.valueStream().map(node -> node.asText()).forEach(conversationIds::add);
+      root.valueStream().map(node -> node.asString()).forEach(conversationIds::add);
     }
     return conversationIds;
   }

@@ -28,10 +28,10 @@ class RpcDispatcherTest {
                 "{\"jsonrpc\":\"2.0\",\"id\":\"ping-1\","
                     + "\"method\":\"rpc.system.ping\",\"params\":{}}"));
 
-    assertThat(response.path("id").asText()).isEqualTo("ping-1");
-    assertThat(response.path("result").path("status").asText()).isEqualTo("ok");
-    assertThat(response.path("result").path("protocol_version").asText()).isEqualTo("3.0");
-    assertThat(response.path("result").path("runtime").asText()).isEqualTo("java");
+    assertThat(response.path("id").asString()).isEqualTo("ping-1");
+    assertThat(response.path("result").path("status").asString()).isEqualTo("ok");
+    assertThat(response.path("result").path("protocol_version").asString()).isEqualTo("3.0");
+    assertThat(response.path("result").path("runtime").asString()).isEqualTo("java");
   }
 
   @Test
@@ -51,7 +51,7 @@ class RpcDispatcherTest {
             dispatcher.dispatch(
                 "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"rpc.tool.list\"," + "\"params\":{}}"));
     assertThat(notMigrated.path("error").path("code").asInt()).isEqualTo(-32004);
-    assertThat(notMigrated.path("error").path("data").path("method").asText())
+    assertThat(notMigrated.path("error").path("data").path("method").asString())
         .isEqualTo("rpc.tool.list");
   }
 

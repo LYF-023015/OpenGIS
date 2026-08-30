@@ -23,6 +23,7 @@ import org.opengis.code.runner.JavaScriptRunner;
 import org.opengis.code.runner.ScriptCallbacks;
 import org.opengis.code.runner.ScriptRunRequest;
 import org.opengis.platform.persistence.JsonFileStore;
+import org.opengis.platform.persistence.JsonTypeReferences;
 import org.opengis.tool.context.CancellationToken;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -91,7 +92,8 @@ public final class WorkerManager implements AutoCloseable {
         specification.path("config").isObject()
             ? specification.path("config")
             : mapper.createObjectNode());
-    files.writeText(folder.resolve(manifest.path("entry").asText()), source.stripTrailing() + "\n");
+    files.writeText(
+        folder.resolve(manifest.path("entry").asString()), source.stripTrailing() + "\n");
     files.writeText(
         folder.resolve("README.md"),
         "# "
@@ -112,10 +114,10 @@ public final class WorkerManager implements AutoCloseable {
     if (running >= maximumRunning)
       throw new IllegalStateException("Maximum running workers reached: " + maximumRunning);
     ObjectNode manifest = files.readObject(folder.resolve("manifest.json"));
-    if (!"java".equalsIgnoreCase(manifest.path("runtime").asText())) {
+    if (!"java".equalsIgnoreCase(manifest.path("runtime").asString())) {
       throw new IllegalArgumentException("Legacy Python Worker cannot run in Java mode");
     }
-    String source = files.readText(folder.resolve(manifest.path("entry").asText()));
+    String source = files.readText(folder.resolve(manifest.path("entry").asString()));
     ObjectNode metadata = files.readObject(folder.resolve("metadata.json"));
     CancellationToken cancellation = new CancellationToken();
     ActiveWorker worker =
@@ -242,7 +244,7 @@ public final class WorkerManager implements AutoCloseable {
   public void restore(Path workspace) {
     for (Path folder : folders(workspace)) {
       ObjectNode metadata = files.readObject(folder.resolve("metadata.json"));
-      String status = metadata.path("status").asText();
+      String status = metadata.path("status").asString();
       if ("running".equals(status) || "starting".equals(status) || "restarting".equals(status)) {
         metadata.put("status", "paused");
         metadata.put("restored", true);
@@ -291,8 +293,8 @@ public final class WorkerManager implements AutoCloseable {
                   .replace('\\', '/'));
         });
     ObjectNode config = files.readObject(worker.folder.resolve("config.json"));
-    @SuppressWarnings("unchecked")
-    Map<String, Object> parameters = mapper.convertValue(config, Map.class);
+    Map<String, Object> parameters =
+        mapper.convertValue(config, JsonTypeReferences.STRING_OBJECT_MAP);
     ScriptCallbacks callbacks = callbacks(worker);
     try {
       var result =
@@ -300,8 +302,8 @@ public final class WorkerManager implements AutoCloseable {
               new ScriptRunRequest(
                   worker.workspace,
                   runId,
-                  manifest.path("name").asText(worker.workerId),
-                  manifest.path("entry_class").asText(),
+                  manifest.path("name").asString(worker.workerId),
+                  manifest.path("entry_class").asString(),
                   source,
                   parameters,
                   strings(manifest.path("permissions")),
@@ -405,11 +407,11 @@ public final class WorkerManager implements AutoCloseable {
   private ObjectNode initialMetadata(Path workspace, Path folder, ObjectNode manifest) {
     ObjectNode value = mapper.createObjectNode();
     value.put("schema_version", "2.0");
-    value.put("worker_id", manifest.path("worker_id").asText());
-    value.put("name", manifest.path("name").asText());
-    value.put("description", manifest.path("description").asText());
-    value.put("runtime", manifest.path("runtime").asText());
-    value.put("entry_class", manifest.path("entry_class").asText());
+    value.put("worker_id", manifest.path("worker_id").asString());
+    value.put("name", manifest.path("name").asString());
+    value.put("description", manifest.path("description").asString());
+    value.put("runtime", manifest.path("runtime").asString());
+    value.put("entry_class", manifest.path("entry_class").asString());
     value.put("workspace_path", workspace.toAbsolutePath().normalize().toString());
     value.put(
         "folder",
@@ -441,7 +443,7 @@ public final class WorkerManager implements AutoCloseable {
                 files
                     .readObject(folder.resolve("metadata.json"))
                     .path("worker_id")
-                    .asText()
+                    .asString()
                     .equals(workerId))
         .findFirst()
         .orElseThrow(() -> new IllegalArgumentException("Worker not found: " + workerId));
@@ -470,9 +472,9 @@ public final class WorkerManager implements AutoCloseable {
   }
 
   private static Path path(ObjectNode metadata, String field) {
-    String value = metadata.path(field).asText("");
+    String value = metadata.path(field).asString("");
     if (value.isBlank()) return null;
-    return Path.of(metadata.path("workspace_path").asText()).resolve(value).normalize();
+    return Path.of(metadata.path("workspace_path").asString()).resolve(value).normalize();
   }
 
   private static String tail(Path path, int lines) {
@@ -503,20 +505,20 @@ public final class WorkerManager implements AutoCloseable {
   private static List<DependencyResolver.Request> dependencyRequests(JsonNode values) {
     List<DependencyResolver.Request> result = new ArrayList<>();
     for (JsonNode value : values) {
-      if (value.isTextual()) result.add(new DependencyResolver.Request(value.asText(), false, ""));
+      if (value.isString()) result.add(new DependencyResolver.Request(value.asString(), false, ""));
       else
         result.add(
             new DependencyResolver.Request(
-                value.path("coordinate").asText(),
+                value.path("coordinate").asString(),
                 value.path("approved").asBoolean(false),
-                value.path("checksum").asText("")));
+                value.path("checksum").asString("")));
     }
     return result;
   }
 
   private static Set<String> strings(JsonNode values) {
     java.util.HashSet<String> result = new java.util.HashSet<>();
-    for (JsonNode value : values) result.add(value.asText());
+    for (JsonNode value : values) result.add(value.asString());
     return Set.copyOf(result);
   }
 
@@ -530,7 +532,7 @@ public final class WorkerManager implements AutoCloseable {
   }
 
   private static String text(JsonNode value, String field, String fallback) {
-    return value.path(field).asText(fallback);
+    return value.path(field).asString(fallback);
   }
 
   private static String slug(String value) {
@@ -637,7 +639,7 @@ public final class WorkerManager implements AutoCloseable {
     }
 
     private boolean isRunning() {
-      String status = metadata.path("status").asText();
+      String status = metadata.path("status").asString();
       return "starting".equals(status) || "running".equals(status) || "restarting".equals(status);
     }
   }

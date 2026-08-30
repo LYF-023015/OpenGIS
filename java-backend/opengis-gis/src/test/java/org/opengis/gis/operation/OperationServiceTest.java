@@ -35,7 +35,7 @@ class OperationServiceTest {
             true,
             new CancellationToken(),
             ScriptCallbacks.disconnected());
-    assertThat(converted.path("status").asText()).isEqualTo("success");
+    assertThat(converted.path("status").asString()).isEqualTo("success");
     assertThat(workspace.resolve("output/points.csv")).content().contains("geometry_wkt");
 
     ObjectNode clustering = mapper.createObjectNode();
@@ -71,7 +71,7 @@ class OperationServiceTest {
             true,
             new CancellationToken(),
             ScriptCallbacks.disconnected());
-    assertThat(workspace.resolve(kde.path("output").path("raster_path").asText())).exists();
+    assertThat(workspace.resolve(kde.path("output").path("raster_path").asString())).exists();
   }
 
   @Test
@@ -81,7 +81,7 @@ class OperationServiceTest {
     spec.put("operation_id", "learning-example");
     spec.put("name", "Learning Example");
     var created = service.create(workspace, spec, false);
-    String checksum = created.path("operation").path("checksum").asText();
+    String checksum = created.path("operation").path("checksum").asString();
     assertThat(
             service
                 .validate(workspace, "learning-example", mapper.createObjectNode(), true)
@@ -93,7 +93,7 @@ class OperationServiceTest {
     edit.put("description", "revision two");
     var updated = service.edit(workspace, "learning-example", edit);
     assertThat(updated.path("operation").path("revision").asInt()).isEqualTo(2);
-    assertThat(updated.path("operation").path("checksum").asText()).isNotEqualTo(checksum);
+    assertThat(updated.path("operation").path("checksum").asString()).isNotEqualTo(checksum);
     assertThat(
             workspace.resolve(
                 ".opengis/operations/learning-example/revisions/000001/manifest.json"))
@@ -108,10 +108,10 @@ class OperationServiceTest {
             true,
             new CancellationToken(),
             ScriptCallbacks.disconnected());
-    assertThat(run.path("status").asText()).isEqualTo("success");
+    assertThat(run.path("status").asString()).isEqualTo("success");
     assertThat(run.path("revision").asInt()).isEqualTo(2);
-    assertThat(run.path("checksum").asText())
-        .isEqualTo(updated.path("operation").path("checksum").asText());
+    assertThat(run.path("checksum").asString())
+        .isEqualTo(updated.path("operation").path("checksum").asString());
   }
 
   @Test
@@ -134,9 +134,9 @@ class OperationServiceTest {
                 .get(workspace, "legacy", true, 10_000)
                 .path("operation")
                 .path("compatibility_status")
-                .asText())
+                .asString())
         .isEqualTo("legacy-python");
-    assertThat(service.legacyReport(workspace, "legacy").path("status").asText())
+    assertThat(service.legacyReport(workspace, "legacy").path("status").asString())
         .isEqualTo("manual_migration_required");
   }
 

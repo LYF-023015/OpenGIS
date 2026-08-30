@@ -22,6 +22,7 @@ import org.opengis.code.runner.JavaScriptRunner;
 import org.opengis.code.runner.ScriptCallbacks;
 import org.opengis.code.runner.ScriptRunRequest;
 import org.opengis.platform.persistence.JsonFileStore;
+import org.opengis.platform.persistence.JsonTypeReferences;
 import org.opengis.platform.persistence.WorkspaceLayout;
 import org.opengis.tool.context.CancellationToken;
 import tools.jackson.databind.JsonNode;
@@ -50,11 +51,11 @@ public final class OperationService {
     workspaceManifests(workspace).stream()
         .map(this::compatible)
         .filter(value -> matches(value, needle))
-        .forEach(value -> values.put(value.path("id").asText(), summary(value)));
+        .forEach(value -> values.put(value.path("id").asString(), summary(value)));
     builtins.all().stream()
         .map(operation -> (ObjectNode) operation.manifest())
         .filter(value -> matches(value, needle))
-        .forEach(value -> values.putIfAbsent(value.path("id").asText(), summary(value)));
+        .forEach(value -> values.putIfAbsent(value.path("id").asString(), summary(value)));
     ObjectNode result = mapper.createObjectNode();
     result.put("success", true);
     result.put("operation_root", root(workspace).toString());
@@ -104,9 +105,9 @@ public final class OperationService {
     files.writeText(
         directory.resolve("README.md"),
         "# "
-            + manifest.path("name").asText(id)
+            + manifest.path("name").asString(id)
             + "\n\n"
-            + manifest.path("description").asText("Reusable Java operation.")
+            + manifest.path("description").asString("Reusable Java operation.")
             + "\n");
     return get(workspace, id, false, 40_000);
   }
@@ -118,10 +119,9 @@ public final class OperationService {
     if (isLegacy(location.manifest()))
       throw new IllegalArgumentException("Legacy Python operations are read-only in Java mode");
     ObjectNode current = location.manifest().deepCopy();
-    String entryClass = current.path("runtime").path("entry_class").asText();
     String source =
         changes.has("code")
-            ? changes.path("code").asText()
+            ? changes.path("code").asString()
             : files.readText(sourcePath(location.directory(), current));
     for (String key :
         List.of("name", "description", "status", "input_schema", "output_schema", "permissions")) {
@@ -135,7 +135,7 @@ public final class OperationService {
     current.put("checksum", checksum(source, current));
     writeRevision(location.directory(), current, source);
     if (changes.has("readme"))
-      files.writeText(location.directory().resolve("README.md"), changes.path("readme").asText());
+      files.writeText(location.directory().resolve("README.md"), changes.path("readme").asString());
     return get(workspace, operationId, false, 40_000);
   }
 
@@ -146,7 +146,7 @@ public final class OperationService {
     String targetId = source.readOnly() ? operationId : operationId + "-java";
     ObjectNode specification = mapper.createObjectNode();
     specification.put("operation_id", targetId);
-    specification.put("name", source.manifest().path("name").asText(targetId));
+    specification.put("name", source.manifest().path("name").asString(targetId));
     specification.put("description", "Java workspace copy of " + operationId);
     specification.put("entry_class", "workspace.operations." + javaClass(targetId));
     specification.put("code", template("workspace.operations." + javaClass(targetId), targetId));
@@ -186,7 +186,7 @@ public final class OperationService {
         scripts.validateAndCompile(
             workspace,
             source,
-            location.manifest().path("runtime").path("entry_class").asText(),
+            location.manifest().path("runtime").path("entry_class").asString(),
             strings(location.manifest().path("permissions")),
             dependencyRequests(location.manifest().path("runtime").path("dependencies")),
             offline);
@@ -206,7 +206,7 @@ public final class OperationService {
     result.set("warnings", mapper.valueToTree(code.sourceValidation().warnings()));
     result.putPOJO("resolved_dependencies", code.resolvedDependencies());
     result.put("revision", location.manifest().path("revision").asInt());
-    result.put("checksum", location.manifest().path("checksum").asText());
+    result.put("checksum", location.manifest().path("checksum").asString());
     return result;
   }
 
@@ -234,15 +234,15 @@ public final class OperationService {
       status = output.path("success").asBoolean(true) ? "success" : "failed";
     } else {
       String source = files.readText(sourcePath(location.directory(), location.manifest()));
-      @SuppressWarnings("unchecked")
-      Map<String, Object> parameterMap = mapper.convertValue(parameters, Map.class);
+      Map<String, Object> parameterMap =
+          mapper.convertValue(parameters, JsonTypeReferences.STRING_OBJECT_MAP);
       var result =
           scripts.run(
               new ScriptRunRequest(
                   workspace,
                   runId,
                   operationId,
-                  location.manifest().path("runtime").path("entry_class").asText(),
+                  location.manifest().path("runtime").path("entry_class").asString(),
                   source,
                   parameterMap,
                   strings(location.manifest().path("permissions")),
@@ -263,7 +263,7 @@ public final class OperationService {
     record.put("scope", location.scope());
     record.put("revision", location.manifest().path("revision").asInt());
     record.put(
-        "checksum", location.manifest().path("checksum").asText("builtin:" + operationId + ":1"));
+        "checksum", location.manifest().path("checksum").asString("builtin:" + operationId + ":1"));
     record.put("started_at", started.toString());
     record.put("finished_at", Instant.now().toString());
     record.set("params", parameters.deepCopy());
@@ -293,11 +293,11 @@ public final class OperationService {
     if (!Files.isRegularFile(metadataPath))
       throw new IllegalArgumentException("Script metadata is required");
     ObjectNode metadata = files.readObject(metadataPath);
-    String runId = metadata.path("run_id").asText();
+    String runId = metadata.path("run_id").asString();
     Path runRecord =
         new WorkspaceLayout(workspace).resolve("script-runs").resolve(runId).resolve("run.json");
     if (!Files.isRegularFile(runRecord)
-        || !"completed".equals(files.readObject(runRecord).path("status").asText())) {
+        || !"completed".equals(files.readObject(runRecord).path("status").asString())) {
       throw new IllegalArgumentException(
           "Only a successfully executed Java script can be promoted");
     }
@@ -307,15 +307,15 @@ public final class OperationService {
         operationId == null || operationId.isBlank()
             ? safeId(source.getFileName().toString().replace(".java", ""))
             : safeId(operationId));
-    specification.put("name", metadata.path("semantic_name").asText("Promoted Java operation"));
+    specification.put("name", metadata.path("semantic_name").asString("Promoted Java operation"));
     specification.put("description", "Promoted from a verified Java Script run");
-    specification.put("entry_class", metadata.path("entry_class").asText());
+    specification.put("entry_class", metadata.path("entry_class").asString());
     specification.put("code", files.readText(source));
     specification.putArray("permissions").add("workspace_files");
     specification
         .putObject("provenance")
         .put("source_run_id", runId)
-        .put("source_sha256", metadata.path("sha256").asText());
+        .put("source_sha256", metadata.path("sha256").asString());
     return create(workspace, specification, overwrite);
   }
 
@@ -424,9 +424,9 @@ public final class OperationService {
         value
             .path("runtime")
             .path("language")
-            .asText(value.path("entry").asText().endsWith(".py") ? "python" : "java");
+            .asString(value.path("entry").asString().endsWith(".py") ? "python" : "java");
     if (!"java".equalsIgnoreCase(language)
-        || value.path("schema_version").asText("1.0").startsWith("1")) {
+        || value.path("schema_version").asString("1.0").startsWith("1")) {
       value.put("compatibility_status", "legacy-python");
       value.put("read_only", true);
     } else {
@@ -473,12 +473,12 @@ public final class OperationService {
       return errors;
     }
     for (JsonNode required : schema.path("required")) {
-      if (parameters == null || !parameters.has(required.asText())) {
+      if (parameters == null || !parameters.has(required.asString())) {
         errors.add(
             mapper
                 .createObjectNode()
                 .put("code", "missing_required_param")
-                .put("message", "Missing required parameter: " + required.asText()));
+                .put("message", "Missing required parameter: " + required.asString()));
       }
     }
     return errors;
@@ -487,20 +487,20 @@ public final class OperationService {
   private List<DependencyResolver.Request> dependencyRequests(JsonNode values) {
     List<DependencyResolver.Request> result = new ArrayList<>();
     for (JsonNode value : values) {
-      if (value.isTextual()) result.add(new DependencyResolver.Request(value.asText(), false, ""));
+      if (value.isString()) result.add(new DependencyResolver.Request(value.asString(), false, ""));
       else
         result.add(
             new DependencyResolver.Request(
-                value.path("coordinate").asText(),
+                value.path("coordinate").asString(),
                 value.path("approved").asBoolean(false),
-                value.path("checksum").asText("")));
+                value.path("checksum").asString("")));
     }
     return result;
   }
 
   private static Set<String> strings(JsonNode values) {
     java.util.HashSet<String> result = new java.util.HashSet<>();
-    for (JsonNode value : values) result.add(value.asText());
+    for (JsonNode value : values) result.add(value.asString());
     return Set.copyOf(result);
   }
 
@@ -521,8 +521,8 @@ public final class OperationService {
             "checksum")) {
       if (value.has(key)) result.set(key, value.get(key).deepCopy());
     }
-    result.put("runtime_language", value.path("runtime").path("language").asText("java"));
-    result.put("entry_class", value.path("runtime").path("entry_class").asText(""));
+    result.put("runtime_language", value.path("runtime").path("language").asString("java"));
+    result.put("entry_class", value.path("runtime").path("entry_class").asString(""));
     return result;
   }
 
@@ -531,12 +531,12 @@ public final class OperationService {
   }
 
   private static boolean isLegacy(JsonNode manifest) {
-    return "legacy-python".equals(manifest.path("compatibility_status").asText())
-        || "python".equalsIgnoreCase(manifest.path("runtime").path("language").asText());
+    return "legacy-python".equals(manifest.path("compatibility_status").asString())
+        || "python".equalsIgnoreCase(manifest.path("runtime").path("language").asString());
   }
 
   private static Path sourcePath(Path directory, JsonNode manifest) {
-    Path path = directory.resolve(manifest.path("entry").asText()).normalize();
+    Path path = directory.resolve(manifest.path("entry").asString()).normalize();
     if (!path.startsWith(directory))
       throw new IllegalArgumentException("Operation entry escapes its directory");
     return path;
@@ -599,7 +599,7 @@ public final class OperationService {
       String normalized =
           source.replace("\r\n", "\n")
               + "\n"
-              + manifest.path("id").asText()
+              + manifest.path("id").asString()
               + "\n"
               + manifest.path("revision").asInt();
       return HexFormat.of()
@@ -612,7 +612,7 @@ public final class OperationService {
   }
 
   private static String text(JsonNode value, String key, String fallback) {
-    String result = value.path(key).asText(fallback);
+    String result = value.path(key).asString(fallback);
     return result == null ? fallback : result;
   }
 

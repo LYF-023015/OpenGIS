@@ -293,8 +293,8 @@ public final class VectorLoader {
     }
     if (geometries.isEmpty()) return null;
     if (geometries.size() == 1) return geometries.getFirst();
-    String type = geometries.getFirst().path("type").asText();
-    if (geometries.stream().allMatch(value -> type.equals(value.path("type").asText()))) {
+    String type = geometries.getFirst().path("type").asString();
+    if (geometries.stream().allMatch(value -> type.equals(value.path("type").asString()))) {
       ObjectNode multi = mapper.createObjectNode().put("type", "Multi" + type);
       ArrayNode coordinates = multi.putArray("coordinates");
       geometries.forEach(value -> coordinates.add(value.path("coordinates")));
@@ -370,7 +370,7 @@ public final class VectorLoader {
   private static ObjectNode normalizeCollection(JsonNode root) {
     if (root != null
         && root.isObject()
-        && "FeatureCollection".equals(root.path("type").asText())
+        && "FeatureCollection".equals(root.path("type").asString())
         && root.path("features").isArray()) {
       return (ObjectNode) root;
     }

@@ -45,13 +45,13 @@ final class CsvToGeoJsonTool extends FunctionalTool {
 
   private static JsonNode convert(
       JsonNode arguments, ToolExecutionContext context, ObjectMapper mapper) {
-    Path input = WorkspacePaths.resolve(context, arguments.path("input_path").asText());
-    String rawOutput = arguments.path("output_path").asText("");
+    Path input = WorkspacePaths.resolve(context, arguments.path("input_path").asString());
+    String rawOutput = arguments.path("output_path").asString("");
     Path output =
         rawOutput.isBlank()
             ? input.resolveSibling(stripExtension(input.getFileName().toString()) + ".geojson")
             : WorkspacePaths.resolve(context, rawOutput);
-    char delimiter = arguments.path("delimiter").asText(",").charAt(0);
+    char delimiter = arguments.path("delimiter").asString(",").charAt(0);
     try {
       List<String> lines = Files.readAllLines(input, StandardCharsets.UTF_8);
       if (lines.isEmpty()) {
@@ -59,10 +59,10 @@ final class CsvToGeoJsonTool extends FunctionalTool {
       }
       List<String> headers = parseRow(lines.getFirst(), delimiter);
       int latitude =
-          findColumn(headers, arguments.path("lat_column").asText(""), "lat", "latitude", "y");
+          findColumn(headers, arguments.path("lat_column").asString(""), "lat", "latitude", "y");
       int longitude =
           findColumn(
-              headers, arguments.path("lng_column").asText(""), "lng", "lon", "longitude", "x");
+              headers, arguments.path("lng_column").asString(""), "lng", "lon", "longitude", "x");
       if (latitude < 0 || longitude < 0) {
         throw new ToolException(
             "coordinate_columns_missing", "Latitude/longitude columns were not found");

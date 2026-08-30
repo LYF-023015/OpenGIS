@@ -39,8 +39,8 @@ public final class WorkflowMigrationService {
     }
     String version =
         source.has("schemaVersion")
-            ? source.path("schemaVersion").asText()
-            : source.path("schema_version").asText("1");
+            ? source.path("schemaVersion").asString()
+            : source.path("schema_version").asString("1");
     if ("2".equals(version)) {
       try {
         WorkflowDocument document = new WorkflowCodec(mapper).parse(source);
@@ -55,11 +55,11 @@ public final class WorkflowMigrationService {
     ObjectNode converted = mapper.createObjectNode();
     converted.put("schemaVersion", 2);
     converted.put(
-        "id", safeId(source.path("id").asText(slug(source.path("name").asText("workflow")))));
-    converted.put("name", source.path("name").asText("Untitled Workflow"));
-    converted.put("description", source.path("description").asText(""));
+        "id", safeId(source.path("id").asString(slug(source.path("name").asString("workflow")))));
+    converted.put("name", source.path("name").asString("Untitled Workflow"));
+    converted.put("description", source.path("description").asString(""));
     String now = OffsetDateTime.now().toString();
-    converted.put("createdAt", source.path("createdAt").asText(now));
+    converted.put("createdAt", source.path("createdAt").asString(now));
     converted.put("updatedAt", now);
     ArrayNode nodes = converted.putArray("nodes");
     for (JsonNode old : source.path("nodes")) {
@@ -69,12 +69,12 @@ public final class WorkflowMigrationService {
     int edgeIndex = 0;
     for (JsonNode old : source.path("edges")) {
       ObjectNode edge = edges.addObject();
-      edge.put("id", old.path("id").asText("edge_" + (++edgeIndex)));
-      edge.put("source", old.path("source").asText());
-      edge.put("sourceHandle", old.path("sourceHandle").asText(""));
-      edge.put("target", old.path("target").asText());
-      edge.put("targetHandle", old.path("targetHandle").asText(""));
-      edge.put("label", old.path("label").asText(""));
+      edge.put("id", old.path("id").asString("edge_" + (++edgeIndex)));
+      edge.put("source", old.path("source").asString());
+      edge.put("sourceHandle", old.path("sourceHandle").asString(""));
+      edge.put("target", old.path("target").asString());
+      edge.put("targetHandle", old.path("targetHandle").asString(""));
+      edge.put("label", old.path("label").asString(""));
     }
     if (source.has("viewport")) converted.set("viewport", source.get("viewport"));
     converted
@@ -101,15 +101,15 @@ public final class WorkflowMigrationService {
 
   private ObjectNode convertNode(JsonNode old, List<WorkflowMigrationReport.Issue> issues) {
     ObjectNode node = mapper.createObjectNode();
-    String id = old.path("id").asText();
+    String id = old.path("id").asString();
     node.put("id", id);
     node.put(
         "title",
         old.path("title")
-            .asText(old.path("label").asText(old.path("task").asText("Untitled Node"))));
-    node.put("description", old.path("description").asText(old.path("task").asText("")));
-    String script = old.path("scriptPath").asText(old.path("script_path").asText(""));
-    String oldType = old.path("nodeType").asText(old.path("type").asText(""));
+            .asString(old.path("label").asString(old.path("task").asString("Untitled Node"))));
+    node.put("description", old.path("description").asString(old.path("task").asString("")));
+    String script = old.path("scriptPath").asString(old.path("script_path").asString(""));
+    String oldType = old.path("nodeType").asString(old.path("type").asString(""));
     String type;
     String ref;
     if (!script.isBlank()) {
@@ -128,12 +128,12 @@ public final class WorkflowMigrationService {
                     + script
                     + "' with a Java tool, operation, or java_script reference."));
       }
-    } else if ("tool_call".equals(oldType) && old.path("toolName").isTextual()) {
+    } else if ("tool_call".equals(oldType) && old.path("toolName").isString()) {
       type = "tool_call";
-      ref = old.path("toolName").asText();
+      ref = old.path("toolName").asString();
     } else {
       type = "agent_task";
-      ref = old.path("profileName").asText("gis-build");
+      ref = old.path("profileName").asString("gis-build");
     }
     node.put("type", type);
     node.putObject("execution").put("kind", type).put("ref", ref);
@@ -149,14 +149,15 @@ public final class WorkflowMigrationService {
             ? old.path("position")
             : mapper.createObjectNode().put("x", 0).put("y", 0));
     node.put(
-        "inputContract", old.path("inputContract").asText(old.path("input_contract").asText("")));
+        "inputContract",
+        old.path("inputContract").asString(old.path("input_contract").asString("")));
     node.put(
         "outputContract",
-        old.path("outputContract").asText(old.path("output_contract").asText("")));
+        old.path("outputContract").asString(old.path("output_contract").asString("")));
     node.putArray("conditions");
     int retries = old.path("maxRetries").asInt(old.path("max_retries").asInt(0));
     node.putObject("retryPolicy").put("maxAttempts", Math.max(1, retries + 1)).put("backoffMs", 0);
-    node.put("notes", old.path("notes").asText(""));
+    node.put("notes", old.path("notes").asString(""));
     if (old.path("hooks").isArray() && !old.path("hooks").isEmpty()) {
       issues.add(
           new WorkflowMigrationReport.Issue(

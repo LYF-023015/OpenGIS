@@ -51,17 +51,18 @@ class WorkerManagerTest {
               (method, parameters) -> {
                 if (method.startsWith("rpc.ui.map.")) mapEvents.add(parameters);
               });
-      String id = started.path("worker_id").asText();
+      String id = started.path("worker_id").asString();
       ObjectNode running = waitStatus(manager, id, "running");
       assertThat(running.path("pid").asLong()).isPositive();
       assertThat(mapEvents).isNotEmpty();
       assertThat(manager.get(workspace, id, false).path("resources").path("alive").asBoolean())
           .isTrue();
 
-      assertThat(manager.pause(workspace, id, "test").path("status").asText()).isEqualTo("paused");
+      assertThat(manager.pause(workspace, id, "test").path("status").asString())
+          .isEqualTo("paused");
       ObjectNode restarted =
           manager.restart(workspace, id, ScriptCallbacks.disconnected(), WorkerEventSink.noop());
-      assertThat(restarted.path("status").asText()).isIn("starting", "running");
+      assertThat(restarted.path("status").asString()).isIn("starting", "running");
       waitStatus(manager, id, "running");
       manager.pause(workspace, id, "cleanup");
       Thread.sleep(300);
@@ -88,25 +89,25 @@ class WorkerManagerTest {
 
     try (WorkerManager manager = new WorkerManager(mapper)) {
       ObjectNode restored = manager.list(workspace, false);
-      assertThat(restored.path("workers").get(0).path("status").asText()).isEqualTo("paused");
+      assertThat(restored.path("workers").get(0).path("status").asString()).isEqualTo("paused");
       assertThat(restored.path("workers").get(0).path("restored").asBoolean()).isTrue();
     }
     ObjectNode report = new WorkerMigrationService(mapper).inspect(workspace, "legacy-1");
-    assertThat(report.path("status").asText()).isEqualTo("manual_migration_required");
+    assertThat(report.path("status").asString()).isEqualTo("manual_migration_required");
     assertThat(report.path("uses_network").asBoolean()).isTrue();
     assertThat(report.path("uses_dynamic_map").asBoolean()).isTrue();
-    assertThat(workspace.resolve(report.path("report_path").asText())).exists();
+    assertThat(workspace.resolve(report.path("report_path").asString())).exists();
   }
 
   private ObjectNode waitStatus(WorkerManager manager, String id, String expected)
       throws InterruptedException {
     long deadline = System.nanoTime() + Duration.ofSeconds(15).toNanos();
     ObjectNode value = manager.get(workspace, id, false);
-    while (System.nanoTime() < deadline && !expected.equals(value.path("status").asText())) {
+    while (System.nanoTime() < deadline && !expected.equals(value.path("status").asString())) {
       Thread.sleep(50);
       value = manager.get(workspace, id, false);
     }
-    assertThat(value.path("status").asText()).isEqualTo(expected);
+    assertThat(value.path("status").asString()).isEqualTo(expected);
     return value;
   }
 }

@@ -51,9 +51,9 @@ public final class FormatConverterOperation implements BuiltinOperation {
 
   @Override
   public JsonNode run(Path workspace, JsonNode parameters, CancellationToken cancellation) {
-    Path input = WorkspaceGisPaths.input(workspace, parameters.path("input_path").asText());
-    String requested = parameters.path("output_format").asText("").toLowerCase(Locale.ROOT);
-    String outputValue = parameters.path("output_path").asText();
+    Path input = WorkspaceGisPaths.input(workspace, parameters.path("input_path").asString());
+    String requested = parameters.path("output_format").asString("").toLowerCase(Locale.ROOT);
+    String outputValue = parameters.path("output_path").asString();
     String format = requested.isBlank() ? extension(outputValue) : requested;
     Path output = WorkspaceGisPaths.output(workspace, outputValue, "converted/output." + format);
     GeoJsonFeatureSet dataset = GeoJsonFeatureSet.load(mapper, input, cancellation);

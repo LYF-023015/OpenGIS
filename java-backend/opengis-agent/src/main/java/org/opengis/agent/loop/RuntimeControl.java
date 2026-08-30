@@ -50,6 +50,11 @@ public final class RuntimeControl {
     toolSteps++;
   }
 
+  /** Records the single no-tool provider call reserved for a bounded final response. */
+  public void recordFinalizationTurn() {
+    providerTurns++;
+  }
+
   public void recordFailure(String operation, String error) {
     FailureMemory.FailureRecord failure = failures.record(operation, error);
     if (failure.count() >= repeatedFailureLimit) {

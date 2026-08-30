@@ -8,12 +8,16 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HexFormat;
 import java.util.UUID;
+import org.opengis.platform.security.SensitiveDataRedactor;
 import org.opengis.tool.api.ArtifactRef;
 import org.opengis.tool.api.ToolException;
 import org.opengis.tool.context.ToolExecutionContext;
+import tools.jackson.databind.ObjectMapper;
 
 /** Writes oversized UTF-8 output below .opengis/runs/{run}/artifacts. */
 public final class ArtifactMaterializer {
+  private static final ObjectMapper MAPPER = new ObjectMapper();
+
   public ArtifactRef writeText(
       ToolExecutionContext context, String toolName, String content, String mediaType) {
     String id = UUID.randomUUID().toString();
@@ -29,7 +33,7 @@ public final class ArtifactMaterializer {
     if (!path.startsWith(context.workspace())) {
       throw new ToolException("artifact_path_invalid", "Artifact path escaped workspace");
     }
-    byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
+    byte[] bytes = redact(content, mediaType).getBytes(StandardCharsets.UTF_8);
     try {
       Files.createDirectories(directory);
       Files.write(path, bytes);
@@ -43,6 +47,18 @@ public final class ArtifactMaterializer {
     } catch (IOException exception) {
       throw new ToolException("artifact_write_failed", "Cannot materialize tool output", exception);
     }
+  }
+
+  private static String redact(String content, String mediaType) {
+    if (content == null) return "";
+    if (mediaType != null && mediaType.toLowerCase(java.util.Locale.ROOT).contains("json")) {
+      try {
+        return MAPPER.writeValueAsString(SensitiveDataRedactor.redact(MAPPER.readTree(content)));
+      } catch (RuntimeException ignored) {
+        // Fall through to conservative text redaction for malformed JSON.
+      }
+    }
+    return SensitiveDataRedactor.redactText(content);
   }
 
   private static String safeSegment(String value) {

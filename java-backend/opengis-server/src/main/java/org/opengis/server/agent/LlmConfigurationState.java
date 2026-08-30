@@ -33,7 +33,7 @@ public final class LlmConfigurationState {
     String protocolText = text(params, "protocol", previous.protocol().name());
     ProviderProtocol protocol = ProviderProtocol.parse(protocolText);
     boolean routeSpecified =
-        params.path("provider").isTextual() || params.path("base_url").isTextual();
+        params.path("provider").isString() || params.path("base_url").isString();
     String baseUrl = text(params, "base_url", routeSpecified ? "" : previous.baseUri().toString());
     String providerId =
         text(
@@ -55,7 +55,7 @@ public final class LlmConfigurationState {
                 ? previous.model()
                 : preset.defaultModel());
     String apiKey =
-        params.path("api_key").isTextual() ? params.path("api_key").asText() : previous.apiKey();
+        params.path("api_key").isString() ? params.path("api_key").asString() : previous.apiKey();
     double temperature =
         params.path("temperature").isNumber()
             ? params.path("temperature").asDouble()
@@ -115,8 +115,8 @@ public final class LlmConfigurationState {
   }
 
   private static String text(JsonNode params, String field, String fallback) {
-    return params.path(field).isTextual() && !params.path(field).asText().isBlank()
-        ? params.path(field).asText().strip()
+    return params.path(field).isString() && !params.path(field).asString().isBlank()
+        ? params.path(field).asString().strip()
         : fallback;
   }
 }

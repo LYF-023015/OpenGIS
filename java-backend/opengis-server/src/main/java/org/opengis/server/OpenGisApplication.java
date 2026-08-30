@@ -15,7 +15,7 @@ public class OpenGisApplication {
     SpringApplication.run(OpenGisApplication.class, normalizeLegacyArguments(args));
   }
 
-  /** Keeps Phase 1 compatible with the Python Sidecar command-line shape. */
+  /** Maps the desktop launcher's concise arguments to Spring Boot properties. */
   static String[] normalizeLegacyArguments(String[] args) {
     List<String> normalized = new ArrayList<>();
     for (int index = 0; index < args.length; index++) {

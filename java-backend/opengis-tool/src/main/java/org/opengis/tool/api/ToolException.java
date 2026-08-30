@@ -2,6 +2,8 @@ package org.opengis.tool.api;
 
 /** Expected execution failure with a stable machine code. */
 public class ToolException extends RuntimeException {
+  private static final long serialVersionUID = 1L;
+
   private final String code;
   private final boolean retryable;
 

@@ -91,13 +91,19 @@ export function ToolAndSkillPanel() {
     setLoading(true)
     setError(null)
     try {
-      const [toolResp, userSkillResp] = await Promise.all([
+      const [toolResult, userSkillResult] = await Promise.allSettled([
         backendClient.send('rpc.tool.list', {}),
         backendClient.send('rpc.user_skill.list', { workspace_path: workspacePath || undefined }),
       ])
+      if (toolResult.status === 'rejected') throw toolResult.reason
+      const toolResp = toolResult.value
       const list: ToolSchemaDict[] = (toolResp as any)?.tools ?? []
       setTools(list)
-      setUserSkills((userSkillResp as any)?.skills ?? [])
+      setUserSkills(
+        userSkillResult.status === 'fulfilled'
+          ? ((userSkillResult.value as any)?.skills ?? [])
+          : [],
+      )
       // Auto-expand the first category
       const cats = [...new Set(list.map(s => s.category))]
       if (cats.length > 0) setExpandedCategory(cats[0]!)

@@ -9,6 +9,7 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.io.geojson.GeoJsonReader;
 import org.opengis.gis.crs.CrsService;
 import org.opengis.gis.vector.VectorLoader;
+import org.opengis.platform.persistence.JsonTypeReferences;
 import org.opengis.tool.context.CancellationToken;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
@@ -40,11 +41,12 @@ public final class GeoJsonFeatureSet {
         Geometry geometry = reader.read(mapper.writeValueAsString(geometryNode));
         Map<String, Object> properties =
             value.path("properties").isObject()
-                ? mapper.convertValue(value.path("properties"), LinkedHashMap.class)
+                ? mapper.convertValue(
+                    value.path("properties"), JsonTypeReferences.STRING_OBJECT_LINKED_MAP)
                 : new LinkedHashMap<>();
         features.add(
             new Feature(
-                value.path("id").asText(""), geometry, properties, geometryNode.deepCopy()));
+                value.path("id").asString(""), geometry, properties, geometryNode.deepCopy()));
       } catch (org.locationtech.jts.io.ParseException exception) {
         throw new IllegalArgumentException("Invalid GeoJSON geometry", exception);
       }

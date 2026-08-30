@@ -36,6 +36,10 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.springframework.ai</groupId>
+      <artifactId>spring-ai-client-chat</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.opengis</groupId>
       <artifactId>opengis-knowledge</artifactId>
       <version>${project.version}</version>

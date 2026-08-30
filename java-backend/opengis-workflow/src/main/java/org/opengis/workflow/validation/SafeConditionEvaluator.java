@@ -31,8 +31,8 @@ public final class SafeConditionEvaluator {
     if (node.isNumber()) {
       return node.asDouble();
     }
-    if (node.isTextual()) {
-      return node.asText();
+    if (node.isString()) {
+      return node.asString();
     }
     if (node.isArray()) {
       return node.valueStream().map(item -> value(item, variables, depth + 1)).toList();
@@ -45,7 +45,7 @@ public final class SafeConditionEvaluator {
     String operator = entry.getKey();
     JsonNode args = entry.getValue();
     if ("var".equals(operator)) {
-      return resolveVariable(args.asText(), variables);
+      return resolveVariable(args.asString(), variables);
     }
     List<Object> values =
         args.isArray()
@@ -80,7 +80,7 @@ public final class SafeConditionEvaluator {
     }
     if (current.isBoolean()) return current.asBoolean();
     if (current.isNumber()) return current.asDouble();
-    if (current.isTextual()) return current.asText();
+    if (current.isString()) return current.asString();
     return current;
   }
 

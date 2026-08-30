@@ -3,6 +3,7 @@ package org.opengis.tool.permission;
 import org.opengis.tool.api.ToolDefinition;
 import org.opengis.tool.api.ToolRisk;
 import org.opengis.tool.context.ToolExecutionContext;
+import tools.jackson.databind.JsonNode;
 
 /** Priority: persisted rule -> profile override -> risk rule -> profile default. */
 public final class PermissionRuntime {
@@ -13,7 +14,13 @@ public final class PermissionRuntime {
   }
 
   public PermissionDecision decide(ToolDefinition tool, ToolExecutionContext context) {
-    var persisted = persistedRules.match(context.workspace(), tool.name(), context.profileName());
+    return decide(tool, null, context);
+  }
+
+  public PermissionDecision decide(
+      ToolDefinition tool, JsonNode arguments, ToolExecutionContext context) {
+    var persisted =
+        persistedRules.match(context.workspace(), tool.name(), context.profileName(), arguments);
     if (persisted.isPresent()) {
       return persisted.get();
     }

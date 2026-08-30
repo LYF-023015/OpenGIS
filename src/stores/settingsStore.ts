@@ -21,6 +21,7 @@ interface SettingsState {
     baseURL: string
     temperature: number
     maxTokens: number
+    contextWindow: number
     reasoningEffort: 'low' | 'medium' | 'high'
     presets: ModelPreset[]
   }
@@ -59,6 +60,7 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
     baseURL: '',
     temperature: 0,
     maxTokens: 4096,
+    contextWindow: 128000,
     reasoningEffort: 'medium' as const,
     presets: [] as ModelPreset[],
   },

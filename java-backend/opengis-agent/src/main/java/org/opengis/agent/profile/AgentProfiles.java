@@ -26,22 +26,22 @@ public final class AgentProfiles {
     JsonNode overlay =
         new AgentProfileStore(workspace)
             .list().stream()
-                .filter(node -> name.equals(node.path("name").asText()))
+                .filter(node -> name.equals(node.path("name").asString()))
                 .findFirst()
                 .orElse(null);
     if (overlay == null) {
       return base;
     }
-    String resolvedName = overlay.path("name").asText(base.name());
-    AgentMode mode = parse(AgentMode.class, overlay.path("mode").asText(), base.mode());
+    String resolvedName = overlay.path("name").asString(base.name());
+    AgentMode mode = parse(AgentMode.class, overlay.path("mode").asString(), base.mode());
     PermissionLevel permission =
         parse(
             PermissionLevel.class,
-            overlay.path("permission_level").asText(),
+            overlay.path("permission_level").asString(),
             base.permissionLevel());
     List<String> groups =
         overlay.path("tool_groups").isArray()
-            ? overlay.path("tool_groups").valueStream().map(JsonNode::asText).toList()
+            ? overlay.path("tool_groups").valueStream().map(JsonNode::asString).toList()
             : base.toolGroups();
     Map<String, Integer> limits = new LinkedHashMap<>(base.limits());
     if (overlay.path("metadata").isObject()) {
@@ -58,12 +58,12 @@ public final class AgentProfiles {
     return new AgentProfile(
         resolvedName,
         mode,
-        overlay.path("description").asText(base.description()),
+        overlay.path("description").asString(base.description()),
         groups,
         permission,
         overlay.path("max_steps").asInt(base.maxSteps()),
         overlay.path("hidden").asBoolean(base.hidden()),
-        overlay.path("prompt_suffix").asText(base.promptSuffix()),
+        overlay.path("prompt_suffix").asString(base.promptSuffix()),
         limits);
   }
 
@@ -88,10 +88,10 @@ public final class AgentProfiles {
             "Structured workflow node execution agent.",
             List.of(),
             PermissionLevel.SAFE_WRITE,
-            8,
+            16,
             false,
             "",
-            Map.of("max_provider_turns", 8)));
+            Map.of("max_provider_turns", 16, "max_tool_steps", 32)));
     profiles.put(
         "gis-subagent",
         new AgentProfile(
@@ -100,10 +100,10 @@ public final class AgentProfiles {
             "Isolated child agent for a self-contained subtask.",
             List.of(),
             PermissionLevel.SAFE_WRITE,
-            4,
+            10,
             false,
             "",
-            Map.of("max_provider_turns", 4)));
+            Map.of("max_provider_turns", 10, "max_tool_steps", 20)));
     return Map.copyOf(profiles);
   }
 }

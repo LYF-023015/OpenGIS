@@ -136,7 +136,7 @@ public final class WorkflowCodec {
   }
 
   private static String text(JsonNode node, String field, String fallback) {
-    return node != null && node.path(field).isTextual() ? node.path(field).asText() : fallback;
+    return node != null && node.path(field).isString() ? node.path(field).asString() : fallback;
   }
 
   private static String slug(String value) {

@@ -28,6 +28,8 @@ import org.opengis.tool.permission.PermissionRuntime;
 import org.opengis.tool.permission.WorkspacePermissionRuleSource;
 import org.opengis.tool.registry.JsonSchemaValidator;
 import org.opengis.tool.registry.ToolRegistry;
+import org.opengis.tool.skill.FileSystemSkillRepository;
+import org.opengis.tool.skill.SkillRepositorySettings;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ObjectNode;
@@ -55,7 +57,7 @@ class BuiltinToolIntegrationTest {
 
     ObjectNode read = mapper.createObjectNode();
     read.put("file_path", "notes/demo.txt");
-    assertThat(execute("read_file", read).output().path("output").asText()).contains("alpha");
+    assertThat(execute("read_file", read).output().path("output").asString()).contains("alpha");
 
     ObjectNode edit = mapper.createObjectNode();
     edit.put("file_path", "notes/demo.txt");
@@ -107,6 +109,35 @@ class BuiltinToolIntegrationTest {
   }
 
   @Test
+  void constrainedPersistedRuleFallsBackToApprovalOutsideAllowedPath() throws Exception {
+    Path store = workspace.resolve(".opengis/permissions.json");
+    Files.createDirectories(store.getParent());
+    Files.writeString(
+        store,
+        "{\"rules\":[{\"id\":\"data-only\",\"tool\":\"write_file\",\"action\":\"allow\","
+            + "\"argument_patterns\":{\"file_path\":\"data/**\"}}]}",
+        StandardCharsets.UTF_8);
+    ToolRuntime persisted = runtime(new WorkspacePermissionRuleSource(), 32_000);
+
+    ObjectNode allowed = mapper.createObjectNode();
+    allowed.put("file_path", "data/allowed.txt");
+    allowed.put("content", "ok");
+    assertThat(
+            persisted
+                .execute(new ToolCall("allowed", "write_file", allowed), context(false))
+                .success())
+        .isTrue();
+
+    ObjectNode outside = mapper.createObjectNode();
+    outside.put("file_path", "reports/rejected.txt");
+    outside.put("content", "must not be written");
+    var rejected =
+        persisted.execute(new ToolCall("outside", "write_file", outside), context(false));
+    assertThat(rejected.error().code()).isEqualTo("permission_rejected");
+    assertThat(workspace.resolve("reports/rejected.txt")).doesNotExist();
+  }
+
+  @Test
   void executesArgvShellWithoutSecondaryShell() {
     String executable =
         Path.of(System.getProperty("java.home"), "bin", isWindows() ? "java.exe" : "java")
@@ -124,11 +155,12 @@ class BuiltinToolIntegrationTest {
     ObjectNode args = mapper.createObjectNode();
     args.put("layer_id", "roads");
     var mapResult = execute("get_layer", args);
-    assertThat(mapResult.output().path("renderer_method").asText())
+    assertThat(mapResult.output().path("renderer_method").asString())
         .isEqualTo("rpc.ui.map.get_layer");
 
     var camera = execute("enter_3d_view", mapper.createObjectNode());
-    assertThat(camera.output().path("renderer_method").asText()).isEqualTo("rpc.ui.map.set_camera");
+    assertThat(camera.output().path("renderer_method").asString())
+        .isEqualTo("rpc.ui.map.set_camera");
     assertThat(camera.output().path("renderer_params").path("pitch").asDouble()).isEqualTo(60.0);
 
     ObjectNode graduated = mapper.createObjectNode();
@@ -137,17 +169,113 @@ class BuiltinToolIntegrationTest {
     graduated.put("method", "equal_interval");
     graduated.put("classes", 5);
     var renderer = execute("set_graduated_style", graduated);
-    assertThat(renderer.output().path("renderer_method").asText())
+    assertThat(renderer.output().path("renderer_method").asString())
         .isEqualTo("rpc.ui.map.set_layer_renderer");
-    assertThat(renderer.output().path("renderer_params").path("renderer").asText())
+    assertThat(renderer.output().path("renderer_params").path("renderer").asString())
         .isEqualTo("graduated");
-    assertThat(renderer.output().path("renderer_params").path("graduated").path("method").asText())
+    assertThat(
+            renderer.output().path("renderer_params").path("graduated").path("method").asString())
         .isEqualTo("equal-interval");
 
     ObjectNode academic = mapper.createObjectNode();
     academic.put("text", "A GIS result.");
     var writing = execute("academic_polish", academic);
-    assertThat(writing.output().path("action").asText()).isEqualTo("polish");
+    assertThat(writing.output().path("action").asString()).isEqualTo("polish");
+  }
+
+  @Test
+  void discoversAndLoadsSkillsOnDemandAcrossWorkspaceRoots() throws Exception {
+    Path skill = workspace.resolve("skills/gis-review/SKILL.md");
+    Files.createDirectories(skill.getParent());
+    Files.writeString(
+        skill,
+        "---\nname: gis-review\ndescription: Review GIS outputs\ntags: [gis, review]\n---\n"
+            + "Read references/checks.md when detailed rules are needed.",
+        StandardCharsets.UTF_8);
+    Files.createDirectories(skill.getParent().resolve("references"));
+    Files.writeString(
+        skill.getParent().resolve("references/checks.md"),
+        "Check the CRS first.",
+        StandardCharsets.UTF_8);
+
+    ObjectNode list = mapper.createObjectNode();
+    list.put("query", "gis");
+    var discovered = execute("list_skills", list);
+    assertThat(discovered.success()).isTrue();
+    assertThat(discovered.output().path("skills").get(0).path("name").asString())
+        .isEqualTo("gis-review");
+
+    ObjectNode load = mapper.createObjectNode();
+    load.put("name", "gis-review");
+    var loaded = execute("load_skill", load);
+    assertThat(loaded.success()).isTrue();
+    assertThat(loaded.output().path("content").asString()).contains("references/checks.md");
+
+    var resources = execute("list_skill_resources", load);
+    assertThat(resources.success()).isTrue();
+    assertThat(resources.output().path("resources").get(0).path("path").asString())
+        .isEqualTo("references/checks.md");
+
+    ObjectNode readResource = mapper.createObjectNode();
+    readResource.put("name", "gis-review");
+    readResource.put("path", "references/checks.md");
+    var reference = execute("read_skill_resource", readResource);
+    assertThat(reference.success()).isTrue();
+    assertThat(reference.output().path("content").asString()).contains("Check the CRS first");
+  }
+
+  @Test
+  void pagesSkillResourcesAndEnforcesThePerRunCharacterBudget() throws Exception {
+    Path skill = workspace.resolve("skills/paged");
+    Files.createDirectories(skill.resolve("references"));
+    Files.writeString(skill.resolve("SKILL.md"), "---\nname: paged\n---\nPaged reference");
+    Files.writeString(skill.resolve("references/large.md"), "abcdefghijkl");
+    SkillRepositorySettings settings = new SkillRepositorySettings(1024, 4096, 6, 10, 10);
+    registry = BuiltinToolCatalog.registry(mapper, new FileSystemSkillRepository(settings));
+    runtime = runtime(PermissionRuleSource.empty(), 32_000);
+
+    ObjectNode arguments = mapper.createObjectNode();
+    arguments.put("name", "paged");
+    arguments.put("path", "references/large.md");
+    arguments.put("max_chars", 6);
+    var first = execute("read_skill_resource", arguments);
+    assertThat(first.success()).isTrue();
+    assertThat(first.output().path("content").asString()).isEqualTo("abcdef");
+    assertThat(first.output().path("next_offset").asInt()).isEqualTo(6);
+    assertThat(first.output().path("truncated").asBoolean()).isTrue();
+
+    arguments.put("offset", 6);
+    var second = execute("read_skill_resource", arguments);
+    assertThat(second.success()).isFalse();
+    assertThat(second.error().code()).isEqualTo("skill_run_resource_budget_exceeded");
+  }
+
+  @Test
+  void createsSearchesUpdatesAndDeletesScopedMemory() {
+    ObjectNode remember = mapper.createObjectNode();
+    remember.put("kind", "FACT");
+    remember.put("content", "项目道路图层使用 EPSG:4326 坐标系");
+    remember.put("scope", "WORKSPACE");
+    var created = execute("remember", remember);
+    assertThat(created.success()).isTrue();
+    String id = created.output().path("id").asString();
+
+    ObjectNode list = mapper.createObjectNode();
+    list.put("query", "EPSG 道路坐标系");
+    var searched = execute("list_memories", list);
+    assertThat(searched.success()).isTrue();
+    assertThat(searched.output().path("memories")).isNotEmpty();
+
+    ObjectNode update = mapper.createObjectNode();
+    update.put("id", id);
+    update.put("importance", 0.95);
+    var updated = execute("update_memory", update);
+    assertThat(updated.success()).isTrue();
+    assertThat(updated.output().path("importance").asDouble()).isEqualTo(0.95);
+
+    ObjectNode delete = mapper.createObjectNode();
+    delete.put("id", id);
+    assertThat(execute("delete_memory", delete).success()).isTrue();
   }
 
   @Test
@@ -173,7 +301,7 @@ class BuiltinToolIntegrationTest {
   }
 
   @Test
-  void truncatesLargeOutputMaterializesArtifactAndEmitsLifecycle() {
+  void truncatesLargeOutputMaterializesArtifactAndEmitsLifecycle() throws Exception {
     ToolDefinition definition =
         new ToolDefinition(
             "large",
@@ -194,7 +322,8 @@ class BuiltinToolIntegrationTest {
 
           @Override
           public JsonNode execute(JsonNode arguments, ToolExecutionContext context) {
-            return mapper.valueToTree(Map.of("content", "x".repeat(2_000)));
+            return mapper.valueToTree(
+                Map.of("content", "x".repeat(2_000), "api_key", "artifact-secret-value"));
           }
         };
     List<ToolEvent> events = new ArrayList<>();
@@ -220,7 +349,11 @@ class BuiltinToolIntegrationTest {
     var result = small.execute(new ToolCall("large", "large", mapper.createObjectNode()), context);
     assertThat(result.truncated()).isTrue();
     assertThat(result.artifacts()).hasSize(1);
-    assertThat(workspace.resolve(result.artifacts().getFirst().path())).exists();
+    Path artifact = workspace.resolve(result.artifacts().getFirst().path());
+    assertThat(artifact).exists();
+    assertThat(Files.readString(artifact))
+        .contains("[REDACTED]")
+        .doesNotContain("artifact-secret-value");
     assertThat(events)
         .extracting(ToolEvent::type)
         .contains("tool.started", "tool.artifact", "tool.completed");

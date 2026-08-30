@@ -1,5 +1,0 @@
-geopandas
-scikit-learn
-numpy
-pandas
-shapely

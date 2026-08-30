@@ -59,19 +59,19 @@ class ProtocolTransportIT {
               true)
           .join();
       JsonNode ping = listener.next(objectMapper);
-      assertThat(ping.path("id").asText()).isEqualTo("ws-ping");
-      assertThat(ping.path("result").path("runtime").asText()).isEqualTo("java");
+      assertThat(ping.path("id").asString()).isEqualTo("ws-ping");
+      assertThat(ping.path("result").path("runtime").asString()).isEqualTo("java");
 
       CompletableFuture<JsonNode> uiResult =
           gateway.request(connectionId, "rpc.ui.map.get_state", Map.of("include_layers", true));
       JsonNode uiRequest = listener.next(objectMapper);
-      assertThat(uiRequest.path("method").asText()).isEqualTo("rpc.ui.map.get_state");
+      assertThat(uiRequest.path("method").asString()).isEqualTo("rpc.ui.map.get_state");
       socket
           .sendText(
               objectMapper.writeValueAsString(
                   Map.of(
                       "jsonrpc", "2.0",
-                      "id", uiRequest.path("id").asText(),
+                      "id", uiRequest.path("id").asString(),
                       "result", Map.of("zoom", 8))),
               true)
           .join();
@@ -79,8 +79,8 @@ class ProtocolTransportIT {
 
       gateway.notify(connectionId, "rpc.ui.chat.show_text", Map.of("text", "phase2-ready"));
       JsonNode notification = listener.next(objectMapper);
-      assertThat(notification.path("method").asText()).isEqualTo("rpc.ui.chat.show_text");
-      assertThat(notification.path("params").path("text").asText()).isEqualTo("phase2-ready");
+      assertThat(notification.path("method").asString()).isEqualTo("rpc.ui.chat.show_text");
+      assertThat(notification.path("params").path("text").asString()).isEqualTo("phase2-ready");
 
       AtomicBoolean rendererNotificationHandled = new AtomicBoolean();
       context
@@ -124,8 +124,8 @@ class ProtocolTransportIT {
             HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
     assertThat(response.statusCode()).isEqualTo(200);
     JsonNode body = objectMapper.readTree(response.body());
-    assertThat(body.path("id").asText()).isEqualTo("http-ping");
-    assertThat(body.path("result").path("status").asText()).isEqualTo("ok");
+    assertThat(body.path("id").asString()).isEqualTo("http-ping");
+    assertThat(body.path("result").path("status").asString()).isEqualTo("ok");
   }
 
   private void verifyInvalidToken(int port) throws Exception {

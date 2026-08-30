@@ -35,12 +35,12 @@ public record AgentProfile(
         "gis-build",
         AgentMode.BUILD,
         "Default autonomous GIS task execution agent.",
-        List.of("core", "qgis", "osm", "datasource", "worker"),
+        List.of("core", "gis", "operation", "code", "worker", "report"),
         PermissionLevel.SAFE_WRITE,
-        12,
+        30,
         false,
         "",
-        Map.of("max_provider_turns", 30, "max_tool_steps", 60, "max_work_steps", 60));
+        Map.of("max_provider_turns", 30, "max_tool_steps", 60));
   }
 
   public static AgentProfile gisPlan() {
@@ -50,10 +50,10 @@ public record AgentProfile(
         "Read-only planning and decomposition agent.",
         List.of("core"),
         PermissionLevel.READ_ONLY,
-        3,
+        8,
         false,
         "\nPlanning mode: read and reason; do not mutate files or map state.\n",
-        Map.of("max_provider_turns", 3, "max_tool_steps", 3, "max_work_steps", 3));
+        Map.of("max_provider_turns", 8, "max_tool_steps", 12));
   }
 
   public static AgentProfile gisExplore() {
@@ -61,11 +61,11 @@ public record AgentProfile(
         "gis-explore",
         AgentMode.EXPLORE,
         "Dataset exploration agent with bounded output.",
-        List.of("core", "datasource", "osm"),
+        List.of("core", "gis", "report"),
         PermissionLevel.READ_ONLY,
-        4,
+        12,
         false,
         "",
-        Map.of("max_provider_turns", 4, "max_tool_steps", 8, "max_work_steps", 8));
+        Map.of("max_provider_turns", 12, "max_tool_steps", 24));
   }
 }

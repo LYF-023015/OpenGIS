@@ -33,7 +33,7 @@ public class WorkspaceMigrationService {
     boolean applied = Files.exists(markerPath);
     String current =
         applied
-            ? files.readObject(markerPath).path("storage_version").asText("unknown")
+            ? files.readObject(markerPath).path("storage_version").asString("unknown")
             : "python-legacy";
     List<String> issues =
         compatibility.stores().stream()
@@ -99,7 +99,7 @@ public class WorkspaceMigrationService {
       throw new WorkspaceStoreException("Migration manifest does not exist: " + manifestPath);
     }
     ObjectNode manifest = files.readObject(manifestPath);
-    if (!"applied".equals(manifest.path("state").asText())) {
+    if (!"applied".equals(manifest.path("state").asString())) {
       return manifest;
     }
     try {

@@ -29,9 +29,10 @@ public class ElectronDataStore {
     }
     merged.put("schemaVersion", SCHEMA_VERSION);
     ObjectNode backend = object(merged, "backend");
-    backend.putIfAbsent("preferredRuntime", files.objectMapper().getNodeFactory().textNode("java"));
     backend.putIfAbsent(
-        "fallbackRuntime", files.objectMapper().getNodeFactory().textNode("python"));
+        "preferredRuntime", files.objectMapper().getNodeFactory().stringNode("java"));
+    backend.putIfAbsent(
+        "fallbackRuntime", files.objectMapper().getNodeFactory().stringNode("python"));
     backend.put("protocolVersion", "3.0");
     return merged;
   }

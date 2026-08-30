@@ -146,7 +146,7 @@ public final class WorkerMigrationService {
   private String workerId(Path folder) {
     Path metadata = folder.resolve("metadata.json");
     if (Files.isRegularFile(metadata)) {
-      String id = files.readObject(metadata).path("worker_id").asText();
+      String id = files.readObject(metadata).path("worker_id").asString();
       if (!id.isBlank()) return id;
     }
     return folder.getFileName().toString();

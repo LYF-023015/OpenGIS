@@ -28,10 +28,10 @@ public final class AgentQueueService {
       Map<String, JsonNode> metadata) {
     Path root = workspace.toAbsolutePath().normalize();
     JsonNode idempotency = metadata == null ? null : metadata.get("idempotency_key");
-    if (idempotency != null && idempotency.isTextual() && !idempotency.asText().isBlank()) {
+    if (idempotency != null && idempotency.isString() && !idempotency.asString().isBlank()) {
       for (AgentQueueItem existing : new AgentQueueRepository(root).list(null, 200)) {
         JsonNode existingKey = existing.metadata().get("idempotency_key");
-        if (existingKey != null && idempotency.asText().equals(existingKey.asText())) {
+        if (existingKey != null && idempotency.asString().equals(existingKey.asString())) {
           if (!existing.prompt().equals(prompt)) {
             throw new IllegalArgumentException(
                 "idempotency_key already belongs to a different command");

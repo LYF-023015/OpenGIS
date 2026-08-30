@@ -17,6 +17,40 @@ class RequestCompactorTest {
   private final ObjectMapper mapper = new ObjectMapper();
 
   @Test
+  void keepsMoreThanEightHistoryMessagesWhenTheyFitTheTokenBudget() {
+    List<LlmMessage> history =
+        java.util.stream.IntStream.range(0, 24)
+            .mapToObj(index -> LlmMessage.user("short message " + index))
+            .toList();
+
+    CanonicalRequest compacted =
+        new RequestCompactor(new TokenEstimator(mapper)).compact(request(history), 128_000);
+
+    assertThat(compacted.sections())
+        .filteredOn(section -> section.kind() == PromptSectionKind.HISTORY)
+        .singleElement()
+        .extracting(PromptSection::messages)
+        .asList()
+        .hasSize(24);
+  }
+
+  @Test
+  void compactsAtHighPressureBeforeTheRequestOverflows() {
+    List<LlmMessage> history =
+        java.util.stream.IntStream.range(0, 12)
+            .mapToObj(index -> LlmMessage.user("history-" + index + " " + "x".repeat(900)))
+            .toList();
+    CanonicalRequest original = request(history);
+    TokenEstimator estimator = new TokenEstimator(mapper);
+    RequestBudget budget = RequestBudget.evaluate(original, estimator, 3200);
+
+    CanonicalRequest compacted = new RequestCompactor(estimator).compact(original, 3200);
+
+    assertThat(budget.pressure()).isEqualTo(RequestBudget.Pressure.HIGH);
+    assertThat(compacted.messages().size()).isLessThan(original.messages().size());
+  }
+
+  @Test
   void compactionNeverStartsHistoryWithOrphanToolMessage() {
     ObjectNode bigArgs = mapper.createObjectNode();
     bigArgs.put("payload", "b".repeat(10_000));
@@ -34,7 +68,8 @@ class RequestCompactorTest {
         compacted.messages().stream().filter(message -> message.role() != LlmRole.SYSTEM).toList();
     assertThat(dialogue).isNotEmpty();
     assertThat(dialogue.getFirst().role()).isNotEqualTo(LlmRole.TOOL);
-    assertThat(dialogue.getFirst().content()).isEqualTo("new");
+    assertThat(dialogue.getLast().role()).isEqualTo(LlmRole.USER);
+    assertThat(dialogue.getLast().content()).isEqualTo("new");
   }
 
   @Test

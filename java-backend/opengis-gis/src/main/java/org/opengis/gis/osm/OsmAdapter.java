@@ -129,7 +129,7 @@ public final class OsmAdapter {
     ArrayNode features = collection.putArray("features");
     for (JsonNode element : response.path("elements")) {
       cancellation.throwIfCancelled();
-      String type = element.path("type").asText();
+      String type = element.path("type").asString();
       JsonNode tags = element.path("tags");
       ObjectNode geometry = null;
       if ("node".equals(type) && tags.isObject() && element.has("lat") && element.has("lon")) {
@@ -155,13 +155,13 @@ public final class OsmAdapter {
     List<List<double[]>> outerSegments = new java.util.ArrayList<>();
     List<List<double[]>> innerSegments = new java.util.ArrayList<>();
     for (JsonNode member : members) {
-      if (!"way".equals(member.path("type").asText()) || !member.path("geometry").isArray()) {
+      if (!"way".equals(member.path("type").asString()) || !member.path("geometry").isArray()) {
         continue;
       }
       List<double[]> segment = coordinates(member.path("geometry"));
       if (segment.size() < 2) continue;
-      if ("inner".equals(member.path("role").asText())) innerSegments.add(segment);
-      else if ("outer".equals(member.path("role").asText())) outerSegments.add(segment);
+      if ("inner".equals(member.path("role").asString())) innerSegments.add(segment);
+      else if ("outer".equals(member.path("role").asString())) outerSegments.add(segment);
     }
     List<List<double[]>> outers = stitchClosedRings(outerSegments);
     if (outers.isEmpty()) return null;
@@ -332,7 +332,7 @@ public final class OsmAdapter {
   }
 
   private static String optionalText(JsonNode params, String field, String fallback) {
-    return params.path(field).isTextual() ? params.path(field).asText() : fallback;
+    return params.path(field).isString() ? params.path(field).asString() : fallback;
   }
 
   private static String escape(String value) {

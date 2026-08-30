@@ -7,6 +7,7 @@ import org.opengis.ai.model.LlmRole;
 
 /** Request-aware history compaction which never mutates the stable prefix or tool schemas. */
 public final class RequestCompactor {
+  private static final double TARGET_USAGE_RATIO = 0.60;
   private final TokenEstimator estimator;
 
   public RequestCompactor(TokenEstimator estimator) {
@@ -15,10 +16,20 @@ public final class RequestCompactor {
 
   public CanonicalRequest compact(CanonicalRequest request, int contextWindow) {
     RequestBudget budget = RequestBudget.evaluate(request, estimator, contextWindow);
-    if (budget.pressure() != RequestBudget.Pressure.OVERFLOW) {
+    if (budget.pressure() != RequestBudget.Pressure.HIGH
+        && budget.pressure() != RequestBudget.Pressure.OVERFLOW) {
       return request;
     }
-    int availableForMessages = contextWindow - budget.toolSchemaTokens() - budget.outputReserve();
+    int fixedMessageTokens =
+        request.sections().stream()
+            .filter(section -> section.kind() != PromptSectionKind.HISTORY)
+            .mapToInt(section -> estimator.messages(section.messages()))
+            .sum();
+    int targetTokens = (int) Math.floor(contextWindow * TARGET_USAGE_RATIO);
+    int historyTokenLimit =
+        Math.max(
+            256,
+            targetTokens - budget.toolSchemaTokens() - budget.outputReserve() - fixedMessageTokens);
     List<PromptSection> compacted = new ArrayList<>();
     for (PromptSection section : request.sections()) {
       if (section.kind() != PromptSectionKind.HISTORY) {
@@ -26,8 +37,7 @@ public final class RequestCompactor {
         continue;
       }
       List<LlmMessage> kept =
-          dropDanglingLeadingTools(
-              keepNewest(section.messages(), Math.max(256, availableForMessages / 2)));
+          dropDanglingLeadingTools(keepNewest(section.messages(), historyTokenLimit));
       int removed = section.messages().size() - kept.size();
       if (removed > 0) {
         compacted.add(

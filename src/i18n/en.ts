@@ -321,6 +321,8 @@ export const en = {
     temperatureDesc: 'Controls randomness. Lower values make output more deterministic.',
     maxTokens: 'Max Tokens',
     maxTokensDesc: 'Maximum number of tokens in the response.',
+    contextWindow: 'Context Window',
+    contextWindowDesc: 'Local context budget. Keep it at or below the selected model’s actual limit; 1000000 is supported.',
     reasoningEffort: 'Reasoning Effort',
     reasoningEffortDesc: 'Controls how much reasoning the model does before responding.',
     reasoningLow: 'Low',

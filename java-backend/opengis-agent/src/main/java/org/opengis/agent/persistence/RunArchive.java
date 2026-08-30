@@ -13,6 +13,7 @@ import java.util.Optional;
 import org.opengis.platform.persistence.JsonFileStore;
 import org.opengis.platform.persistence.WorkspaceLayout;
 import org.opengis.platform.persistence.WorkspaceStoreException;
+import org.opengis.platform.security.SensitiveDataRedactor;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ObjectNode;
 
@@ -29,13 +30,11 @@ public final class RunArchive {
 
   private static final List<String> OPEN_STATUSES = List.of("pending", "running", "streaming");
 
-  private final String runId;
   private final Path runDirectory;
   private final JsonFileStore files;
   private ObjectNode meta;
 
-  private RunArchive(String runId, Path runDirectory, JsonFileStore files, ObjectNode meta) {
-    this.runId = runId;
+  private RunArchive(Path runDirectory, JsonFileStore files, ObjectNode meta) {
     this.runDirectory = runDirectory;
     this.files = files;
     this.meta = meta;
@@ -49,7 +48,7 @@ public final class RunArchive {
     ObjectNode meta = files.objectMapper().createObjectNode();
     meta.put("run_id", runId);
     meta.put("status", "running");
-    meta.put("prompt", prompt == null ? "" : prompt);
+    meta.put("prompt", SensitiveDataRedactor.redactText(prompt == null ? "" : prompt));
     meta.put("workspace_path", layout.workspaceRoot().toString());
     meta.put("model", model == null ? "" : model);
     meta.putNull("pre_sha");
@@ -64,7 +63,7 @@ public final class RunArchive {
     meta.put("step_count", 0);
     meta.putArray("risky_ops");
     meta.putNull("error");
-    RunArchive archive = new RunArchive(runId, runDirectory, files, meta);
+    RunArchive archive = new RunArchive(runDirectory, files, meta);
     archive.flushMeta();
     try {
       Files.createDirectories(runDirectory);
@@ -121,9 +120,10 @@ public final class RunArchive {
     repairOpenRecords(status, error);
     meta.put("status", status);
     meta.put("finished_at", OffsetDateTime.now().toString());
-    putNullable(meta, "error", error);
+    putNullable(meta, "error", SensitiveDataRedactor.redactText(error));
     if (finalAnswer != null && !finalAnswer.isBlank()) {
-      files.writeText(runDirectory.resolve("final_answer.md"), finalAnswer);
+      files.writeText(
+          runDirectory.resolve("final_answer.md"), SensitiveDataRedactor.redactText(finalAnswer));
     }
     flushMeta();
   }
@@ -151,7 +151,7 @@ public final class RunArchive {
       return Optional.empty();
     }
     JsonFileStore files = new JsonFileStore();
-    return Optional.of(new RunArchive(runId, runDirectory, files, files.readObject(metaPath)));
+    return Optional.of(new RunArchive(runDirectory, files, files.readObject(metaPath)));
   }
 
   public static List<RunIndex> list(Path workspaceRoot) {
@@ -177,7 +177,7 @@ public final class RunArchive {
   }
 
   private void append(String stream, ObjectNode value) {
-    ObjectNode entry = value.deepCopy();
+    ObjectNode entry = (ObjectNode) SensitiveDataRedactor.redact(value);
     if (!entry.has("ts")) {
       entry.put("ts", OffsetDateTime.now().toString());
     }
@@ -187,7 +187,7 @@ public final class RunArchive {
   private void repairOpenRecords(String runStatus, String error) {
     Map<String, ObjectNode> tools = latest("tool_calls.jsonl", "call_id");
     for (ObjectNode tool : tools.values()) {
-      if (!OPEN_STATUSES.contains(tool.path("status").asText())) {
+      if (!OPEN_STATUSES.contains(tool.path("status").asString())) {
         continue;
       }
       ObjectNode terminal = tool.deepCopy();
@@ -212,7 +212,7 @@ public final class RunArchive {
 
     Map<String, ObjectNode> parts = latest("message_parts.jsonl", "id");
     for (ObjectNode part : parts.values()) {
-      if (!OPEN_STATUSES.contains(part.path("status").asText())) {
+      if (!OPEN_STATUSES.contains(part.path("status").asString())) {
         continue;
       }
       ObjectNode terminal = part.deepCopy();
@@ -235,7 +235,7 @@ public final class RunArchive {
   private Map<String, ObjectNode> latest(String stream, String idField) {
     Map<String, ObjectNode> latest = new LinkedHashMap<>();
     for (ObjectNode row : read(stream)) {
-      String id = row.path(idField).asText();
+      String id = row.path(idField).asString();
       if (!id.isBlank()) {
         latest.put(id, row);
       }
@@ -249,10 +249,10 @@ public final class RunArchive {
 
   private static RunIndex toIndex(JsonNode meta) {
     return new RunIndex(
-        meta.path("run_id").asText(),
-        meta.path("status").asText("unknown"),
-        meta.path("prompt").asText(),
-        meta.path("created_at").asText(),
+        meta.path("run_id").asString(),
+        meta.path("status").asString("unknown"),
+        meta.path("prompt").asString(),
+        meta.path("created_at").asString(),
         textOrNull(meta.get("finished_at")),
         meta.path("step_count").asInt(),
         textOrNull(meta.get("pre_sha")),
@@ -260,7 +260,7 @@ public final class RunArchive {
   }
 
   private static String textOrNull(JsonNode value) {
-    return value == null || value.isNull() ? null : value.asText();
+    return value == null || value.isNull() ? null : value.asString();
   }
 
   private static void putNullable(ObjectNode target, String field, String value) {

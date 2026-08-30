@@ -1,6 +1,6 @@
 # OpenGIS Java 后端
 
-`java-backend/` 是 OpenGIS 从 Python 迁移到 Java 的主后端工程根目录，与 `python-backend/` 平级。迁移完成后应用默认且生产只启动 Java；`python-backend/` 永久保留为参考/恢复备份，不参与正常运行链路。
+`java-backend/` 是 OpenGIS 唯一的后端工程根目录。应用与测试均只启动 Java，不再包含 Python sidecar 或 Python backend 回退链路。
 
 ## 推荐学习顺序
 
@@ -21,10 +21,10 @@ java-backend/
 ├─ opengis-common/                 # JSON Schema、DTO、错误码等稳定契约
 ├─ opengis-framework/              # 通用技术基础设施
 ├─ opengis-platform/               # Workspace、文件、Git、迁移
-├─ opengis-ai/                     # Provider-neutral LLM（Phase 5）
+├─ opengis-ai/                     # Spring AI Provider 适配与稳定 LLM 边界
 ├─ opengis-knowledge/              # Context、Memory、Skill
 ├─ opengis-tool/                   # Tool SPI、Registry、权限和 Runtime
-├─ opengis-agent/                  # Agent Loop、Session、Telemetry
+├─ opengis-agent/                  # ChatClient/Advisor 编排、Session、Telemetry
 ├─ opengis-workflow/               # Workflow DAG 与 child session
 ├─ opengis-gis/                    # GIS、Raster、Operation
 ├─ opengis-worker/                 # 独立 JVM Worker
@@ -32,6 +32,15 @@ java-backend/
 ```
 
 依赖方向始终是 `server → 领域模块 → platform/framework → common`。底层模块不能反向依赖上层，`ModuleDependencyTest` 自动检查该规则。
+
+### Controller、Service 与 Repository 在哪里
+
+本工程按业务模块组织代码，但仍然保留常见的职责分层：
+
+- `opengis-server/transport` 和 `opengis-server/rpc` 是接口适配层，相当于 REST 项目中的 Controller。RPC 类按照 `AgentRpcMethods`、`WorkflowRpcMethods`、`GisRpcMethods` 等业务职责命名。
+- 各业务模块及 `opengis-server` 中的 `*Service` 是应用与领域服务层。领域模块尽量保持纯 Java，由 `opengis-server/config` 统一注册为 Spring Bean。
+- 各模块中的 `*Repository`、`*Store`、`*Archive` 是持久化层。当前主要存储到 Workspace JSON/JSONL 文件，而不是 JPA 数据库。
+- `docs/migration/phase*/` 和兼容测试数据中的阶段编号只记录迁移历史；生产类、包和配置不再使用 `PhaseX` 命名。
 
 ## 当前完成度
 
@@ -44,7 +53,8 @@ java-backend/
 - Phase 7：完整 Java GIS、Raster、OSM/QGIS 和 datasource adapters。
 - Phase 8A/B/C：Operation v2、Java Script SDK/Runner 和 Java Worker 全生命周期。
 - Phase 9：Electron/Renderer 默认 Java、通用 BackendManager、结构化 Pivot、bundled JRE 和无 Python 生产包；Windows-only 发布范围已验收。
-- Phase 10：迁移台账终态、Windows SBOM/许可证/checksum、生产 Python 隔离、双轮候选版验证和 Python 可恢复备份均已完成。
+- Phase 10：迁移台账终态、Windows SBOM/许可证/checksum、生产 Python 移除和双轮候选版验证均已完成。
+- Spring AI 升级：Spring AI 2.0 接管 OpenAI/Anthropic 模型适配与 ToolCallingAdvisor 循环；OpenGIS 保留 Session、RuntimeControl、ToolRuntime、RunArchive 和 UI 事件边界。
 
 ## 常用命令
 
@@ -63,7 +73,6 @@ npm run typecheck
 npm run test:phase4-renderer
 npm run smoke:java-sidecar
 npm run audit:phase10
-python-backend/.venv/Scripts/python.exe -m pytest python-backend/tests/test_protocol_schema.py -q
 ```
 
 构建输出位于各模块 `target/`，不提交 Git。

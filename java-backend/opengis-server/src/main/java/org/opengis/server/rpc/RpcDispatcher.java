@@ -45,9 +45,9 @@ public class RpcDispatcher {
     if (hasId && id == InvalidId.VALUE) {
       return error(null, JsonRpcErrorCodes.INVALID_REQUEST, "Invalid Request", "Invalid id");
     }
-    if (!ProtocolVersion.JSON_RPC.equals(message.path("jsonrpc").asText())
-        || !message.path("method").isTextual()
-        || message.path("method").asText().isBlank()) {
+    if (!ProtocolVersion.JSON_RPC.equals(message.path("jsonrpc").asString())
+        || !message.path("method").isString()
+        || message.path("method").asString().isBlank()) {
       return error(id, JsonRpcErrorCodes.INVALID_REQUEST, "Invalid Request", null);
     }
 
@@ -56,7 +56,7 @@ public class RpcDispatcher {
       return hasId ? error(id, JsonRpcErrorCodes.INVALID_PARAMS, "Invalid params", null) : null;
     }
 
-    String method = message.path("method").asText();
+    String method = message.path("method").asString();
     RpcHandler handler = registry.find(method).orElse(null);
     if (handler == null) {
       return hasId
@@ -84,8 +84,8 @@ public class RpcDispatcher {
     if (node == null || node.isNull()) {
       return null;
     }
-    if (node.isTextual()) {
-      return node.asText();
+    if (node.isString()) {
+      return node.asString();
     }
     if (node.isIntegralNumber()) {
       return node.longValue();

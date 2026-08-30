@@ -1,9 +1,0 @@
-{
-  "schemaVersion": 1,
-  "recordedAt": "2026-08-03T03:43:37.836Z",
-  "decision": "risk-accepted-without-manual-review",
-  "manualReviewRequired": false,
-  "releaseBlocking": false,
-  "noAssertionCount": 4,
-  "note": "NOASSERTION values remain honest; the user explicitly waived manual license review on 2026-08-03."
-}

@@ -74,7 +74,7 @@ public final class AdvancedClusteringOperation implements BuiltinOperation {
 
   @Override
   public JsonNode run(Path workspace, JsonNode parameters, CancellationToken cancellation) {
-    Path input = WorkspaceGisPaths.input(workspace, parameters.path("input_path").asText());
+    Path input = WorkspaceGisPaths.input(workspace, parameters.path("input_path").asString());
     GeoJsonFeatureSet dataset = GeoJsonFeatureSet.load(mapper, input, cancellation);
     if (dataset.features().isEmpty())
       throw new IllegalArgumentException("Input contains no valid geometry");
@@ -88,7 +88,7 @@ public final class AdvancedClusteringOperation implements BuiltinOperation {
       points[index][1] = coordinate.y;
     }
     boolean geographic = dataset.crs().toUpperCase(Locale.ROOT).contains("4326");
-    String method = parameters.path("method").asText("dbscan").toLowerCase(Locale.ROOT);
+    String method = parameters.path("method").asString("dbscan").toLowerCase(Locale.ROOT);
     int[] labels =
         switch (method) {
           case "dbscan" ->
@@ -142,7 +142,7 @@ public final class AdvancedClusteringOperation implements BuiltinOperation {
     Path outputDirectory =
         WorkspaceGisPaths.output(
                 workspace,
-                parameters.path("output_dir").asText("cluster_output/.keep"),
+                parameters.path("output_dir").asString("cluster_output/.keep"),
                 "cluster_output/.keep")
             .getParent();
     String stem = stem(input);

@@ -15,6 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
+import org.opengis.platform.persistence.JsonTypeReferences;
 import org.opengis.script.sdk.OpenGisScript;
 import org.opengis.script.sdk.OpenGisWorker;
 import org.opengis.script.sdk.ProtocolTransport;
@@ -29,7 +30,6 @@ import tools.jackson.databind.node.ObjectNode;
 public final class ScriptHostMain {
   private ScriptHostMain() {}
 
-  @SuppressWarnings("unchecked")
   public static void main(String[] args) throws Exception {
     if (args.length != 1) throw new IllegalArgumentException("Entry class argument is required");
     ObjectMapper mapper = new ObjectMapper();
@@ -39,11 +39,12 @@ public final class ScriptHostMain {
     String raw = input.readLine();
     if (raw == null) throw new IllegalStateException("Parent closed before execute");
     JsonNode execute = mapper.readTree(raw);
-    if (!"execute".equals(execute.path("type").asText()))
+    if (!"execute".equals(execute.path("type").asString()))
       throw new IllegalArgumentException("First frame must be execute");
-    String runId = execute.path("run_id").asText();
-    Path workspace = Path.of(execute.path("workspace").asText()).toAbsolutePath().normalize();
-    Map<String, Object> parameters = mapper.convertValue(execute.path("parameters"), Map.class);
+    String runId = execute.path("run_id").asString();
+    Path workspace = Path.of(execute.path("workspace").asString()).toAbsolutePath().normalize();
+    Map<String, Object> parameters =
+        mapper.convertValue(execute.path("parameters"), JsonTypeReferences.STRING_OBJECT_MAP);
     HostTransport transport = new HostTransport(runId, input, protocolOutput, mapper);
     Thread execution = Thread.currentThread();
     transport.startReader(execution);
@@ -115,22 +116,22 @@ public final class ScriptHostMain {
                   String line;
                   while ((line = input.readLine()) != null) {
                     JsonNode message = mapper.readTree(line);
-                    String type = message.path("type").asText();
+                    String type = message.path("type").asString();
                     if ("cancel".equals(type) || "shutdown".equals(type)) {
                       cancelled.set(true);
                       execution.interrupt();
                     } else if ("request_result".equals(type)) {
-                      String callId = message.path("call_id").asText();
+                      String callId = message.path("call_id").asString();
                       CompletableFuture<Map<String, Object>> future = pending.remove(callId);
                       if (future != null) {
-                        @SuppressWarnings("unchecked")
                         Map<String, Object> payload =
-                            mapper.convertValue(message.path("payload"), Map.class);
+                            mapper.convertValue(
+                                message.path("payload"), JsonTypeReferences.STRING_OBJECT_MAP);
                         if (message.path("success").asBoolean(false)) future.complete(payload);
                         else
                           future.completeExceptionally(
                               new IllegalStateException(
-                                  message.path("error").asText("Parent request failed")));
+                                  message.path("error").asString("Parent request failed")));
                       }
                     }
                   }

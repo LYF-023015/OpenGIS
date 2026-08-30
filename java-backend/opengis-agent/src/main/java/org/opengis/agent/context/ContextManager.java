@@ -21,7 +21,10 @@ import org.opengis.ai.model.LlmToolDefinition;
 import org.opengis.knowledge.context.WorkingState;
 import org.opengis.knowledge.memory.MemoryRecord;
 import org.opengis.knowledge.memory.MemoryRepository;
+import org.opengis.knowledge.memory.MemoryScope;
+import org.opengis.knowledge.memory.search.MemorySearchQuery;
 import org.opengis.platform.persistence.JsonFileStore;
+import org.opengis.platform.persistence.JsonTypeReferences;
 import org.opengis.platform.persistence.WorkspaceLayout;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.node.ArrayNode;
@@ -48,6 +51,31 @@ public final class ContextManager {
     return List.copyOf(state(conversationId).messages);
   }
 
+  public SummaryBatch summaryBatch(String conversationId, int requestedMessages) {
+    ConversationState state = state(conversationId);
+    int start = Math.min(state.summarizedMessages, state.messages.size());
+    int maximumEnd = Math.max(start, state.messages.size() - 1);
+    int end = Math.min(maximumEnd, start + Math.max(0, requestedMessages));
+    while (end < maximumEnd && state.messages.get(end).role() == LlmRole.TOOL) {
+      end++;
+    }
+    return new SummaryBatch(
+        state.conversationSummary, List.copyOf(state.messages.subList(start, end)), end);
+  }
+
+  public void applySummary(String conversationId, String summary, int summarizedThrough) {
+    if (summary == null || summary.isBlank()) {
+      throw new IllegalArgumentException("Conversation summary is required");
+    }
+    ConversationState state = state(conversationId);
+    if (summarizedThrough < state.summarizedMessages || summarizedThrough > state.messages.size()) {
+      throw new IllegalArgumentException("Invalid conversation summary checkpoint");
+    }
+    state.conversationSummary = summary.strip();
+    state.summarizedMessages = summarizedThrough;
+    save(conversationId);
+  }
+
   public void workingState(String conversationId, WorkingState workingState) {
     state(conversationId).workingState = workingState == null ? WorkingState.empty() : workingState;
     save(conversationId);
@@ -65,7 +93,19 @@ public final class ContextManager {
       int maxTokens,
       Duration timeout) {
     ConversationState state = state(conversationId);
-    List<MemoryRecord> selected = memory.relevant(latestUserTask(state.messages), 8);
+    List<MemoryRecord> selected =
+        memory
+            .search(
+                new MemorySearchQuery(
+                    latestUserTask(state.messages),
+                    8,
+                    6_000,
+                    Set.of(MemoryScope.GLOBAL, MemoryScope.WORKSPACE, MemoryScope.CONVERSATION),
+                    conversationId,
+                    ""))
+            .stream()
+            .map(result -> result.record())
+            .toList();
     List<LlmMessage> memoryMessages =
         selected.isEmpty()
             ? List.of()
@@ -73,12 +113,32 @@ public final class ContextManager {
                 LlmMessage.system(
                     "Relevant project memory:\n"
                         + selected.stream()
-                            .map(record -> "- [" + record.kind() + "] " + record.content())
+                            .map(
+                                record ->
+                                    "- ["
+                                        + record.scope()
+                                        + "/"
+                                        + record.kind()
+                                        + ", confidence="
+                                        + String.format(
+                                            java.util.Locale.ROOT, "%.2f", record.confidence())
+                                        + "] "
+                                        + record.content())
                             .collect(java.util.stream.Collectors.joining("\n"))));
     List<LlmMessage> workingMessages =
         state.workingState.equals(WorkingState.empty())
             ? List.of()
             : List.of(LlmMessage.system("Current working state: " + state.workingState));
+    List<LlmMessage> summaryMessages =
+        state.conversationSummary.isBlank()
+            ? List.of()
+            : List.of(
+                LlmMessage.system(
+                    "Conversation summary (authoritative only for earlier compacted turns):\n"
+                        + state.conversationSummary));
+    List<LlmMessage> activeHistory =
+        state.messages.subList(
+            Math.min(state.summarizedMessages, state.messages.size()), state.messages.size());
     return new CanonicalRequestBuilder(model)
         .add(
             "system",
@@ -105,6 +165,12 @@ public final class ContextManager {
             PromptStability.WORKSPACE_STATIC,
             PromptCachePolicy.BREAKPOINT)
         .add(
+            "conversation-summary",
+            PromptSectionKind.CONVERSATION_SUMMARY,
+            summaryMessages,
+            PromptStability.SESSION_STATIC,
+            PromptCachePolicy.NONE)
+        .add(
             "memory",
             PromptSectionKind.MEMORY,
             memoryMessages,
@@ -119,7 +185,7 @@ public final class ContextManager {
         .add(
             "history",
             PromptSectionKind.HISTORY,
-            repairedHistory(state.messages),
+            repairedHistory(activeHistory),
             PromptStability.SESSION_STATIC,
             PromptCachePolicy.NONE)
         .tools(tools)
@@ -192,12 +258,20 @@ public final class ContextManager {
     if (working.isObject()) {
       state.workingState =
           new WorkingState(
-              working.path("goal").asText(),
+              working.path("goal").asString(),
               strings(working.path("completed")),
               strings(working.path("pending")),
               working.path("artifacts").isObject()
-                  ? files.objectMapper().convertValue(working.path("artifacts"), Map.class)
+                  ? files
+                      .objectMapper()
+                      .convertValue(working.path("artifacts"), JsonTypeReferences.STRING_MAP)
                   : Map.of());
+    }
+    JsonNode summary = root.path("conversation_summary");
+    if (summary.isObject()) {
+      state.conversationSummary = summary.path("content").asString();
+      state.summarizedMessages =
+          Math.min(state.messages.size(), Math.max(0, summary.path("summarized_messages").asInt()));
     }
     return state;
   }
@@ -205,7 +279,7 @@ public final class ContextManager {
   private LlmMessage readMessage(JsonNode node) {
     LlmRole role;
     try {
-      role = LlmRole.valueOf(node.path("role").asText("USER").toUpperCase(java.util.Locale.ROOT));
+      role = LlmRole.valueOf(node.path("role").asString("USER").toUpperCase(java.util.Locale.ROOT));
     } catch (IllegalArgumentException exception) {
       role = LlmRole.USER;
     }
@@ -213,17 +287,17 @@ public final class ContextManager {
     for (JsonNode call : node.path("toolCalls")) {
       calls.add(
           new LlmToolCall(
-              call.path("id").asText(),
-              call.path("name").asText(),
+              call.path("id").asString(),
+              call.path("name").asString(),
               call.path("arguments").isObject()
                   ? call.path("arguments")
                   : files.objectMapper().createObjectNode()));
     }
     return new LlmMessage(
         role,
-        node.path("content").asText(),
-        node.path("name").asText(),
-        node.path("toolCallId").asText(node.path("tool_call_id").asText()),
+        node.path("content").asString(),
+        node.path("name").asString(),
+        node.path("toolCallId").asString(node.path("tool_call_id").asString()),
         calls);
   }
 
@@ -233,10 +307,13 @@ public final class ContextManager {
       return;
     }
     ObjectNode root = files.objectMapper().createObjectNode();
-    root.put("schema_version", 1);
+    root.put("schema_version", 2);
     ArrayNode messages = root.putArray("messages");
     state.messages.forEach(message -> messages.add(files.objectMapper().valueToTree(message)));
     root.set("working_state", files.objectMapper().valueToTree(state.workingState));
+    ObjectNode summary = root.putObject("conversation_summary");
+    summary.put("content", state.conversationSummary);
+    summary.put("summarized_messages", state.summarizedMessages);
     files.write(path(conversationId), root);
   }
 
@@ -265,11 +342,22 @@ public final class ContextManager {
   }
 
   private static List<String> strings(JsonNode node) {
-    return node.isArray() ? node.valueStream().map(JsonNode::asText).toList() : List.of();
+    return node.isArray() ? node.valueStream().map(JsonNode::asString).toList() : List.of();
   }
 
   private static final class ConversationState {
     private final List<LlmMessage> messages = new ArrayList<>();
     private WorkingState workingState = WorkingState.empty();
+    private String conversationSummary = "";
+    private int summarizedMessages;
+  }
+
+  public record SummaryBatch(
+      String existingSummary, List<LlmMessage> messages, int summarizedThrough) {
+    public SummaryBatch {
+      existingSummary = existingSummary == null ? "" : existingSummary;
+      messages = messages == null ? List.of() : List.copyOf(messages);
+      summarizedThrough = Math.max(0, summarizedThrough);
+    }
   }
 }

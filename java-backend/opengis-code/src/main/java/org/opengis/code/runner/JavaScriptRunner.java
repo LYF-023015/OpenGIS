@@ -29,6 +29,7 @@ import org.opengis.code.dependency.DependencyResolver;
 import org.opengis.code.host.ScriptHostMain;
 import org.opengis.code.validation.JavaSourceValidator;
 import org.opengis.platform.persistence.JsonFileStore;
+import org.opengis.platform.persistence.JsonTypeReferences;
 import org.opengis.platform.persistence.WorkspaceLayout;
 import org.opengis.script.sdk.ScriptProtocol;
 import tools.jackson.databind.JsonNode;
@@ -96,6 +97,7 @@ public final class JavaScriptRunner {
     }
   }
 
+  @SuppressWarnings("try") // The cancellation registration is a lifetime-only resource.
   public ScriptRunResult run(ScriptRunRequest request, ScriptCallbacks callbacks) {
     ScriptCallbacks activeCallbacks =
         callbacks == null ? ScriptCallbacks.disconnected() : callbacks;
@@ -522,9 +524,8 @@ public final class JavaScriptRunner {
       this.stderr = stderr;
     }
 
-    @SuppressWarnings("unchecked")
     void accept(JsonNode message) {
-      if (!ScriptProtocol.VERSION.equals(message.path("protocol_version").asText())) {
+      if (!ScriptProtocol.VERSION.equals(message.path("protocol_version").asString())) {
         fail("protocol_error", "Unsupported child protocol version");
         destroyTree(process);
         return;
@@ -536,9 +537,10 @@ public final class JavaScriptRunner {
         destroyTree(process);
         return;
       }
-      String type = message.path("type").asText();
-      String callId = message.path("call_id").asText();
-      Map<String, Object> payload = mapper.convertValue(message.path("payload"), Map.class);
+      String type = message.path("type").asString();
+      String callId = message.path("call_id").asString();
+      Map<String, Object> payload =
+          mapper.convertValue(message.path("payload"), JsonTypeReferences.STRING_OBJECT_MAP);
       callbacks.event(type, payload);
       switch (type) {
         case "stdout" ->
@@ -551,14 +553,18 @@ public final class JavaScriptRunner {
         case "map_event" ->
             callbacks.mapEvent(
                 String.valueOf(payload.get("method")),
-                (Map<String, Object>) payload.getOrDefault("parameters", Map.of()));
+                mapper.convertValue(
+                    payload.getOrDefault("parameters", Map.of()),
+                    JsonTypeReferences.STRING_OBJECT_MAP));
         case "tool_call" ->
             reply(
                 callId,
                 () ->
                     callbacks.callTool(
                         String.valueOf(payload.get("name")),
-                        (Map<String, Object>) payload.getOrDefault("arguments", Map.of())));
+                        mapper.convertValue(
+                            payload.getOrDefault("arguments", Map.of()),
+                            JsonTypeReferences.STRING_OBJECT_MAP)));
         case "artifact" -> reply(callId, () -> registerArtifact(payload));
         case "completed" -> complete("completed", payload.getOrDefault("output", Map.of()), "");
         case "failed" ->

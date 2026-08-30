@@ -4,7 +4,9 @@ import java.util.List;
 
 /** Raised when a workflow cannot safely be persisted or executed. */
 public final class WorkflowValidationException extends IllegalArgumentException {
-  private final List<String> errors;
+  private static final long serialVersionUID = 1L;
+
+  private final transient List<String> errors;
 
   public WorkflowValidationException(List<String> errors) {
     super(String.join("; ", errors));

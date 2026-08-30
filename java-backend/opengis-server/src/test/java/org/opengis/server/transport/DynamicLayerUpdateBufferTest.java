@@ -44,7 +44,7 @@ class DynamicLayerUpdateBufferTest {
     List<Integer> sequences = new ArrayList<>();
     for (String payload : sent) {
       JsonNode message = objectMapper.readTree(payload);
-      assertThat(message.path("method").asText()).isEqualTo(DynamicLayerUpdateBuffer.METHOD);
+      assertThat(message.path("method").asString()).isEqualTo(DynamicLayerUpdateBuffer.METHOD);
       sequences.add(message.path("params").path("sequence").asInt());
     }
     assertThat(sequences).containsExactly(1, 2, 3);

@@ -92,6 +92,10 @@
       <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <mainClass>org.opengis.server.OpenGisApplication</mainClass>
+          <skip>false</skip>
+        </configuration>
         <executions>
           <execution>
             <goals>

@@ -121,7 +121,7 @@ final class FileTools {
   }
 
   private static JsonNode read(JsonNode args, ToolExecutionContext context) {
-    Path path = WorkspacePaths.resolve(context, args.path("file_path").asText());
+    Path path = WorkspacePaths.resolve(context, args.path("file_path").asString());
     int offset = args.path("offset").asInt(1);
     int limit = args.path("limit").asInt(2000);
     if (!Files.isRegularFile(path)) {
@@ -152,8 +152,8 @@ final class FileTools {
   }
 
   private static JsonNode list(JsonNode args, ToolExecutionContext context) {
-    Path path = WorkspacePaths.resolve(context, args.path("path").asText());
-    String pattern = args.path("pattern").asText("");
+    Path path = WorkspacePaths.resolve(context, args.path("path").asString());
+    String pattern = args.path("pattern").asString("");
     if (!Files.isDirectory(path)) {
       throw new ToolException("not_a_directory", "Not a directory: " + path);
     }
@@ -191,7 +191,7 @@ final class FileTools {
   }
 
   private static JsonNode exists(JsonNode args, ToolExecutionContext context) {
-    Path path = WorkspacePaths.resolve(context, args.path("path").asText());
+    Path path = WorkspacePaths.resolve(context, args.path("path").asString());
     ObjectNode result = new ObjectMapper().createObjectNode();
     result.put("path", path.toString());
     result.put("exists", Files.exists(path));
@@ -201,8 +201,8 @@ final class FileTools {
   }
 
   private static JsonNode glob(JsonNode args, ToolExecutionContext context) {
-    Path root = WorkspacePaths.resolve(context, args.path("path").asText("."));
-    String pattern = args.path("pattern").asText();
+    Path root = WorkspacePaths.resolve(context, args.path("path").asString("."));
+    String pattern = args.path("pattern").asString();
     int limit = args.path("limit").asInt(1000);
     var matcher = root.getFileSystem().getPathMatcher("glob:" + pattern);
     ArrayNode matches = new ObjectMapper().createArrayNode();
@@ -221,10 +221,10 @@ final class FileTools {
   }
 
   private static JsonNode grep(JsonNode args, ToolExecutionContext context) {
-    Path root = WorkspacePaths.resolve(context, args.path("path").asText("."));
+    Path root = WorkspacePaths.resolve(context, args.path("path").asString("."));
     Pattern pattern;
     try {
-      pattern = Pattern.compile(args.path("pattern").asText());
+      pattern = Pattern.compile(args.path("pattern").asString());
     } catch (RuntimeException exception) {
       throw new ToolException("invalid_regex", "Invalid regular expression", exception);
     }
@@ -263,14 +263,14 @@ final class FileTools {
   }
 
   private static JsonNode write(JsonNode args, ToolExecutionContext context) {
-    Path path = WorkspacePaths.resolve(context, args.path("file_path").asText());
+    Path path = WorkspacePaths.resolve(context, args.path("file_path").asString());
     if (Files.exists(path) && !args.path("overwrite").asBoolean(false)) {
       throw new ToolException(
           "overwrite_requires_opt_in", "Existing file requires overwrite=true: " + path);
     }
     try {
       Files.createDirectories(path.getParent());
-      Files.writeString(path, args.path("content").asText(), StandardCharsets.UTF_8);
+      Files.writeString(path, args.path("content").asString(), StandardCharsets.UTF_8);
       context
           .uiRpc()
           .notify(
@@ -286,20 +286,20 @@ final class FileTools {
   }
 
   private static JsonNode edit(JsonNode args, ToolExecutionContext context) {
-    Path path = WorkspacePaths.resolve(context, args.path("file_path").asText());
+    Path path = WorkspacePaths.resolve(context, args.path("file_path").asString());
     try {
       String original = Files.readString(path, StandardCharsets.UTF_8);
-      String oldValue = args.path("old_string").asText();
+      String oldValue = args.path("old_string").asString();
       if (!original.contains(oldValue)) {
         throw new ToolException("edit_target_not_found", "old_string was not found");
       }
       boolean replaceAll = args.path("replace_all").asBoolean(false);
       String updated =
           replaceAll
-              ? original.replace(oldValue, args.path("new_string").asText())
+              ? original.replace(oldValue, args.path("new_string").asString())
               : original.replaceFirst(
                   Pattern.quote(oldValue),
-                  java.util.regex.Matcher.quoteReplacement(args.path("new_string").asText()));
+                  java.util.regex.Matcher.quoteReplacement(args.path("new_string").asString()));
       Files.writeString(path, updated, StandardCharsets.UTF_8);
       ObjectNode result = (ObjectNode) pathResult(path, "edited");
       result.put("before_chars", original.length());
@@ -311,7 +311,7 @@ final class FileTools {
   }
 
   private static JsonNode mkdir(JsonNode args, ToolExecutionContext context) {
-    Path path = WorkspacePaths.resolve(context, args.path("path").asText());
+    Path path = WorkspacePaths.resolve(context, args.path("path").asString());
     try {
       boolean existed = Files.exists(path);
       Files.createDirectories(path);
@@ -324,8 +324,8 @@ final class FileTools {
   }
 
   private static JsonNode copy(JsonNode args, ToolExecutionContext context) {
-    Path source = WorkspacePaths.resolve(context, args.path("src").asText());
-    Path target = WorkspacePaths.resolve(context, args.path("dst").asText());
+    Path source = WorkspacePaths.resolve(context, args.path("src").asString());
+    Path target = WorkspacePaths.resolve(context, args.path("dst").asString());
     try {
       copyRecursively(source, target);
       return sourceTargetResult(source, target);
@@ -335,8 +335,8 @@ final class FileTools {
   }
 
   private static JsonNode move(JsonNode args, ToolExecutionContext context) {
-    Path source = WorkspacePaths.resolve(context, args.path("src").asText());
-    Path target = WorkspacePaths.resolve(context, args.path("dst").asText());
+    Path source = WorkspacePaths.resolve(context, args.path("src").asString());
+    Path target = WorkspacePaths.resolve(context, args.path("dst").asString());
     try {
       Files.createDirectories(target.getParent());
       Files.move(source, target);
@@ -347,7 +347,7 @@ final class FileTools {
   }
 
   private static JsonNode delete(JsonNode args, ToolExecutionContext context) {
-    Path path = WorkspacePaths.resolve(context, args.path("path").asText());
+    Path path = WorkspacePaths.resolve(context, args.path("path").asString());
     try {
       if (Files.isDirectory(path) && args.path("recursive").asBoolean(false)) {
         Files.walkFileTree(

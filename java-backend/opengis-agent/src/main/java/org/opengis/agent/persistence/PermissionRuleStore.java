@@ -40,7 +40,7 @@ public class PermissionRuleStore {
 
   public synchronized boolean remove(String ruleId) {
     List<ObjectNode> rules = new java.util.ArrayList<>(list());
-    boolean removed = rules.removeIf(rule -> ruleId.equals(rule.path("id").asText()));
+    boolean removed = rules.removeIf(rule -> ruleId.equals(rule.path("id").asString()));
     if (removed) {
       save(rules);
     }

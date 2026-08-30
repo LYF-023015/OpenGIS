@@ -22,14 +22,14 @@ public class AgentProfileStore {
 
   public List<ObjectNode> list() {
     Map<String, ObjectNode> profiles = new LinkedHashMap<>();
-    defaults().forEach(profile -> profiles.put(profile.path("name").asText(), profile));
+    defaults().forEach(profile -> profiles.put(profile.path("name").asString(), profile));
     ObjectNode root = files.readObject(path);
     if (root.path("profiles").isArray()) {
       root.path("profiles")
           .valueStream()
           .filter(JsonNode::isObject)
           .map(node -> (ObjectNode) node)
-          .forEach(profile -> profiles.put(profile.path("name").asText(), profile));
+          .forEach(profile -> profiles.put(profile.path("name").asString(), profile));
     }
     return List.copyOf(profiles.values());
   }

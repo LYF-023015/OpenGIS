@@ -67,7 +67,7 @@ class VectorLoaderTest {
         StandardCharsets.UTF_8);
     VectorLoadResult kmlResult = loader.load(kml, 10, new CancellationToken());
     assertThat(kmlResult.metadata().formatName()).isEqualTo("KML");
-    assertThat(kmlResult.geojson().path("features").get(0).path("geometry").path("type").asText())
+    assertThat(kmlResult.geojson().path("features").get(0).path("geometry").path("type").asString())
         .isEqualTo("GeometryCollection");
   }
 
@@ -123,7 +123,7 @@ class VectorLoaderTest {
     assertThat(loaded.geojson().path("features"))
         .allSatisfy(
             feature ->
-                assertThat(feature.path("properties").path("_opengis_layer").asText())
+                assertThat(feature.path("properties").path("_opengis_layer").asString())
                     .isNotBlank());
   }
 

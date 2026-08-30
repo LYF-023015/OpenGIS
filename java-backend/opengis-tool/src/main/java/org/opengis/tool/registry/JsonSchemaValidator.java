@@ -20,7 +20,7 @@ public final class JsonSchemaValidator {
     if (schema == null || schema.isMissingNode()) {
       return;
     }
-    String type = schema.path("type").asText("");
+    String type = schema.path("type").asString("");
     if (!type.isBlank() && !matches(type, value)) {
       violations.add(path + " must be " + type);
       return;
@@ -37,11 +37,11 @@ public final class JsonSchemaValidator {
         violations.add(path + " is above maximum");
       }
     }
-    if (value != null && value.isTextual()) {
-      if (schema.has("minLength") && value.asText().length() < schema.path("minLength").asInt()) {
+    if (value != null && value.isString()) {
+      if (schema.has("minLength") && value.asString().length() < schema.path("minLength").asInt()) {
         violations.add(path + " is shorter than minLength");
       }
-      if (schema.has("maxLength") && value.asText().length() > schema.path("maxLength").asInt()) {
+      if (schema.has("maxLength") && value.asString().length() > schema.path("maxLength").asInt()) {
         violations.add(path + " is longer than maxLength");
       }
     }
@@ -65,7 +65,7 @@ public final class JsonSchemaValidator {
   private void validateObject(
       String path, JsonNode schema, JsonNode value, List<String> violations) {
     Set<String> required = new HashSet<>();
-    schema.path("required").valueStream().forEach(node -> required.add(node.asText()));
+    schema.path("required").valueStream().forEach(node -> required.add(node.asString()));
     for (String field : required) {
       if (!value.has(field) || value.path(field).isNull()) {
         violations.add(path + "." + field + " is required");
@@ -89,7 +89,7 @@ public final class JsonSchemaValidator {
     return switch (type) {
       case "object" -> value.isObject();
       case "array" -> value.isArray();
-      case "string" -> value.isTextual();
+      case "string" -> value.isString();
       case "number" -> value.isNumber();
       case "integer" -> value.isIntegralNumber();
       case "boolean" -> value.isBoolean();

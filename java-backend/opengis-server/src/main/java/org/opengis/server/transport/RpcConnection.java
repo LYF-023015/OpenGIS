@@ -67,7 +67,7 @@ public final class RpcConnection {
         || (!message.has("result") && !message.has("error"))) {
       return false;
     }
-    String requestId = message.path("id").asText();
+    String requestId = message.path("id").asString();
     CompletableFuture<JsonNode> future = pendingRequests.remove(requestId);
     if (future == null) {
       return true;
@@ -77,7 +77,7 @@ public final class RpcConnection {
       future.completeExceptionally(
           new RpcException(
               error.path("code").asInt(),
-              error.path("message").asText("RPC error"),
+              error.path("message").asString("RPC error"),
               error.get("data")));
     } else {
       future.complete(message.get("result"));

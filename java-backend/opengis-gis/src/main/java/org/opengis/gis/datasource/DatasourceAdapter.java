@@ -54,7 +54,7 @@ public final class DatasourceAdapter {
     Source source = find(requiredName(params));
     byte[] bytes = http.get(source.url(), Duration.ofSeconds(30), cancellation);
     ObjectNode geojson = transfer.parse(bytes);
-    String output = params.path("output_path").asText(params.path("save_path").asText(""));
+    String output = params.path("output_path").asString(params.path("save_path").asString(""));
     return transfer.finish(
         workspace,
         output,
@@ -81,7 +81,7 @@ public final class DatasourceAdapter {
   }
 
   private static String requiredName(JsonNode params) {
-    String name = params.path("name").asText("");
+    String name = params.path("name").asString("");
     if (name.isBlank())
       throw new ToolException("datasource_name_required", "Datasource name is required");
     return name;
@@ -94,15 +94,15 @@ public final class DatasourceAdapter {
       ArrayNode values = (ArrayNode) mapper.readTree(input);
       List<Source> sources = new ArrayList<>();
       for (JsonNode value : values) {
-        URI url = URI.create(value.path("url").asText());
+        URI url = URI.create(value.path("url").asString());
         if (!"https".equalsIgnoreCase(url.getScheme())) {
           throw new IllegalStateException("Datasource catalog URL must use HTTPS");
         }
         sources.add(
             new Source(
-                value.path("id").asText(),
-                value.path("name").asText(),
-                value.path("description").asText(),
+                value.path("id").asString(),
+                value.path("name").asString(),
+                value.path("description").asString(),
                 url));
       }
       return List.copyOf(sources);

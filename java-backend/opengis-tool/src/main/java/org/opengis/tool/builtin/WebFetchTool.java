@@ -45,7 +45,7 @@ final class WebFetchTool extends FunctionalTool {
   private static JsonNode fetch(JsonNode args, ToolExecutionContext context) {
     URI uri;
     try {
-      uri = URI.create(args.path("url").asText());
+      uri = URI.create(args.path("url").asString());
     } catch (IllegalArgumentException exception) {
       throw new ToolException("invalid_url", "Invalid URL", exception);
     }

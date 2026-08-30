@@ -131,17 +131,17 @@ final class UiCommandTools {
     switch (name) {
       case "add_layer" -> {
         JsonNode geoJson = arguments.get("geojson");
-        if ((geoJson == null || geoJson.isNull()) && arguments.path("geojson_path").isTextual()) {
+        if ((geoJson == null || geoJson.isNull()) && arguments.path("geojson_path").isString()) {
           java.nio.file.Path path =
-              WorkspacePaths.resolve(context, arguments.path("geojson_path").asText());
+              WorkspacePaths.resolve(context, arguments.path("geojson_path").asString());
           try {
             geoJson = mapper.readTree(java.nio.file.Files.readString(path));
           } catch (java.io.IOException | tools.jackson.core.JacksonException exception) {
             throw new ToolException("invalid_geojson", "Cannot load GeoJSON layer", exception);
           }
-        } else if (geoJson != null && geoJson.isTextual()) {
+        } else if (geoJson != null && geoJson.isString()) {
           try {
-            geoJson = mapper.readTree(geoJson.asText());
+            geoJson = mapper.readTree(geoJson.asString());
           } catch (tools.jackson.core.JacksonException exception) {
             throw new ToolException("invalid_geojson", "Inline GeoJSON is invalid", exception);
           }
@@ -152,7 +152,7 @@ final class UiCommandTools {
         }
         payload.remove("geojson_path");
         payload.set("geojson", geoJson);
-        if (!payload.path("name").isTextual() || payload.path("name").asText().isBlank()) {
+        if (!payload.path("name").isString() || payload.path("name").asString().isBlank()) {
           payload.put("name", "OpenGIS layer");
         }
       }
@@ -186,7 +186,7 @@ final class UiCommandTools {
                   }
                 });
         payload.removeAll();
-        payload.put("layer_id", arguments.path("layer_id").asText());
+        payload.put("layer_id", arguments.path("layer_id").asString());
         payload.set("raster", raster);
       }
       case "update_legend_spec" -> {
@@ -200,19 +200,19 @@ final class UiCommandTools {
                   }
                 });
         payload.removeAll();
-        payload.put("layer_id", arguments.path("layer_id").asText());
+        payload.put("layer_id", arguments.path("layer_id").asString());
         payload.set("legend", legend);
       }
       case "add_raster" -> {
         if (!payload.has("path")) {
           String path =
-              arguments.path("raster_path").asText(arguments.path("file_path").asText(""));
+              arguments.path("raster_path").asString(arguments.path("file_path").asString(""));
           if (!path.isBlank()) {
             payload.put("path", WorkspacePaths.resolve(context, path).toString());
           }
         } else {
           payload.put(
-              "path", WorkspacePaths.resolve(context, payload.path("path").asText()).toString());
+              "path", WorkspacePaths.resolve(context, payload.path("path").asString()).toString());
         }
         payload.remove("raster_path");
         payload.remove("file_path");
@@ -268,7 +268,7 @@ final class UiCommandTools {
         arguments.has("point_size") ? "circle" : arguments.has("line_width") ? "line" : "fill");
     style.set("paint", paint);
     payload.removeAll();
-    payload.put("layer_id", arguments.path("layer_id").asText());
+    payload.put("layer_id", arguments.path("layer_id").asString());
     payload.set("style", style);
   }
 
@@ -276,8 +276,8 @@ final class UiCommandTools {
       JsonNode arguments, ObjectNode payload, String renderer, ObjectMapper mapper) {
     ObjectNode configuration = mapper.createObjectNode();
     if ("graduated".equals(renderer)) {
-      configuration.put("field", arguments.path("field").asText());
-      configuration.put("method", arguments.path("method").asText("quantile").replace('_', '-'));
+      configuration.put("field", arguments.path("field").asString());
+      configuration.put("method", arguments.path("method").asString("quantile").replace('_', '-'));
       if (arguments.has("classes")) {
         configuration.set("classes", arguments.path("classes"));
       }
@@ -288,20 +288,20 @@ final class UiCommandTools {
         configuration.set("palette", arguments.path("palette"));
       }
     } else if ("categorized".equals(renderer)) {
-      configuration.put("field", arguments.path("field").asText());
+      configuration.put("field", arguments.path("field").asString());
       copy(arguments, "colors", configuration, "colors");
       copy(arguments, "categories", configuration, "categories");
       copy(arguments, "max_categories", configuration, "maxCategories");
       copy(arguments, "other_color", configuration, "otherColor");
     } else {
-      configuration.put("heightField", arguments.path("height_field").asText());
+      configuration.put("heightField", arguments.path("height_field").asString());
       if (arguments.has("height_multiplier")) {
         configuration.set("heightMultiplier", arguments.path("height_multiplier"));
       }
       copy(arguments, "base_field", configuration, "baseField");
     }
     payload.removeAll();
-    payload.put("layer_id", arguments.path("layer_id").asText());
+    payload.put("layer_id", arguments.path("layer_id").asString());
     payload.put("renderer", renderer);
     payload.set(renderer, configuration);
   }

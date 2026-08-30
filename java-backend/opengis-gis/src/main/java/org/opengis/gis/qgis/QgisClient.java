@@ -101,9 +101,9 @@ public final class QgisClient {
         throw new ToolException("qgis_connection_closed", "QGIS closed the connection");
       cancellation.throwIfCancelled();
       JsonNode value = mapper.readTree(response);
-      if ("error".equals(value.path("status").asText())) {
+      if ("error".equals(value.path("status").asString())) {
         throw new ToolException(
-            "qgis_command_failed", value.path("message").asText("QGIS command failed"));
+            "qgis_command_failed", value.path("message").asString("QGIS command failed"));
       }
       return value.has("result") ? value.path("result") : value;
     } catch (ToolException exception) {

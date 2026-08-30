@@ -21,7 +21,7 @@ public final class GeoJsonCrsTransformer {
   public ObjectNode transform(
       JsonNode input, String source, String target, CancellationToken cancellation) {
     if (!input.isObject()
-        || !"FeatureCollection".equals(input.path("type").asText())
+        || !"FeatureCollection".equals(input.path("type").asString())
         || !input.path("features").isArray()) {
       throw new ToolException("invalid_geojson", "Expected a GeoJSON FeatureCollection");
     }

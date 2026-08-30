@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.List;
 import org.opengis.platform.persistence.JsonFileStore;
 import org.opengis.platform.persistence.WorkspaceLayout;
+import org.opengis.platform.security.SensitiveDataRedactor;
 import tools.jackson.databind.node.ObjectNode;
 
 /** Append-only workspace artifact index. */
@@ -16,7 +17,7 @@ public class ArtifactStore {
   }
 
   public void append(ObjectNode artifact) {
-    files.append(path, artifact);
+    files.append(path, SensitiveDataRedactor.redact(artifact));
   }
 
   public List<ObjectNode> list() {

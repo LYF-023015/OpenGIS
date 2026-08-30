@@ -1,4 +1,13 @@
-import { app, BrowserWindow, shell, ipcMain, nativeImage, nativeTheme, dialog } from 'electron'
+import {
+  app,
+  BrowserWindow,
+  shell,
+  ipcMain,
+  nativeImage,
+  nativeTheme,
+  dialog,
+  type MessageBoxOptions,
+} from 'electron'
 import { join } from 'path'
 import { readFileSync, existsSync } from 'fs'
 import { BackendManager } from './ipc/backendManager'
@@ -195,7 +204,7 @@ async function initializeBackend(): Promise<void> {
       console.error('Failed to start backend:', error)
       const status = backendManager.getStatus()
       mainWindow?.webContents.send('backend:status-changed', status)
-      const result = await dialog.showMessageBox(loadingWindow ?? undefined, {
+      const messageBoxOptions: MessageBoxOptions = {
         type: 'error',
         title: 'OpenGIS Java Backend Failed',
         message: 'The Java backend could not be started.',
@@ -203,7 +212,11 @@ async function initializeBackend(): Promise<void> {
         buttons: ['Retry', 'Open Logs', 'Quit'],
         defaultId: 0,
         cancelId: 2,
-      })
+      }
+      const parentWindow = loadingWindow?.isDestroyed() === false ? loadingWindow : null
+      const result = parentWindow
+        ? await dialog.showMessageBox(parentWindow, messageBoxOptions)
+        : await dialog.showMessageBox(messageBoxOptions)
       if (result.response === 0) continue
       if (result.response === 1) {
         const dir = getLogDir()

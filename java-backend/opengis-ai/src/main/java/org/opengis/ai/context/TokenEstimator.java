@@ -15,16 +15,28 @@ public final class TokenEstimator {
   }
 
   public int messages(List<LlmMessage> messages) {
-    long chars = 0;
+    long weightedCharacters = 0;
     for (LlmMessage message : messages) {
-      chars += 12L + message.content().length() + message.name().length();
-      chars += mapper.writeValueAsString(message.toolCalls()).length();
+      weightedCharacters += 12L;
+      weightedCharacters += weightedCharacters(message.content());
+      weightedCharacters += weightedCharacters(message.name());
+      weightedCharacters += weightedCharacters(mapper.writeValueAsString(message.toolCalls()));
     }
-    return safeTokens(chars);
+    return safeTokens(weightedCharacters);
   }
 
   public int tools(List<LlmToolDefinition> tools) {
-    return safeTokens(mapper.writeValueAsString(tools).length());
+    return safeTokens(weightedCharacters(mapper.writeValueAsString(tools)));
+  }
+
+  private static long weightedCharacters(String value) {
+    long weighted = 0;
+    for (int offset = 0; offset < value.length(); ) {
+      int codePoint = value.codePointAt(offset);
+      weighted += codePoint <= 0x7f ? 1 : CHARS_PER_TOKEN;
+      offset += Character.charCount(codePoint);
+    }
+    return weighted;
   }
 
   private static int safeTokens(long chars) {

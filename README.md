@@ -123,7 +123,7 @@ The project is under active development. The current goal is not to replace all 
 
 - **Workflow**: DAG-based multi-step analysis where nodes describe what they receive from upstream and what they output.
 - **Operation**: Software-level atomic operations with input/output schemas, dependencies, code, documentation, and run history.
-- **Worker**: Resident Python service packages structured as `main.py + config.json + manifest.json + src/`, suitable for real-time data, API polling, and dynamic rendering.
+- **Worker**: Resident Java worker processes for real-time data, API polling, and dynamic rendering.
 - **Project Skills**: Skills are project-level capability / knowledge packages, distinct from tools. Tools are functions the Agent can call directly; Skills are user-injected context, flows, constraints, or capability sets.
 - **Run Archive**: Every Agent execution round is archived as an event stream of tool calls, MessageParts, artifacts, and metadata.
 
@@ -131,48 +131,46 @@ The project is under active development. The current goal is not to replace all 
 
 ### 3.1 Process Model
 
-OpenGIS uses a hybrid architecture of **Electron shell + React Renderer + Python Sidecar + Python subprocess / Worker**:
+OpenGIS uses an **Electron shell + React Renderer + Spring Boot Java backend** architecture:
 
 ```text
 Electron Main
-  ├─ Window, menu, file system, settings, Python sidecar lifecycle
+  ├─ Window, menu, file system, settings, Java backend lifecycle
   │
   └─ Renderer (React + TypeScript)
        ├─ MapLibre map rendering
        ├─ Chat / MessagePart UI
        ├─ Layers, assets, Operation, Workflow, Worker, Layout Composer
-       └─ JSON-RPC Dispatcher: handles Python -> UI reverse RPC
+       └─ JSON-RPC Dispatcher: handles Java -> UI reverse RPC
 
-Python Sidecar (FastAPI + uvicorn + LiteLLM)
+Java Backend (Spring Boot + Spring AI)
   ├─ WebSocket JSON-RPC service
   ├─ Agent loop / session / memory / tool runtime
   ├─ GIS / OSM / datasource / raster / operation / workflow / worker integration
-  ├─ Per-turn code execution subprocess
-  └─ Resident Worker processes
+  └─ Java Worker processes
 ```
 
 | Layer | Technology | Responsibilities | Key Directories |
 |---|---|---|---|
-| Electron Main | Electron 30 + Node | Window, menu, IPC, Python sidecar lifecycle | `electron/` |
+| Electron Main | Electron 30 + Node | Window, menu, IPC, Java backend lifecycle | `electron/` |
 | Renderer | React 18 + TypeScript + Zustand | UI, map, layer state, reverse RPC handlers | `src/features/`, `src/services/`, `src/stores/` |
 | Map Engine | MapLibre GL JS | WebGL map, source/layer sync, export | `src/features/map/` |
-| Python Sidecar | FastAPI + uvicorn + LiteLLM | JSON-RPC, Agent, Tool, Workflow, Worker | `python-backend/opengis_backend/` |
-| Python Execution | subprocess runner | Agent-generated Python code execution | `agent/execution/` |
-| Resident Worker | Python process | Background dynamic data, continuous rendering | `worker/` |
+| Java Backend | Java 21 + Spring Boot + Spring AI | JSON-RPC, Agent, Tool, Workflow, GIS, Worker | `java-backend/` |
+| Java Worker | Java process | Background dynamic data, continuous rendering | `java-backend/opengis-worker/` |
 
 ### 3.2 Communication: Bidirectional JSON-RPC
 
-The Renderer and Python sidecar communicate over a single WebSocket channel using JSON-RPC 2.0, supporting both directions:
+The Renderer and Java backend communicate over a single WebSocket channel using JSON-RPC 2.0, supporting both directions:
 
 ```text
-Renderer -> Python
+Renderer -> Java
   chat.user_message
   rpc.code.run_script
   rpc.runs.list / get
   rpc.agent.*
   rpc.worker.*
 
-Python -> Renderer
+Java -> Renderer
   rpc.ui.map.add_layer_from_geojson
   rpc.ui.map.dynamic_layer_update
   rpc.ui.map.set_layer_style
@@ -196,22 +194,19 @@ The Agent has been upgraded from the old CodeAct to a mainstream function-call a
 ```text
 AgentProfile
   -> SessionCoordinator
-  -> ContextProjector / ProviderProjector
-  -> LLM function-call streaming
-  -> TurnRunner / LoopKernel
+  -> SpringAiAgentRunner / ChatClient
+  -> RunLifecycleAdvisor
+  -> ToolCallingAdvisor / OpenGisToolCallingManager
   -> ToolRuntime / PermissionRuntime
   -> EventLog / RunArchive / MessagePart
 ```
 
 | Module | Responsibilities | Directory |
 |---|---|---|
-| `agent/loop/` | AgentLoop, TurnRunner, LoopKernel, RuntimeControl, loop policy | `python-backend/opengis_backend/agent/loop/` |
-| `agent/execution/` | ToolRuntime, tool schema, parameter validation, Python execution, auto-install | `agent/execution/` |
-| `agent/context/` | ContextManager, ContextProjector, MemoryStore, compression, failure memory | `agent/context/` |
-| `agent/session/` | SessionCoordinator, queue, run session, inbox | `agent/session/` |
-| `agent/governance/` | AgentProfile, PermissionRuntime, permission rules | `agent/governance/` |
-| `agent/telemetry/` | EventLog, MessagePart, RunArchive, script archive, artifacts | `agent/telemetry/` |
-| `agent/workflow/` | Workflow model, storage, output passing, DAG orchestration | `agent/workflow/` |
+| `opengis-agent` | Spring AI Agent runner, SessionCoordinator, RuntimeControl, context and archives | `java-backend/opengis-agent/` |
+| `opengis-tool` | ToolRuntime, schema validation, permission and artifact handling | `java-backend/opengis-tool/` |
+| `opengis-ai` | Spring AI model configuration and provider projection | `java-backend/opengis-ai/` |
+| `opengis-workflow` | Workflow model, storage, output passing and DAG orchestration | `java-backend/opengis-workflow/` |
 
 #### 3.3.1 Function-call First
 
@@ -267,7 +262,7 @@ Legacy code sometimes called tools "skills." In the new architecture, avoid mixi
 
 ### 3.5 Tool Runtime
 
-All tools are centralized in `python-backend/opengis_backend/tools/`:
+Tools are centralized in `java-backend/opengis-tool/`, with GIS tools in `java-backend/opengis-gis/`:
 
 | Tool Group | Representative Tools | Description |
 |---|---|---|
@@ -511,7 +506,7 @@ OpenGIS is not a hard sandbox product, but provides multiple safety layers:
 | Worker | Start / restart / delete approval, max running limit |
 | RunArchive | Complete event and tool call audit trail |
 | Workspace | Git snapshot, rollback capable |
-| Python Execution | Subprocess isolation, interruptible, process tree cleanup |
+| JavaScript Execution | Isolated child JVM, interruptible, process tree cleanup |
 
 ### 3.15 Project Directory
 
@@ -534,16 +529,14 @@ OpenGIS/
       rpc/                          # Frontend JSON-RPC dispatcher / handlers
       geo/                          # Data types, parsers, raster / vector tools
     stores/                         # Zustand stores
-  python-backend/
-    opengis_backend/
-      agent/                        # Agent architecture
-      tools/                        # Tool registry and built-in tools
-      integrations/                 # GIS / OSM / QGIS / datasource
-      operations/                   # Built-in Operations
-      worker/                       # Worker manager and protocol
-      runs/                         # RunArchive
-      rpc/                          # WebSocket JSON-RPC handler
-      workspace/                    # Workspace snapshot / templates
+  java-backend/
+    opengis-agent/                  # Spring AI Agent orchestration
+    opengis-ai/                     # Provider and model adapters
+    opengis-tool/                   # Tool registry and runtime
+    opengis-gis/                    # GIS / OSM / QGIS / datasource
+    opengis-workflow/               # Workflow orchestration
+    opengis-worker/                 # Worker manager and protocol
+    opengis-server/                 # Spring Boot and JSON-RPC transport
   resources/                        # Icons, screenshots, static assets
   docs/                             # Design records and bug scans
 ```
@@ -555,10 +548,10 @@ OpenGIS/
 | Dependency | Version | Required | Description |
 |---|---|---|---|
 | Node.js | >= 18 | Yes | Frontend, Electron, build |
-| Python | >= 3.11 | Yes | Python sidecar and GIS tools |
+| Java | 21 | Yes | Spring Boot backend, Agent, GIS and workers |
 | Git | Any | Yes | Workspace snapshot / run rollback |
 | LLM API Key | OpenAI / Anthropic / DeepSeek / MiniMax / GLM / Ollama, etc. | Required for Agent | Basic map features do not require LLM |
-| GDAL / Rasterio wheels | Matching Python environment | Recommended | Raster / Shapefile / GeoPandas capabilities |
+| GDAL-compatible native libraries | Platform dependent | Optional | Additional raster/vector format capabilities |
 
 ### 4.2 Clone the Repository
 
@@ -606,10 +599,10 @@ Startup sequence:
 
 1. electron-vite starts the renderer dev server.
 2. Compiles Electron main / preload.
-3. Electron main launches the Python sidecar.
-4. Renderer connects to the sidecar WebSocket via token.
+3. Electron main launches the Java backend.
+4. Renderer connects to the backend WebSocket via token.
 
-Once the window and Python ready status appear, you're good to go.
+Once the window and Java backend ready status appear, you're good to go.
 
 ### 4.6 Configure the Model
 
@@ -656,23 +649,18 @@ npm run dist:win         # Windows packaging
 npm run dist:linux       # Linux packaging
 ```
 
-Backend test example:
-
-```bash
-"$HOME/Library/Application Support/opengis/venv/bin/python" -m unittest discover -s python-backend/tests
-```
-
-Windows PowerShell path is typically:
+Backend tests:
 
 ```powershell
-& "$env:APPDATA/opengis/venv/Scripts/python.exe" -m unittest discover -s python-backend/tests
+cd java-backend
+./mvnw.cmd verify
 ```
 
 ### 5.2 Adding a Tool
 
-1. Create or modify a tool file in `python-backend/opengis_backend/tools/builtin/`.
-2. Use `@tool(...)` to declare name, group, parameters, and return description.
-3. Access workspace, conversation, notify, and other context via `ToolContext`.
+1. Implement `OpenGisTool` in `java-backend/opengis-tool/` (or `opengis-gis/` for GIS tools).
+2. Declare its `ToolDefinition`, JSON schema, group and risk level.
+3. Access workspace, cancellation and UI RPC via `ToolExecutionContext`.
 4. For map operations, prefer sending `rpc.ui.map.*` reverse RPC; do not maintain map state in Python.
 5. Add tests covering at least parameter validation and return structure.
 
@@ -691,24 +679,20 @@ Map capabilities typically require changes on both sides:
 Built-in Operations go in:
 
 ```text
-python-backend/opengis_backend/operations/builtin/
+java-backend/opengis-gis/src/main/java/org/opengis/gis/operation/builtin/
 ```
 
 Recommended structure:
 
 ```text
-my_operation/
-  manifest.json
-  main.py
-  README.md
-  examples/
+MyOperation.java
 ```
 
 `manifest.json` should clearly describe:
 
 - Input schema.
 - Output schema.
-- Python dependencies.
+- Java/runtime dependencies.
 - Operation description.
 - Applicable scenarios.
 

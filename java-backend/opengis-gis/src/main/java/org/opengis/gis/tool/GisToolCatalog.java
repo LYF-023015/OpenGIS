@@ -22,6 +22,7 @@ import org.opengis.gis.raster.RasterService;
 import org.opengis.gis.raster.RasterStyle;
 import org.opengis.gis.vector.VectorLoadResult;
 import org.opengis.gis.vector.VectorLoader;
+import org.opengis.platform.persistence.JsonTypeReferences;
 import org.opengis.tool.api.OpenGisTool;
 import org.opengis.tool.api.ToolDefinition;
 import org.opengis.tool.api.ToolException;
@@ -65,8 +66,8 @@ public final class GisToolCatalog {
             (args, context) ->
                 mapper.valueToTree(
                     geometry.execute(
-                        args.path("operation").asText(), args.path("left_wkt").asText(),
-                        args.path("right_wkt").asText(""), args.path("distance").asDouble(0)))));
+                        args.path("operation").asString(), args.path("left_wkt").asString(),
+                        args.path("right_wkt").asString(""), args.path("distance").asDouble(0)))));
     tools.add(
         tool(
             registerRasterDefinition(mapper),
@@ -76,7 +77,7 @@ public final class GisToolCatalog {
             adapterDefinition(mapper, "osm_call", "OSM Call", ToolRisk.NETWORK),
             (args, context) ->
                 osm.call(
-                    args.path("command").asText(),
+                    args.path("command").asString(),
                     adapterParams(args, mapper),
                     context.workspace(),
                     context.cancellation())));
@@ -85,7 +86,7 @@ public final class GisToolCatalog {
             adapterDefinition(mapper, "datasource_call", "Datasource Call", ToolRisk.NETWORK),
             (args, context) ->
                 datasources.call(
-                    args.path("command").asText(),
+                    args.path("command").asString(),
                     adapterParams(args, mapper),
                     context.workspace(),
                     context.cancellation())));
@@ -94,7 +95,7 @@ public final class GisToolCatalog {
             adapterDefinition(mapper, "qgis_call", "QGIS Call", ToolRisk.NETWORK),
             (args, context) ->
                 qgis.call(
-                    args.path("command").asText(),
+                    args.path("command").asString(),
                     adapterParams(args, mapper),
                     context.cancellation())));
     return List.copyOf(tools);
@@ -118,7 +119,7 @@ public final class GisToolCatalog {
       VectorLoader vectors,
       RasterService rasters,
       ObjectMapper mapper) {
-    Path path = WorkspaceGisPaths.input(context.workspace(), args.path("path").asText());
+    Path path = WorkspaceGisPaths.input(context.workspace(), args.path("path").asString());
     GisFormat format =
         GisFormat.detect(path)
             .orElseThrow(
@@ -135,7 +136,7 @@ public final class GisToolCatalog {
 
   private static JsonNode loadVector(
       JsonNode args, ToolExecutionContext context, VectorLoader vectors, ObjectMapper mapper) {
-    Path path = WorkspaceGisPaths.input(context.workspace(), args.path("path").asText());
+    Path path = WorkspaceGisPaths.input(context.workspace(), args.path("path").asString());
     VectorLoadResult result =
         vectors.load(path, args.path("max_features").asInt(100_000), context.cancellation());
     ObjectNode output = mapper.createObjectNode();
@@ -151,14 +152,14 @@ public final class GisToolCatalog {
       VectorLoader vectors,
       GeoJsonCrsTransformer transformer,
       ObjectMapper mapper) {
-    Path input = WorkspaceGisPaths.input(context.workspace(), args.path("input_path").asText());
+    Path input = WorkspaceGisPaths.input(context.workspace(), args.path("input_path").asString());
     VectorLoadResult loaded =
         vectors.load(input, args.path("max_features").asInt(100_000), context.cancellation());
-    String source = args.path("source_crs").asText(loaded.metadata().crs());
-    String target = args.path("target_crs").asText("EPSG:4326");
+    String source = args.path("source_crs").asString(loaded.metadata().crs());
+    String target = args.path("target_crs").asString("EPSG:4326");
     ObjectNode geojson =
         transformer.transform(loaded.geojson(), source, target, context.cancellation());
-    String outputValue = args.path("output_path").asText("");
+    String outputValue = args.path("output_path").asString("");
     if (outputValue.isBlank()) {
       outputValue =
           "data/"
@@ -187,10 +188,10 @@ public final class GisToolCatalog {
 
   private static JsonNode registerRaster(
       JsonNode args, ToolExecutionContext context, RasterService rasters, ObjectMapper mapper) {
-    Path path = WorkspaceGisPaths.input(context.workspace(), args.path("path").asText());
+    Path path = WorkspaceGisPaths.input(context.workspace(), args.path("path").asString());
     Map<String, Object> style =
         args.path("style").isObject()
-            ? mapper.convertValue(args.path("style"), Map.class)
+            ? mapper.convertValue(args.path("style"), JsonTypeReferences.STRING_OBJECT_MAP)
             : Map.of();
     RasterRegistration registration =
         rasters.register(
@@ -208,9 +209,9 @@ public final class GisToolCatalog {
   private static JsonNode adapterParams(JsonNode args, ObjectMapper mapper) {
     JsonNode value = args.path("params");
     if (value.isObject()) return value;
-    if (!value.isTextual() || value.asText().isBlank()) return mapper.createObjectNode();
+    if (!value.isString() || value.asString().isBlank()) return mapper.createObjectNode();
     try {
-      JsonNode parsed = mapper.readTree(value.asText());
+      JsonNode parsed = mapper.readTree(value.asString());
       if (!parsed.isObject())
         throw new ToolException("invalid_adapter_params", "params must be a JSON object");
       return parsed;

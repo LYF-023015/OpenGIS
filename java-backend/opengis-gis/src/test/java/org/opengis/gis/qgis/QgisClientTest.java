@@ -23,7 +23,7 @@ class QgisClientTest {
                 try (var socket = server.accept()) {
                   DataInputStream input = new DataInputStream(socket.getInputStream());
                   byte[] request = input.readNBytes(input.readInt());
-                  String command = mapper.readTree(request).path("type").asText();
+                  String command = mapper.readTree(request).path("type").asString();
                   byte[] response =
                       mapper.writeValueAsBytes(
                           Map.of("status", "ok", "result", Map.of("connected", true)));

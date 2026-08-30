@@ -1,0 +1,2129 @@
+{
+  "schema_version" : 1,
+  "total" : 96,
+  "tools" : [ {
+    "name" : "academic_grammar_check",
+    "display_name" : "academic grammar check",
+    "description" : "Check grammar and spelling; returns provider-neutral instructions for the Agent.",
+    "category" : "writing",
+    "group" : "report",
+    "version" : "1.0.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "style" : {
+          "type" : "string"
+        },
+        "language" : {
+          "type" : "string"
+        },
+        "max_words" : {
+          "type" : "integer",
+          "minimum" : 1,
+          "maximum" : 20000
+        },
+        "text" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "preserve_terms" : {
+          "type" : "string"
+        },
+        "target_lang" : {
+          "type" : "string"
+        },
+        "format" : {
+          "type" : "string"
+        }
+      },
+      "required" : [ "text" ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "academic" ]
+  }, {
+    "name" : "academic_polish",
+    "display_name" : "academic polish",
+    "description" : "Polish academic text; returns provider-neutral instructions for the Agent.",
+    "category" : "writing",
+    "group" : "report",
+    "version" : "1.0.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "style" : {
+          "type" : "string"
+        },
+        "language" : {
+          "type" : "string"
+        },
+        "max_words" : {
+          "type" : "integer",
+          "minimum" : 1,
+          "maximum" : 20000
+        },
+        "text" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "preserve_terms" : {
+          "type" : "string"
+        },
+        "target_lang" : {
+          "type" : "string"
+        },
+        "format" : {
+          "type" : "string"
+        }
+      },
+      "required" : [ "text" ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "academic" ]
+  }, {
+    "name" : "academic_translate",
+    "display_name" : "academic translate",
+    "description" : "Translate academic text; returns provider-neutral instructions for the Agent.",
+    "category" : "writing",
+    "group" : "report",
+    "version" : "1.0.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "style" : {
+          "type" : "string"
+        },
+        "language" : {
+          "type" : "string"
+        },
+        "max_words" : {
+          "type" : "integer",
+          "minimum" : 1,
+          "maximum" : 20000
+        },
+        "text" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "preserve_terms" : {
+          "type" : "string"
+        },
+        "target_lang" : {
+          "type" : "string"
+        },
+        "format" : {
+          "type" : "string"
+        }
+      },
+      "required" : [ "text" ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "academic" ]
+  }, {
+    "name" : "add_layer",
+    "display_name" : "Add Layer",
+    "description" : "Renderer-backed command rpc.ui.map.add_layer_from_geojson.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : { },
+      "required" : [ ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "add_raster",
+    "display_name" : "Add Raster",
+    "description" : "Renderer-backed command rpc.ui.map.add_raster_from_file.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : { },
+      "required" : [ ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "bash",
+    "display_name" : "Execute Shell Command",
+    "description" : "Execute an argv array directly; command-string parsing is intentionally unsupported.",
+    "category" : "system",
+    "group" : "core",
+    "version" : "2.0.0",
+    "risk" : "PROCESS",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "timeout" : {
+          "type" : "integer",
+          "minimum" : 1,
+          "maximum" : 600000
+        },
+        "argv" : {
+          "type" : "array",
+          "minItems" : 1,
+          "items" : {
+            "type" : "string",
+            "minLength" : 1
+          }
+        },
+        "description" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "workdir" : {
+          "type" : "string"
+        }
+      },
+      "required" : [ "argv", "description" ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "process", "argv" ]
+  }, {
+    "name" : "consolidate_memory",
+    "display_name" : "Consolidate Memory",
+    "description" : "Archive duplicate, stale low-value, and over-capacity memory without deleting provenance.",
+    "category" : "orchestration",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "WRITE",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : { },
+      "required" : [ ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "memory", "maintenance" ]
+  }, {
+    "name" : "copy_file",
+    "display_name" : "Copy File or Directory",
+    "description" : "Copy File or Directory within the current workspace.",
+    "category" : "system",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "WRITE",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "src" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "dst" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "src", "dst" ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "filesystem" ]
+  }, {
+    "name" : "copy_operation_to_workspace",
+    "display_name" : "Copy Operation To Workspace",
+    "description" : "Copy a built-in or legacy Operation into an editable Java v2 workspace package.",
+    "category" : "system",
+    "group" : "operation",
+    "version" : "2.0",
+    "risk" : "WRITE",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "operation_id" : { },
+        "overwrite" : { }
+      },
+      "required" : [ "operation_id" ],
+      "additionalProperties" : true
+    },
+    "tags" : [ "java", "execution", "operation" ]
+  }, {
+    "name" : "create_directory",
+    "display_name" : "Create Directory",
+    "description" : "Create Directory within the current workspace.",
+    "category" : "system",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "WRITE",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "path" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "path" ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "filesystem" ]
+  }, {
+    "name" : "create_operation",
+    "display_name" : "Create Reusable Operation",
+    "description" : "Create a standard Maven-layout Java Operation v2 package.",
+    "category" : "system",
+    "group" : "operation",
+    "version" : "2.0",
+    "risk" : "WRITE",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "operation_id" : { },
+        "name" : { },
+        "description" : { },
+        "entry_class" : { },
+        "code" : { },
+        "input_schema" : { },
+        "output_schema" : { },
+        "dependencies" : { },
+        "permissions" : { },
+        "overwrite" : { }
+      },
+      "required" : [ "operation_id", "name", "code" ],
+      "additionalProperties" : true
+    },
+    "tags" : [ "java", "execution", "operation" ]
+  }, {
+    "name" : "csv_to_geojson",
+    "display_name" : "CSV to GeoJSON",
+    "description" : "Convert a UTF-8 point CSV to WGS84 GeoJSON; full GIS I/O remains in Phase 7.",
+    "category" : "data",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "WRITE",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "input_path" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "output_path" : {
+          "type" : "string"
+        },
+        "lat_column" : {
+          "type" : "string"
+        },
+        "lng_column" : {
+          "type" : "string"
+        },
+        "delimiter" : {
+          "type" : "string"
+        }
+      },
+      "required" : [ "input_path" ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "gis", "geojson", "csv" ]
+  }, {
+    "name" : "datasource_call",
+    "display_name" : "Datasource Call",
+    "description" : "Run the Java Datasource Call adapter with JSON-string params.",
+    "category" : "data",
+    "group" : "gis",
+    "version" : "2.0.0",
+    "risk" : "NETWORK",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : false,
+      "properties" : {
+        "command" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "params" : {
+          "type" : "string"
+        }
+      },
+      "required" : [ "command" ]
+    },
+    "tags" : [ "gis", "java" ]
+  }, {
+    "name" : "debug_agent_context",
+    "display_name" : "Debug Agent Context",
+    "description" : "Return the non-secret execution identity visible to tools.",
+    "category" : "system",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : { },
+      "required" : [ ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "debug" ]
+  }, {
+    "name" : "delete_file",
+    "display_name" : "Delete File or Directory",
+    "description" : "Delete File or Directory within the current workspace.",
+    "category" : "system",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "DESTRUCTIVE",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "recursive" : {
+          "type" : "boolean"
+        },
+        "path" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "path" ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "filesystem" ]
+  }, {
+    "name" : "delete_memory",
+    "display_name" : "Delete Memory",
+    "description" : "Permanently delete one memory by id. Prefer update_memory with ARCHIVED when possible.",
+    "category" : "orchestration",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "DESTRUCTIVE",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "id" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "id" ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "memory", "delete" ]
+  }, {
+    "name" : "delete_worker",
+    "display_name" : "Delete Java Worker",
+    "description" : "Stop and remove one exact workspace Worker package.",
+    "category" : "system",
+    "group" : "worker",
+    "version" : "2.0",
+    "risk" : "DESTRUCTIVE",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "worker_id" : { }
+      },
+      "required" : [ "worker_id" ],
+      "additionalProperties" : true
+    },
+    "tags" : [ "java", "execution", "worker" ]
+  }, {
+    "name" : "edit_file",
+    "display_name" : "Edit File",
+    "description" : "Edit File within the current workspace.",
+    "category" : "system",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "WRITE",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "old_string" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "file_path" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "replace_all" : {
+          "type" : "boolean"
+        },
+        "new_string" : {
+          "type" : "string"
+        }
+      },
+      "required" : [ "file_path", "old_string", "new_string" ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "filesystem" ]
+  }, {
+    "name" : "edit_operation",
+    "display_name" : "Edit Reusable Operation",
+    "description" : "Edit a workspace Operation and create an immutable revision snapshot.",
+    "category" : "system",
+    "group" : "operation",
+    "version" : "2.0",
+    "risk" : "WRITE",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "operation_id" : { },
+        "name" : { },
+        "description" : { },
+        "code" : { },
+        "input_schema" : { },
+        "output_schema" : { },
+        "dependencies" : { },
+        "permissions" : { },
+        "readme" : { },
+        "status" : { }
+      },
+      "required" : [ "operation_id" ],
+      "additionalProperties" : true
+    },
+    "tags" : [ "java", "execution", "operation" ]
+  }, {
+    "name" : "enter_3d_view",
+    "display_name" : "Enter 3d View",
+    "description" : "Renderer-backed command rpc.ui.map.set_camera.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : { },
+      "required" : [ ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "execute_code",
+    "display_name" : "Execute Java Code",
+    "description" : "Compile and run OpenGisScript source in an isolated, cancellable child JVM.",
+    "category" : "system",
+    "group" : "code",
+    "version" : "2.0",
+    "risk" : "PROCESS",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "code" : { },
+        "entry_class" : { },
+        "name" : { },
+        "params" : { },
+        "permissions" : { },
+        "dependencies" : { },
+        "offline" : { },
+        "exec_timeout" : { },
+        "max_heap_mb" : { }
+      },
+      "required" : [ "code" ],
+      "additionalProperties" : true
+    },
+    "tags" : [ "java", "execution", "code" ]
+  }, {
+    "name" : "exit_3d_view",
+    "display_name" : "Exit 3d View",
+    "description" : "Renderer-backed command rpc.ui.map.set_camera.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : { },
+      "required" : [ ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "file_exists",
+    "display_name" : "Check File Exists",
+    "description" : "Check File Exists within the current workspace.",
+    "category" : "system",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "path" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "path" ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "filesystem" ]
+  }, {
+    "name" : "fly_to",
+    "display_name" : "Fly To",
+    "description" : "Renderer-backed command rpc.ui.map.fly_to.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : { },
+      "required" : [ ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "format_references",
+    "display_name" : "format references",
+    "description" : "Format academic references; returns provider-neutral instructions for the Agent.",
+    "category" : "writing",
+    "group" : "report",
+    "version" : "1.0.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "style" : {
+          "type" : "string"
+        },
+        "language" : {
+          "type" : "string"
+        },
+        "max_words" : {
+          "type" : "integer",
+          "minimum" : 1,
+          "maximum" : 20000
+        },
+        "text" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "preserve_terms" : {
+          "type" : "string"
+        },
+        "target_lang" : {
+          "type" : "string"
+        },
+        "format" : {
+          "type" : "string"
+        }
+      },
+      "required" : [ "text" ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "academic" ]
+  }, {
+    "name" : "generate_abstract",
+    "display_name" : "generate abstract",
+    "description" : "Generate a structured abstract; returns provider-neutral instructions for the Agent.",
+    "category" : "writing",
+    "group" : "report",
+    "version" : "1.0.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "style" : {
+          "type" : "string"
+        },
+        "language" : {
+          "type" : "string"
+        },
+        "max_words" : {
+          "type" : "integer",
+          "minimum" : 1,
+          "maximum" : 20000
+        },
+        "text" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "preserve_terms" : {
+          "type" : "string"
+        },
+        "target_lang" : {
+          "type" : "string"
+        },
+        "format" : {
+          "type" : "string"
+        }
+      },
+      "required" : [ "text" ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "academic" ]
+  }, {
+    "name" : "geometry_operation",
+    "display_name" : "Geometry Operation",
+    "description" : "Execute a bounded JTS geometry operation on WKT.",
+    "category" : "data",
+    "group" : "gis",
+    "version" : "2.0.0",
+    "risk" : "PROCESS",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : false,
+      "properties" : {
+        "operation" : {
+          "type" : "string",
+          "minLength" : 1,
+          "enum" : [ "buffer", "centroid", "convex_hull", "intersection", "union", "difference" ]
+        },
+        "left_wkt" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "right_wkt" : {
+          "type" : "string"
+        },
+        "distance" : {
+          "type" : "number",
+          "minimum" : -1.0E8,
+          "maximum" : 1.0E8
+        }
+      },
+      "required" : [ "operation", "left_wkt" ]
+    },
+    "tags" : [ "gis", "java" ]
+  }, {
+    "name" : "get_layer",
+    "display_name" : "Get Layer",
+    "description" : "Renderer-backed command rpc.ui.map.get_layer.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : {
+        "layer_id" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "layer_id" ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "get_map_state",
+    "display_name" : "Get Map State",
+    "description" : "Renderer-backed command rpc.ui.map.get_state.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : { },
+      "required" : [ ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "get_operation",
+    "display_name" : "Get Reusable Operation",
+    "description" : "Read an Operation manifest and optional Java source.",
+    "category" : "system",
+    "group" : "operation",
+    "version" : "2.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "operation_id" : { },
+        "include_code" : { },
+        "max_code_chars" : { }
+      },
+      "required" : [ "operation_id" ],
+      "additionalProperties" : true
+    },
+    "tags" : [ "java", "execution", "operation" ]
+  }, {
+    "name" : "get_raster_info",
+    "display_name" : "Get Raster Info",
+    "description" : "Renderer-backed command rpc.ui.map.get_raster_info.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : {
+        "layer_id" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "layer_id" ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "get_worker",
+    "display_name" : "Get Java Worker",
+    "description" : "Inspect Worker state, resources and logs.",
+    "category" : "system",
+    "group" : "worker",
+    "version" : "2.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "worker_id" : { },
+        "include_logs" : { }
+      },
+      "required" : [ "worker_id" ],
+      "additionalProperties" : true
+    },
+    "tags" : [ "java", "execution", "worker" ]
+  }, {
+    "name" : "gis_capabilities",
+    "display_name" : "GIS Capabilities",
+    "description" : "Show the Phase 7 Java GIS capability matrix.",
+    "category" : "data",
+    "group" : "gis",
+    "version" : "2.0.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : false,
+      "properties" : { },
+      "required" : [ ]
+    },
+    "tags" : [ "gis", "java" ]
+  }, {
+    "name" : "gis_file_info",
+    "display_name" : "GIS File Info",
+    "description" : "Inspect vector or GeoTIFF metadata without Python.",
+    "category" : "data",
+    "group" : "gis",
+    "version" : "2.0.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : false,
+      "properties" : {
+        "path" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "max_features" : {
+          "type" : "integer",
+          "minimum" : 1,
+          "maximum" : 100000
+        }
+      },
+      "required" : [ "path" ]
+    },
+    "tags" : [ "gis", "java" ]
+  }, {
+    "name" : "glob",
+    "display_name" : "Glob Files",
+    "description" : "Glob Files within the current workspace.",
+    "category" : "system",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "limit" : {
+          "type" : "integer",
+          "minimum" : 1,
+          "maximum" : 20000
+        },
+        "pattern" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "path" : {
+          "type" : "string"
+        }
+      },
+      "required" : [ "pattern" ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "filesystem" ]
+  }, {
+    "name" : "grep",
+    "display_name" : "Regex Search",
+    "description" : "Regex Search within the current workspace.",
+    "category" : "system",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "limit" : {
+          "type" : "integer",
+          "minimum" : 1,
+          "maximum" : 5000
+        },
+        "pattern" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "path" : {
+          "type" : "string"
+        }
+      },
+      "required" : [ "pattern" ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "filesystem" ]
+  }, {
+    "name" : "highlight_features",
+    "display_name" : "Highlight Features",
+    "description" : "Renderer-backed command rpc.ui.map.highlight_features.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : {
+        "layer_id" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "layer_id" ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "interactive_snapshot",
+    "display_name" : "Interactive Snapshot",
+    "description" : "Renderer-backed command rpc.ui.chat.interactive_snapshot.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : { },
+      "required" : [ ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "layout_add_element",
+    "display_name" : "Layout Add Element",
+    "description" : "Renderer-backed command rpc.ui.layout.add_element.",
+    "category" : "layout",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : {
+        "type" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "type" ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "layout_capture_map",
+    "display_name" : "Layout Capture Map",
+    "description" : "Renderer-backed command rpc.ui.layout.capture_map.",
+    "category" : "layout",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : { },
+      "required" : [ ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "layout_export",
+    "display_name" : "Layout Export",
+    "description" : "Renderer-backed command rpc.ui.layout.export.",
+    "category" : "layout",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : { },
+      "required" : [ ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "layout_get_state",
+    "display_name" : "Layout Get State",
+    "description" : "Renderer-backed command rpc.ui.layout.get_state.",
+    "category" : "layout",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : { },
+      "required" : [ ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "layout_remove_element",
+    "display_name" : "Layout Remove Element",
+    "description" : "Renderer-backed command rpc.ui.layout.remove_element.",
+    "category" : "layout",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : {
+        "element_id" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "element_id" ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "layout_set_page",
+    "display_name" : "Layout Set Page",
+    "description" : "Renderer-backed command rpc.ui.layout.set_page.",
+    "category" : "layout",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : { },
+      "required" : [ ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "layout_update_frame",
+    "display_name" : "Layout Update Frame",
+    "description" : "Renderer-backed command rpc.ui.layout.update_frame.",
+    "category" : "layout",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : {
+        "element_id" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "element_id" ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "layout_update_map_view",
+    "display_name" : "Layout Update Map View",
+    "description" : "Renderer-backed command rpc.ui.layout.update_map_view.",
+    "category" : "layout",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : {
+        "element_id" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "element_id" ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "layout_update_props",
+    "display_name" : "Layout Update Props",
+    "description" : "Renderer-backed command rpc.ui.layout.update_props.",
+    "category" : "layout",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : {
+        "element_id" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "element_id" ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "layout_update_style",
+    "display_name" : "Layout Update Style",
+    "description" : "Renderer-backed command rpc.ui.layout.update_style.",
+    "category" : "layout",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : {
+        "element_id" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "element_id" ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "list_directory",
+    "display_name" : "List Directory",
+    "description" : "List Directory within the current workspace.",
+    "category" : "system",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "pattern" : {
+          "type" : "string"
+        },
+        "path" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "path" ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "filesystem" ]
+  }, {
+    "name" : "list_layers",
+    "display_name" : "List Layers",
+    "description" : "Renderer-backed command rpc.ui.map.list_layers.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : { },
+      "required" : [ ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "list_memories",
+    "display_name" : "List Memories",
+    "description" : "Inspect or search scoped Agent memory with explainable hybrid relevance scores.",
+    "category" : "orchestration",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "scope" : { "type" : "string" },
+        "limit" : { "type" : "integer", "minimum" : 1, "maximum" : 100 },
+        "status" : { "type" : "string" },
+        "query" : { "type" : "string" }
+      },
+      "required" : [ ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "memory", "search" ]
+  }, {
+    "name" : "list_operations",
+    "display_name" : "List Reusable Operations",
+    "description" : "List Java v2, built-in and legacy read-only Operations.",
+    "category" : "system",
+    "group" : "operation",
+    "version" : "2.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "query" : { },
+        "limit" : { }
+      },
+      "required" : [ ],
+      "additionalProperties" : true
+    },
+    "tags" : [ "java", "execution", "operation" ]
+  }, {
+    "name" : "list_scripts",
+    "display_name" : "List Reusable Scripts",
+    "description" : "List Java/Python legacy script archive metadata without executing it.",
+    "category" : "system",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : { },
+      "required" : [ ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "script", "legacy-reader" ]
+  }, {
+    "name" : "list_skill_resources",
+    "display_name" : "List Skill Resources",
+    "description" : "List references, templates, scripts and assets declared inside a skill package.",
+    "category" : "orchestration",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "name" ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "skill", "resource", "discovery" ]
+  }, {
+    "name" : "list_skills",
+    "display_name" : "List Skills",
+    "description" : "Discover compact skill metadata. Use load_skill only for a relevant skill.",
+    "category" : "orchestration",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "query" : {
+          "type" : "string"
+        }
+      },
+      "required" : [ ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "skill", "discovery" ]
+  }, {
+    "name" : "list_workers",
+    "display_name" : "List Java Workers",
+    "description" : "List workspace Java Workers.",
+    "category" : "system",
+    "group" : "worker",
+    "version" : "2.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "include_logs" : { }
+      },
+      "required" : [ ],
+      "additionalProperties" : true
+    },
+    "tags" : [ "java", "execution", "worker" ]
+  }, {
+    "name" : "load_gis_vector",
+    "display_name" : "Load GIS Vector",
+    "description" : "Load bounded GeoJSON, CSV, Shapefile, GeoPackage or KML as GeoJSON.",
+    "category" : "data",
+    "group" : "gis",
+    "version" : "2.0.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : false,
+      "properties" : {
+        "path" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "max_features" : {
+          "type" : "integer",
+          "minimum" : 1,
+          "maximum" : 100000
+        }
+      },
+      "required" : [ "path" ]
+    },
+    "tags" : [ "gis", "java" ]
+  }, {
+    "name" : "load_skill",
+    "display_name" : "Load Skill",
+    "description" : "Load the selected global or workspace SKILL.md without executing embedded code.",
+    "category" : "orchestration",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "name" ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "skill" ]
+  }, {
+    "name" : "move_file",
+    "display_name" : "Move or Rename File",
+    "description" : "Move or Rename File within the current workspace.",
+    "category" : "system",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "DESTRUCTIVE",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "src" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "dst" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "src", "dst" ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "filesystem" ]
+  }, {
+    "name" : "osm_call",
+    "display_name" : "OSM Call",
+    "description" : "Run the Java OSM Call adapter with JSON-string params.",
+    "category" : "data",
+    "group" : "gis",
+    "version" : "2.0.0",
+    "risk" : "NETWORK",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : false,
+      "properties" : {
+        "command" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "params" : {
+          "type" : "string"
+        }
+      },
+      "required" : [ "command" ]
+    },
+    "tags" : [ "gis", "java" ]
+  }, {
+    "name" : "pause_worker",
+    "display_name" : "Pause Java Worker",
+    "description" : "Stop a Worker process while preserving its package and metadata.",
+    "category" : "system",
+    "group" : "worker",
+    "version" : "2.0",
+    "risk" : "PROCESS",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "worker_id" : { },
+        "reason" : { }
+      },
+      "required" : [ "worker_id" ],
+      "additionalProperties" : true
+    },
+    "tags" : [ "java", "execution", "worker" ]
+  }, {
+    "name" : "promote_script_to_operation",
+    "display_name" : "Promote Script To Operation",
+    "description" : "Promote only a successfully executed archived Java script.",
+    "category" : "system",
+    "group" : "operation",
+    "version" : "2.0",
+    "risk" : "WRITE",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "script_path" : { },
+        "operation_id" : { },
+        "overwrite" : { }
+      },
+      "required" : [ "script_path" ],
+      "additionalProperties" : true
+    },
+    "tags" : [ "java", "execution", "operation" ]
+  }, {
+    "name" : "qgis_call",
+    "display_name" : "QGIS Call",
+    "description" : "Run the Java QGIS Call adapter with JSON-string params.",
+    "category" : "data",
+    "group" : "gis",
+    "version" : "2.0.0",
+    "risk" : "NETWORK",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : false,
+      "properties" : {
+        "command" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "params" : {
+          "type" : "string"
+        }
+      },
+      "required" : [ "command" ]
+    },
+    "tags" : [ "gis", "java" ]
+  }, {
+    "name" : "query_features",
+    "display_name" : "Query Features",
+    "description" : "Renderer-backed command rpc.ui.map.query_features.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : {
+        "layer_id" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "layer_id" ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "read_file",
+    "display_name" : "Read File",
+    "description" : "Read File within the current workspace.",
+    "category" : "system",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "file_path" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "offset" : {
+          "type" : "integer",
+          "minimum" : 1,
+          "maximum" : 10000000
+        },
+        "limit" : {
+          "type" : "integer",
+          "minimum" : 1,
+          "maximum" : 20000
+        }
+      },
+      "required" : [ "file_path" ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "filesystem" ]
+  }, {
+    "name" : "read_script",
+    "display_name" : "Read Reusable Script",
+    "description" : "Read an archived script as data; Phase 8B owns Java execution.",
+    "category" : "system",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "path" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "path" ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "script", "legacy-reader" ]
+  }, {
+    "name" : "read_skill_resource",
+    "display_name" : "Read Skill Resource",
+    "description" : "Read one bounded text slice relative to a skill package. Use offset to continue; never executes script content.",
+    "category" : "orchestration",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "max_chars" : {
+          "type" : "integer",
+          "minimum" : 1,
+          "maximum" : 50000
+        },
+        "name" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "offset" : {
+          "type" : "integer",
+          "minimum" : 0,
+          "maximum" : 2147483647
+        },
+        "path" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "name", "path" ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "skill", "resource" ]
+  }, {
+    "name" : "register_raster_tiles",
+    "display_name" : "Register Raster Tiles",
+    "description" : "Register a GeoTIFF for Java XYZ tile rendering.",
+    "category" : "data",
+    "group" : "gis",
+    "version" : "2.0.0",
+    "risk" : "PROCESS",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : false,
+      "properties" : {
+        "path" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "style" : {
+          "type" : "object",
+          "additionalProperties" : true,
+          "properties" : { }
+        }
+      },
+      "required" : [ "path" ]
+    },
+    "tags" : [ "gis", "java" ]
+  }, {
+    "name" : "remember",
+    "display_name" : "Remember",
+    "description" : "Create or deduplicate a scoped durable memory with provenance and confidence.",
+    "category" : "orchestration",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "WRITE",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "kind" : { "type" : "string" },
+        "confidence" : { "type" : "number", "minimum" : 0.0, "maximum" : 1.0 },
+        "scope" : { "type" : "string" },
+        "content" : { "type" : "string", "minLength" : 1 },
+        "metadata" : { "type" : "object", "additionalProperties" : true, "properties" : { } },
+        "importance" : { "type" : "number", "minimum" : 0.0, "maximum" : 1.0 }
+      },
+      "required" : [ "content" ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "memory", "write" ]
+  }, {
+    "name" : "remove_layer",
+    "display_name" : "Remove Layer",
+    "description" : "Renderer-backed command rpc.ui.map.remove_layer.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : {
+        "layer_id" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "layer_id" ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "restart_worker",
+    "display_name" : "Restart Java Worker",
+    "description" : "Restart an existing Java Worker with the same package and id.",
+    "category" : "system",
+    "group" : "worker",
+    "version" : "2.0",
+    "risk" : "PROCESS",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "worker_id" : { }
+      },
+      "required" : [ "worker_id" ],
+      "additionalProperties" : true
+    },
+    "tags" : [ "java", "execution", "worker" ]
+  }, {
+    "name" : "run_operation",
+    "display_name" : "Run Reusable Operation",
+    "description" : "Run a trusted built-in or isolated child-JVM Java Operation at a fixed revision.",
+    "category" : "system",
+    "group" : "operation",
+    "version" : "2.0",
+    "risk" : "PROCESS",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "operation_id" : { },
+        "params" : { },
+        "timeout_seconds" : { },
+        "offline" : { }
+      },
+      "required" : [ "operation_id", "params" ],
+      "additionalProperties" : true
+    },
+    "tags" : [ "java", "execution", "operation" ]
+  }, {
+    "name" : "save_plot",
+    "display_name" : "Save Plot",
+    "description" : "Renderer-backed command rpc.ui.chat.show_image.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : { },
+      "required" : [ ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "set_basemap",
+    "display_name" : "Set Basemap",
+    "description" : "Renderer-backed command rpc.ui.map.set_basemap.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : {
+        "basemap_id" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "basemap_id" ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "set_basemap_visibility",
+    "display_name" : "Set Basemap Visibility",
+    "description" : "Renderer-backed command rpc.ui.map.set_basemap_visibility.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : {
+        "visible" : {
+          "type" : "boolean"
+        }
+      },
+      "required" : [ "visible" ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "set_categorized_style",
+    "display_name" : "Set Categorized Style",
+    "description" : "Renderer-backed command rpc.ui.map.set_layer_renderer.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : {
+        "layer_id" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "field" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "layer_id", "field" ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "set_extrusion_style",
+    "display_name" : "Set Extrusion Style",
+    "description" : "Renderer-backed command rpc.ui.map.set_layer_renderer.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : {
+        "layer_id" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "height_field" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "layer_id", "height_field" ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "set_graduated_style",
+    "display_name" : "Set Graduated Style",
+    "description" : "Renderer-backed command rpc.ui.map.set_layer_renderer.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : {
+        "layer_id" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "field" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "layer_id", "field" ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "set_layer_filter",
+    "display_name" : "Set Layer Filter",
+    "description" : "Renderer-backed command rpc.ui.map.set_layer_filter.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : {
+        "layer_id" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "layer_id" ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "set_layer_label",
+    "display_name" : "Set Layer Label",
+    "description" : "Renderer-backed command rpc.ui.map.set_layer_label.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : {
+        "layer_id" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "layer_id" ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "set_layer_order",
+    "display_name" : "Set Layer Order",
+    "description" : "Renderer-backed command rpc.ui.map.set_layer_order.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : {
+        "layer_ids" : {
+          "type" : "array",
+          "minItems" : 1,
+          "items" : {
+            "type" : "string",
+            "minLength" : 1
+          }
+        }
+      },
+      "required" : [ "layer_ids" ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "set_layer_visual_variables",
+    "display_name" : "Set Layer Visual Variables",
+    "description" : "Renderer-backed command rpc.ui.map.update_visual_variables.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : {
+        "layer_id" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "layer_id" ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "set_map_camera",
+    "display_name" : "Set Map Camera",
+    "description" : "Renderer-backed command rpc.ui.map.set_camera.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : { },
+      "required" : [ ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "set_raster_style",
+    "display_name" : "Set Raster Style",
+    "description" : "Renderer-backed command rpc.ui.map.set_raster_style.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : {
+        "layer_id" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "layer_id" ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "start_dynamic_map_worker",
+    "display_name" : "Start Dynamic Map Worker",
+    "description" : "Create a Java Worker that publishes ordered full/diff dynamic-map frames.",
+    "category" : "system",
+    "group" : "worker",
+    "version" : "2.0",
+    "risk" : "PROCESS",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "name" : { },
+        "description" : { },
+        "entry_class" : { },
+        "code" : { },
+        "config" : { },
+        "permissions" : { },
+        "dependencies" : { },
+        "auto_restart" : { }
+      },
+      "required" : [ "name", "code" ],
+      "additionalProperties" : true
+    },
+    "tags" : [ "java", "execution", "worker" ]
+  }, {
+    "name" : "start_worker",
+    "display_name" : "Start Java Worker",
+    "description" : "Create and start a persistent OpenGisWorker service package.",
+    "category" : "system",
+    "group" : "worker",
+    "version" : "2.0",
+    "risk" : "PROCESS",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "name" : { },
+        "description" : { },
+        "entry_class" : { },
+        "code" : { },
+        "config" : { },
+        "permissions" : { },
+        "dependencies" : { },
+        "auto_restart" : { }
+      },
+      "required" : [ "name", "code" ],
+      "additionalProperties" : true
+    },
+    "tags" : [ "java", "execution", "worker" ]
+  }, {
+    "name" : "transform_geojson_crs",
+    "display_name" : "Transform GeoJSON CRS",
+    "description" : "Transform a vector dataset to another CRS and save GeoJSON.",
+    "category" : "data",
+    "group" : "gis",
+    "version" : "2.0.0",
+    "risk" : "WRITE",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : false,
+      "properties" : {
+        "input_path" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "output_path" : {
+          "type" : "string"
+        },
+        "source_crs" : {
+          "type" : "string"
+        },
+        "target_crs" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "max_features" : {
+          "type" : "integer",
+          "minimum" : 1,
+          "maximum" : 100000
+        }
+      },
+      "required" : [ "input_path", "target_crs" ]
+    },
+    "tags" : [ "gis", "java" ]
+  }, {
+    "name" : "update_layer_style",
+    "display_name" : "Update Layer Style",
+    "description" : "Renderer-backed command rpc.ui.map.set_layer_style.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : {
+        "layer_id" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "layer_id" ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "update_legend_spec",
+    "display_name" : "Update Legend Spec",
+    "description" : "Renderer-backed command rpc.ui.map.update_legend_spec.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : {
+        "layer_id" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "layer_id" ]
+    },
+    "tags" : [ "renderer" ]
+  }, {
+    "name" : "update_memory",
+    "display_name" : "Update Memory",
+    "description" : "Correct memory content, confidence, importance, status, or metadata by id.",
+    "category" : "orchestration",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "WRITE",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "importance" : { "type" : "number", "minimum" : 0.0, "maximum" : 1.0 },
+        "id" : { "type" : "string", "minLength" : 1 },
+        "confidence" : { "type" : "number", "minimum" : 0.0, "maximum" : 1.0 },
+        "content" : { "type" : "string" },
+        "metadata" : { "type" : "object", "additionalProperties" : true, "properties" : { } },
+        "status" : { "type" : "string" }
+      },
+      "required" : [ "id" ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "memory", "write" ]
+  }, {
+    "name" : "validate_operation",
+    "display_name" : "Validate Reusable Operation",
+    "description" : "Validate manifest, schema, Maven dependencies and Java source compilation.",
+    "category" : "system",
+    "group" : "operation",
+    "version" : "2.0",
+    "risk" : "PROCESS",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "operation_id" : { },
+        "params" : { },
+        "offline" : { }
+      },
+      "required" : [ "operation_id" ],
+      "additionalProperties" : true
+    },
+    "tags" : [ "java", "execution", "operation" ]
+  }, {
+    "name" : "wait_worker_update",
+    "display_name" : "Wait For Worker Update",
+    "description" : "Wait for a Worker state_version change without polling loops.",
+    "category" : "system",
+    "group" : "worker",
+    "version" : "2.0",
+    "risk" : "READ",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "worker_id" : { },
+        "after_version" : { },
+        "timeout" : { }
+      },
+      "required" : [ "worker_id" ],
+      "additionalProperties" : true
+    },
+    "tags" : [ "java", "execution", "worker" ]
+  }, {
+    "name" : "webfetch",
+    "display_name" : "Fetch Web Page",
+    "description" : "Fetch an HTTP or HTTPS resource with bounded redirects and timeout.",
+    "category" : "system",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "NETWORK",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "timeout" : {
+          "type" : "integer",
+          "minimum" : 1,
+          "maximum" : 120
+        },
+        "format" : {
+          "type" : "string",
+          "enum" : [ "markdown", "text", "html" ]
+        },
+        "url" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "url" ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "network" ]
+  }, {
+    "name" : "write_file",
+    "display_name" : "Write File",
+    "description" : "Write File within the current workspace.",
+    "category" : "system",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "WRITE",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "overwrite" : {
+          "type" : "boolean"
+        },
+        "file_path" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "content" : {
+          "type" : "string"
+        }
+      },
+      "required" : [ "file_path", "content" ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "filesystem" ]
+  }, {
+    "name" : "write_report_section",
+    "display_name" : "Write Report Section",
+    "description" : "Append one Markdown section and keep report assets inside the workspace.",
+    "category" : "report",
+    "group" : "report",
+    "version" : "1.0.0",
+    "risk" : "WRITE",
+    "input_schema" : {
+      "type" : "object",
+      "properties" : {
+        "output_dir" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "heading" : {
+          "type" : "string",
+          "minLength" : 1
+        },
+        "content" : {
+          "type" : "string"
+        },
+        "title" : {
+          "type" : "string"
+        },
+        "figures" : {
+          "type" : "string"
+        }
+      },
+      "required" : [ "output_dir", "heading", "content" ],
+      "additionalProperties" : false
+    },
+    "tags" : [ "markdown" ]
+  }, {
+    "name" : "zoom_to_layer",
+    "display_name" : "Zoom To Layer",
+    "description" : "Renderer-backed command rpc.ui.map.zoom_to_layer.",
+    "category" : "visualization",
+    "group" : "core",
+    "version" : "1.0.0",
+    "risk" : "UI",
+    "input_schema" : {
+      "type" : "object",
+      "additionalProperties" : true,
+      "properties" : {
+        "layer_id" : {
+          "type" : "string",
+          "minLength" : 1
+        }
+      },
+      "required" : [ "layer_id" ]
+    },
+    "tags" : [ "renderer" ]
+  } ]
+}

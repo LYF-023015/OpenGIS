@@ -44,7 +44,7 @@ class RpcConnectionTest {
     List<String> sent = new ArrayList<>();
     RpcConnection connection = connection(sent);
     CompletableFuture<JsonNode> pending = connection.request("rpc.ui.map.get_state", Map.of());
-    String requestId = objectMapper.readTree(sent.getFirst()).path("id").asText();
+    String requestId = objectMapper.readTree(sent.getFirst()).path("id").asString();
 
     boolean accepted =
         connection.acceptResponse(
