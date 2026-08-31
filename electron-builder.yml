@@ -11,11 +11,11 @@ files:
   - "resources/icons/**/*"
 
 extraResources:
-  - from: "java-backend/opengis-server/target/runtime/"
+  - from: "java-backend/server/target/runtime/"
     to: "java-runtime/"
     filter:
       - "**/*"
-  - from: "java-backend/opengis-server/target/opengis-server-0.1.0-SNAPSHOT.jar"
+  - from: "java-backend/server/target/opengis-server-0.1.0-SNAPSHOT.jar"
     to: "java-backend/opengis-server.jar"
   - from: "resources/icons/"
     to: "icons/"

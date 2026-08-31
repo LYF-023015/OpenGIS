@@ -6,22 +6,11 @@
   <artifactId>opengis-parent</artifactId>
   <version>0.1.0-SNAPSHOT</version>
   <packaging>pom</packaging>
-  <name>OpenGIS Java Migration</name>
+  <name>OpenGIS Java Backend</name>
 
   <modules>
-    <module>opengis-common</module>
-    <module>opengis-framework</module>
-    <module>opengis-platform</module>
-    <module>opengis-script-sdk</module>
-    <module>opengis-ai</module>
-    <module>opengis-knowledge</module>
-    <module>opengis-tool</module>
-    <module>opengis-code</module>
-    <module>opengis-agent</module>
-    <module>opengis-workflow</module>
-    <module>opengis-gis</module>
-    <module>opengis-worker</module>
-    <module>opengis-server</module>
+    <module>script-sdk</module>
+    <module>server</module>
   </modules>
 
   <properties>
@@ -42,6 +31,7 @@
     <geotools.version>35.0</geotools.version>
     <unit-api.version>2.2</unit-api.version>
     <javaparser.version>3.28.2</javaparser.version>
+    <victools.version>5.0.0</victools.version>
   </properties>
 
   <dependencyManagement>
@@ -79,6 +69,21 @@
         <groupId>com.google.re2j</groupId>
         <artifactId>re2j</artifactId>
         <version>1.8</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.victools</groupId>
+        <artifactId>jsonschema-generator</artifactId>
+        <version>${victools.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.victools</groupId>
+        <artifactId>jsonschema-module-jackson</artifactId>
+        <version>${victools.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.victools</groupId>
+        <artifactId>jsonschema-module-swagger-2</artifactId>
+        <version>${victools.version}</version>
       </dependency>
       <dependency>
         <groupId>org.springframework.boot</groupId>
@@ -149,6 +154,8 @@
         <configuration>
           <failIfNoTests>false</failIfNoTests>
           <useModulePath>false</useModulePath>
+          <!-- Avoid intermittent Windows manifest-classpath root mismatches in forked tests. -->
+          <useSystemClassLoader>false</useSystemClassLoader>
         </configuration>
       </plugin>
       <plugin>

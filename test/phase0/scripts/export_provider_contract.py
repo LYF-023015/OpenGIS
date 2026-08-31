@@ -46,7 +46,7 @@ def main() -> None:
 
     write_json(OUT / "provider-migration.json", {
         "schema_version": "1.0",
-        "source": "src/features/settings/providerMap.ts",
+        "source": "src/plugins/system/settings/model/providerMap.ts",
         "decision_policy": "Preserve every public preset during migration; certify wire compatibility by tier. No provider is silently removed.",
         "providers": providers,
     })

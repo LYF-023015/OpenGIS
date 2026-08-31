@@ -83,7 +83,7 @@ The project is under active development. The current goal is not to replace all 
 <p align="center">
   <img src="resources/assets/1.png" alt="Agent Chat: Streaming Code, Tool Calls, Chart Output" width="100%" />
 </p>
-<p align="center"><sub>The Agent can read data, execute Python, generate charts, and display images / map results back in the chat and on the map.</sub></p>
+<p align="center"><sub>The Agent can read data, execute controlled Java code, generate charts, and display images / map results back in the chat and on the map.</sub></p>
 
 <br>
 <p align="center">
@@ -102,12 +102,12 @@ The project is under active development. The current goal is not to replace all 
 ### 2.1 Agent Capabilities
 
 - **Function-call Agent Loop**: Structured tool calls as the primary path, avoiding the old CodeAct era of guessing code blocks and tool calls from plain text.
-- **Code Execution**: Controlled Python execution for ad-hoc GIS analysis, data cleaning, charting, and long-tail algorithm validation.
+- **Code Execution**: Controlled Java code is statically checked, compiled, and run in an isolated child JVM for ad-hoc GIS analysis, data cleaning, and long-tail algorithm validation.
 - **Tool Governance**: All tools go through unified schema, permissions, result normalization, event archiving, and frontend display.
 - **Plan / Sub-Agent / Workflow**: Plan, Subagent, and Workflow all share the same session / run / MessagePart protocol.
 - **Memory & Knowledge Retention**: Structured MemoryStore, ContextProjector, KnowledgeExtractor, and FailureMemory jointly manage context and experience.
 - **Operation Reuse**: A complex analysis can be distilled into an editable, verifiable, runnable, workspace-shareable Operation.
-- **Worker Background Tasks**: With user approval, the Agent can create / restart / pause / delete resident Python Workers for dynamic data ingestion and real-time map rendering.
+- **Worker Background Tasks**: With user approval, the Agent can create / restart / pause / delete resident Java Workers running in isolated child JVMs for dynamic data ingestion and real-time map rendering.
 
 ### 2.2 GIS & Map Capabilities
 
@@ -147,16 +147,21 @@ Java Backend (Spring Boot + Spring AI)
   ├─ WebSocket JSON-RPC service
   ├─ Agent loop / session / memory / tool runtime
   ├─ GIS / OSM / datasource / raster / operation / workflow / worker integration
+  ├─ PluginRuntime: dependency-ordered built-in capability assembly
   └─ Java Worker processes
 ```
 
 | Layer | Technology | Responsibilities | Key Directories |
 |---|---|---|---|
 | Electron Main | Electron 30 + Node | Window, menu, IPC, Java backend lifecycle | `electron/` |
-| Renderer | React 18 + TypeScript + Zustand | UI, map, layer state, reverse RPC handlers | `src/features/`, `src/services/`, `src/stores/` |
-| Map Engine | MapLibre GL JS | WebGL map, source/layer sync, export | `src/features/map/` |
+| Renderer | React 18 + TypeScript + Zustand | UI, map, layer state, reverse RPC handlers | `src/app/`, `src/shell/`, `src/plugins/`, `src/shared/` |
+| Map Engine | MapLibre GL JS | WebGL map, source/layer sync, export | `src/plugins/gis/map/` |
 | Java Backend | Java 21 + Spring Boot + Spring AI | JSON-RPC, Agent, Tool, Workflow, GIS, Worker | `java-backend/` |
-| Java Worker | Java process | Background dynamic data, continuous rendering | `java-backend/opengis-worker/` |
+| Java Plugin Host | Plain Java `PluginRuntime` | Tool catalogs, memory, GIS and execution capability assembly | `java-backend/server/src/org/opengis/framework/`, `java-backend/server/src/org/opengis/plugins/` |
+| Renderer Plugin Host | TypeScript | RPC bridge, map extensions and UI contributions | `src/app/plugins/` |
+| Java Worker | Java process | Background dynamic data, continuous rendering | `java-backend/server/src/org/opengis/worker/` |
+
+The plugin boundary follows **stable kernel + domain modules + capability plugins**. The kernel only owns lifecycle, dependency ordering, profiles and service lookup; domain modules implement Agent, Tool, GIS and Workflow behavior; capability plugins register cross-module adapters at the composition boundary. Plugins are compiled into the application—not hot-loaded scripts or a marketplace. See [`docs/architecture/plugin-architecture.md`](docs/architecture/plugin-architecture.md).
 
 ### 3.2 Communication: Bidirectional JSON-RPC
 
@@ -178,14 +183,14 @@ Java -> Renderer
   chat / event notification
 ```
 
-The frontend `src/services/pythonClient.ts` handles WebSocket connection, request timeouts, notification dispatch, and dynamic map event buffering. Inbound `rpc.ui.*` notifications go to `src/services/rpc/handlers/` and ultimately write to Zustand stores or directly invoke MapEngine.
+The frontend `src/shared/backend/backendClient.ts` handles WebSocket connection, request timeouts, notification dispatch, and dynamic map event buffering. The `rpc-bridge` plugin registers inbound `rpc.ui.*` notifications with `src/shared/backend/rpc/handlers/`, which ultimately write to Zustand stores or invoke MapEngine.
 
 Key principles:
 
-- **Map state lives in the frontend**: Python does not hold MapLibre handles; all layer state is authoritative in the frontend store.
-- **Heavy computation in Python**: Spatial analysis, raster processing, model inference, Operations, and Workers run in Python.
-- **UI operations via reverse RPC**: Python tools command the frontend to load layers, update styles, and switch views through `rpc.ui.map.*`.
-- **Dynamic data via notification stream**: Worker stdout outputs one line of JSON; the sidecar parses and forwards it to the frontend dynamic handler.
+- **Map state lives in the frontend**: Java does not hold MapLibre handles; all layer state is authoritative in the frontend store.
+- **Domain computation runs in Java**: Spatial analysis, raster processing, model inference, Operations, Workflows, and Workers are implemented by Java modules.
+- **UI operations use reverse RPC**: Java tools command the frontend to load layers, update styles, and switch views through `rpc.ui.map.*`.
+- **Dynamic data uses notifications**: Workers emit structured events that the sidecar forwards to the frontend dynamic handler.
 
 ### 3.3 Agent Architecture
 
@@ -201,20 +206,20 @@ AgentProfile
   -> EventLog / RunArchive / MessagePart
 ```
 
-| Module | Responsibilities | Directory |
+| Domain package | Responsibilities | Directory |
 |---|---|---|
-| `opengis-agent` | Spring AI Agent runner, SessionCoordinator, RuntimeControl, context and archives | `java-backend/opengis-agent/` |
-| `opengis-tool` | ToolRuntime, schema validation, permission and artifact handling | `java-backend/opengis-tool/` |
-| `opengis-ai` | Spring AI model configuration and provider projection | `java-backend/opengis-ai/` |
-| `opengis-workflow` | Workflow model, storage, output passing and DAG orchestration | `java-backend/opengis-workflow/` |
+| `agent` | Spring AI Agent runner, SessionCoordinator, RuntimeControl, context and archives | `java-backend/server/src/org/opengis/agent/` |
+| `tool` | ToolRuntime, schema validation, permission and artifact handling | `java-backend/server/src/org/opengis/tool/` |
+| `ai` | Spring AI model configuration and provider projection | `java-backend/server/src/org/opengis/ai/` |
+| `workflow` | Workflow model, storage, output passing and DAG orchestration | `java-backend/server/src/org/opengis/workflow/` |
 
 #### 3.3.1 Function-call First
 
-OpenGIS now uses function calls as the primary Agent path. The model outputs structured tool calls, and the framework executes tools by schema and returns structured results. Python code execution remains a tool but is no longer the loop control protocol.
+OpenGIS now uses function calls as the primary Agent path. The model outputs structured tool calls, and the framework executes tools by schema and returns structured results. Code execution remains a governed tool but is no longer the loop control protocol.
 
 This addresses several issues from the old CodeAct:
 
-- Agent reply text is no longer mistakenly executed as Python code.
+- Agent reply text is never mistaken for executable code.
 - Tool parameters are constrained by schema, not natural language parsing.
 - The frontend can uniformly display tools, code, artifacts, Operations, Workers, and errors.
 - Permission approval, tool pruning, result compression, and run archiving all have unified entry points.
@@ -227,14 +232,14 @@ Agent output is no longer a single mixed block of text, but event-driven `Messag
 |---|---|
 | `text` | Normal Agent reply |
 | `tool` | Tool call and result |
-| `code` | Generated / executed Python code |
+| `code` | Generated / executed Java code (legacy Python records remain replayable) |
 | `artifact` | Images, reports, files, layers, etc. |
 | `operation` | Operation run block |
 | `progress` | Current bottom status bar |
 | `plan` | Plan / Workflow progress |
 | `error` | Errors and interruptions |
 
-The frontend Chat directly renders MessageParts. Default tool calls are collapsed; Python code is collapsible; execution output is compressed by default; images and locally-referenced Markdown resources are rendered through secure path conversion.
+The frontend Chat directly renders MessageParts. Default tool calls are collapsed; code blocks are collapsible; execution output is compressed by default; images and locally-referenced Markdown resources are rendered through secure path conversion.
 
 #### 3.3.3 Loop Convergence & Anomaly Protection
 
@@ -256,13 +261,13 @@ Current naming conventions:
 | **Skill** | A user / project injectable knowledge, flow, constraint, or capability package that can influence context and tool selection | External skill packages, project-level docs | Project / user level |
 | **Operation** | A reusable software-level atomic operation with input/output schemas, dependencies, main program, docs, and run history | DBSCAN clustering, KDE, format conversion | Built-in + workspace |
 | **Workflow** | DAG multi-step task orchestration where nodes define input/output descriptions | Academic reports, watershed analysis | `.flow.json` |
-| **Worker** | A resident Python service for continuous data processing and dynamic rendering | Flight tracking, dynamic points, real-time trajectories | Workspace |
+| **Worker** | A resident Java service in an isolated child JVM for continuous data processing and dynamic rendering | Flight tracking, dynamic points, real-time trajectories | Workspace |
 
 Legacy code sometimes called tools "skills." In the new architecture, avoid mixing: **Tools are tools, external capability packages are Skills, reusable algorithms are Operations.**
 
 ### 3.5 Tool Runtime
 
-Tools are centralized in `java-backend/opengis-tool/`, with GIS tools in `java-backend/opengis-gis/`:
+Tools are centralized in `java-backend/server/src/org/opengis/tool/`, with GIS tools in `java-backend/server/src/org/opengis/gis/`:
 
 | Tool Group | Representative Tools | Description |
 |---|---|---|
@@ -282,7 +287,7 @@ Tools are centralized in `java-backend/opengis-tool/`, with GIS tools in `java-b
 
 ToolRuntime is responsible for:
 
-- Registering Python functions as LLM-visible JSON schemas.
+- Registering `OpenGisTool` implementations as LLM-visible JSON schemas.
 - Performing parameter validation and permission decisions before execution.
 - Normalizing output, truncating large results, and generating artifact pointers after execution.
 - Writing tool calls / results to RunArchive and MessagePart.
@@ -363,15 +368,14 @@ The frontend Workflow UI and Plan UI share the MessagePart protocol but display 
 
 Operation is a more stable reuse unit than scripts. It distills a complex exploration into a reusable, modifiable, verifiable atomic capability.
 
-An Operation contains:
+A workspace Operation contains:
 
 ```text
 operation/
-  manifest.json      # Name, description, input/output schema, dependencies, version
-  main.py            # Single entry point
+  operation.json     # Name, description, input/output schema, dependencies, version
+  src/main/java/...  # Single OpenGisScript entry point
   README.md          # Usage instructions
-  examples/          # Example parameters
-  runs/              # Run history
+  revisions/         # Auditable historical versions
 ```
 
 Two types of Operations:
@@ -390,7 +394,7 @@ The frontend Operation panel uses a list + detail structure, and Chat also displ
 
 ### 3.10 Worker Architecture
 
-Worker is a resident Python service suitable for:
+Worker is a resident Java service running in an isolated child JVM, suitable for:
 
 - Continuously polling external APIs.
 - Real-time reading of dynamic data.
@@ -401,52 +405,38 @@ Worker service package structure:
 
 ```text
 worker/<name>-<worker_id>/
-  main.py              # Single entry point
-  opengis_worker.py    # Auto-generated OpenGIS helper, should not be manually edited
-  config.json          # worker_id, interval_seconds, layer ids, API parameters
-  manifest.json        # Service metadata, permissions, dynamic layer declarations
+  manifest.json        # Runtime, entry class, dependencies and permissions
+  config.json          # Interval, layer ids and API parameters
+  metadata.json        # State, restart count and runtime information
   README.md
   stdout.log
   stderr.log
-  metadata.json
-  src/
-    datasource.py      # Data fetching
-    service.py         # State and business logic
-    publisher.py       # OpenGIS output adapter
+  src/main/java/.../Worker.java
 ```
 
-Dynamic map protocol:
+The entry class implements `OpenGisWorker` and publishes ordered full / diff map events through the SDK:
 
-```python
-from opengis_worker import emit_moving_objects
-
-emit_moving_objects(
-    point_layer_id="live_points",
-    track_layer_id="live_tracks",
-    points=[{"id": "p1", "lon": 121.5, "lat": 31.2}],
-    tracks={"p1": [[121.5, 31.2], [121.51, 31.21]]},
-    sequence=1,
-)
+```java
+public final class FlightWorker implements OpenGisWorker {
+  @Override
+  public void run(WorkerContext context) throws Exception {
+    context.publish("rpc.ui.map.dynamic_layer_update", frame);
+  }
+}
 ```
 
-The helper outputs to stdout:
-
-```json
-{"opengis_method":"rpc.ui.map.dynamic_layer_update","params":{...}}
-```
-
-The worker manager parses stdout, supplements `worker_id`, `worker_name`, `workspace_path`, `worker_started_at`, and forwards to the frontend. The frontend dynamic handler updates the layer store and instantly syncs MapLibre sources.
+The worker manager handles compilation, the child JVM, event forwarding, bounded restart, resource sampling, and process-tree cleanup. The frontend dynamic handler updates the layer store and instantly syncs MapLibre sources.
 
 Constraints:
 
 - Default max of two running workers.
 - Start, restart, pause, and delete require permission governance.
 - Background continuous tasks must use workers, not `execute_code`.
-- Entry point must be `main.py`; auxiliary modules are allowed but multiple entry points are not.
+- The entry class must implement `OpenGisWorker`; legacy Python Workers are read-only and produce a migration report rather than executing in Java mode.
 
 ### 3.11 Map & Rendering Architecture
 
-The frontend map is managed by `src/features/map/engine/MapEngine.ts`. Renderers are split across `src/features/map/renderers/`:
+The frontend map is managed by `src/plugins/gis/map/engine/MapEngine.ts`. Renderers are split across `src/plugins/gis/map/renderers/`:
 
 | Renderer | Purpose |
 |---|---|
@@ -459,7 +449,7 @@ The frontend map is managed by `src/features/map/engine/MapEngine.ts`. Renderers
 | `rasterRenderer` | Raster |
 | `extrusionRenderer` | 3D extrusion |
 
-Layer data parsing is in `src/services/geo/parsers/`. Large vector data uses handle-based strategies to avoid repeatedly stuffing entire GeoJSON into the React store. Raster data supports both frontend parsing and backend server-side tile paths.
+Layer data parsing is in `src/shared/geo/parsers/`. Large vector data uses handle-based strategies to avoid repeatedly stuffing entire GeoJSON into the React store. Raster data supports both frontend parsing and backend server-side tile paths.
 
 The style system supports:
 
@@ -492,7 +482,7 @@ Layout Composer is a canvas system for cartographic export, targeting the basic 
 - Export images.
 - Expose canvas elements as Agent tools for natural-language cartography.
 
-Current implementation is in `src/features/layout-composer/`.
+Current implementation is in `src/plugins/gis/layout/`.
 
 ### 3.14 Permissions & Security
 
@@ -506,7 +496,7 @@ OpenGIS is not a hard sandbox product, but provides multiple safety layers:
 | Worker | Start / restart / delete approval, max running limit |
 | RunArchive | Complete event and tool call audit trail |
 | Workspace | Git snapshot, rollback capable |
-| JavaScript Execution | Isolated child JVM, interruptible, process tree cleanup |
+| Java Code Execution | Isolated child JVM, interruptible, process tree cleanup |
 
 ### 3.15 Project Directory
 
@@ -514,29 +504,20 @@ OpenGIS is not a hard sandbox product, but provides multiple safety layers:
 OpenGIS/
   electron/                         # Electron main / preload
   src/
-    features/
-      chat/                         # MessagePart Chat UI
-      map/                          # MapLibre engine / renderers / identify
-      layers/                       # Layer management and style panel
-      assets/                       # File asset browsing
-      workflows/                    # Workflow editor
-      operations/                   # Operation UI
-      workers/                      # Worker management panel
-      layout-composer/              # Cartographic canvas
-      pivot/                        # Data pivot
-      settings/                     # Settings
-    services/
-      rpc/                          # Frontend JSON-RPC dispatcher / handlers
-      geo/                          # Data types, parsers, raster / vector tools
-    stores/                         # Zustand stores
+    app/                            # React startup and plugin runtime
+    shell/                          # Desktop workbench shell
+    plugins/
+      assistant/                    # Chat and approval
+      workspace/                    # Assets, viewers and Java scripts
+      gis/                          # Map, layers, analysis, layout and operations
+      automation/                   # Workflows, workers and runs
+      system/                       # Settings and tool/skill catalog
+    shared/                         # JSON-RPC, geo contracts and shared UI
   java-backend/
-    opengis-agent/                  # Spring AI Agent orchestration
-    opengis-ai/                     # Provider and model adapters
-    opengis-tool/                   # Tool registry and runtime
-    opengis-gis/                    # GIS / OSM / QGIS / datasource
-    opengis-workflow/               # Workflow orchestration
-    opengis-worker/                 # Worker manager and protocol
-    opengis-server/                 # Spring Boot and JSON-RPC transport
+    server/src/org/opengis/         # One Spring Boot modular monolith
+      core/ assistant/ gis/ automation/ tool/ server/
+    script-sdk/                     # Stable API for isolated Java scripts and workers
+  python-backend/                   # Explicit dev fallback / migration reference; excluded from production packages
   resources/                        # Icons, screenshots, static assets
   docs/                             # Design records and bug scans
 ```
@@ -566,28 +547,14 @@ cd OpenGIS
 npm install
 ```
 
-### 4.4 Install Python Backend Environment
+### 4.4 Verify the Java Backend
 
-```bash
-npm run setup:python
+```powershell
+cd java-backend
+./mvnw.cmd verify
 ```
 
-This command creates a shared virtual environment in the user data directory and installs Python dependencies. Both dev mode and packaged applications reuse this environment, avoiding the need to maintain two sets of Python dependencies between source and installed locations.
-
-Typical paths:
-
-```text
-macOS:   ~/Library/Application Support/opengis/venv
-Windows: %APPDATA%/opengis/venv
-Linux:   ~/.config/opengis/venv
-```
-
-If GDAL, Fiona, or Rasterio fail to install on Windows / macOS, use conda for binary dependencies first:
-
-```bash
-conda install -c conda-forge geopandas rasterio fiona pyproj shapely -y
-npm run setup:python
-```
+The Maven Wrapper runs the full Java module test suite with the repository's pinned Maven configuration. Production packaging uses `npm run build:java-runtime` to create the bundled Java runtime; a separate Maven installation is normally unnecessary.
 
 ### 4.5 Start Development Mode
 
@@ -658,20 +625,21 @@ cd java-backend
 
 ### 5.2 Adding a Tool
 
-1. Implement `OpenGisTool` in `java-backend/opengis-tool/` (or `opengis-gis/` for GIS tools).
+1. Implement `OpenGisTool` in `java-backend/server/src/org/opengis/tool/` (or `java-backend/server/src/org/opengis/gis/` for GIS tools).
 2. Declare its `ToolDefinition`, JSON schema, group and risk level.
 3. Access workspace, cancellation and UI RPC via `ToolExecutionContext`.
-4. For map operations, prefer sending `rpc.ui.map.*` reverse RPC; do not maintain map state in Python.
-5. Add tests covering at least parameter validation and return structure.
+4. Contribute it from the owning `ToolCatalogPlugin`; place cross-domain adapters in `java-backend/server/src/org/opengis/plugins/`.
+5. For map operations, prefer sending `rpc.ui.map.*` reverse RPC; do not maintain map state in the Java backend.
+6. Add tests covering parameter validation, permission, return structure, and contribution rollback.
 
 ### 5.3 Adding Map Capabilities
 
 Map capabilities typically require changes on both sides:
 
 1. Backend tool: Declare the Agent-callable entry point.
-2. Frontend RPC handler: Receive `rpc.ui.map.*` in `src/services/rpc/handlers/map/`.
+2. Frontend RPC handler: Receive `rpc.ui.map.*` in `src/shared/backend/rpc/handlers/map/`.
 3. Store: Extend `MapLayerDefinition` or `LayerStyle` if needed.
-4. Renderer: Extend MapLibre paint / layout in `src/features/map/renderers/`.
+4. Renderer: Extend MapLibre paint / layout in `src/plugins/gis/map/renderers/`.
 5. UI: If users need manual control, add an edit entry in the layer or style panel.
 
 ### 5.4 Adding an Operation
@@ -679,7 +647,7 @@ Map capabilities typically require changes on both sides:
 Built-in Operations go in:
 
 ```text
-java-backend/opengis-gis/src/main/java/org/opengis/gis/operation/builtin/
+java-backend/server/src/org/opengis/gis/operation/builtin/
 ```
 
 Recommended structure:
@@ -688,7 +656,7 @@ Recommended structure:
 MyOperation.java
 ```
 
-`manifest.json` should clearly describe:
+The Operation definition should clearly describe:
 
 - Input schema.
 - Output schema.
@@ -698,13 +666,13 @@ MyOperation.java
 
 ### 5.5 Adding Worker Scenarios
 
-Workers should not be written as a single large script. Recommended structure:
+Workers should not be written as a single large class. Split a Java package by responsibility:
 
 ```text
-main.py              # Load config, start loop
-src/datasource.py    # Fetch data
-src/service.py       # Update state, trajectories, filters
-src/publisher.py     # emit_dynamic_points / emit_moving_objects
+Worker.java          # Implements OpenGisWorker and owns lifecycle
+Datasource.java      # Fetch data
+WorkerService.java   # Update state, trajectories and filters
+Publisher.java       # Publish full / diff dynamic-map events
 ```
 
 Dynamic maps must ensure:
@@ -713,14 +681,14 @@ Dynamic maps must ensure:
 - Full first frame, subsequent diffs, or use high-level helpers for automatic handling.
 - Stable feature IDs.
 - Monotonically increasing sequence.
-- Do not write infinite loops in `execute_code`.
+- Do not write infinite loops in `execute_code`; continuous jobs must use Workers.
 
 ### 5.6 Windows Notes
 
 - Paths may contain spaces and Chinese characters; use `Path` / JSON parameters, not shell string concatenation.
-- Python venv paths and Electron packaging paths differ; avoid hardcoding macOS paths.
-- Subprocess cancellation on Windows uses `CTRL_BREAK_EVENT` and `taskkill /F /T`; consider process tree cleanup when adding background processes.
-- GDAL / Rasterio are recommended to use precompiled wheels or conda-forge.
+- Development JDK and bundled jlink runtime paths differ; do not hardcode a local JDK path.
+- Java code and Workers run in child JVMs; every new background process must integrate cancellation and process-tree cleanup.
+- Native GIS libraries are optional enhancements; the Java modules provide the baseline GeoJSON, OSM, JTS, and GeoTIFF capabilities.
 
 ## 6. Roadmap
 

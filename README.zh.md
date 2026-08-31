@@ -83,7 +83,7 @@ OpenGIS 是一个基于 Agent 的开源 GIS 桌面应用。它不是一个简单
 <p align="center">
   <img src="resources/assets/1.png" alt="Agent 对话：流式代码、工具调用、图表输出" width="100%" />
 </p>
-<p align="center"><sub>Agent 可以读取数据、执行 Python、生成图表，并把图片 / 地图结果回显到对话和地图中。</sub></p>
+<p align="center"><sub>Agent 可以读取数据、执行受控 Java 代码、生成图表，并把图片 / 地图结果回显到对话和地图中。</sub></p>
 
 <br>
 <p align="center">
@@ -102,12 +102,12 @@ OpenGIS 是一个基于 Agent 的开源 GIS 桌面应用。它不是一个简单
 ### 2.1 Agent 能力
 
 - **Function-call Agent Loop**：以结构化 tool call 为主，避免旧 CodeAct 时代从文本里猜代码块和工具调用。
-- **代码执行**：保留受控 Python 执行工具，适合临时 GIS 分析、数据清洗、绘图和长尾算法验证。
+- **代码执行**：受控 Java 代码经过静态检查和编译后在独立子 JVM 中运行，适合临时 GIS 分析、数据清洗和长尾算法验证。
 - **工具治理**：所有工具经过统一 schema、权限、结果归一化、事件归档和前端展示。
 - **计划 / 子 Agent / Workflow**：Plan、Subagent、Workflow 都归入同一套 session / run / MessagePart 协议。
 - **记忆与知识沉淀**：结构化 MemoryStore、ContextProjector、KnowledgeExtractor、FailureMemory 共同管理上下文和经验。
 - **Operation 复用**：一次复杂分析可以沉淀成可编辑、可验证、可运行、跨 workspace 共享的 Operation。
-- **Worker 后台任务**：Agent 可以经用户批准创建 / 重启 / 暂停 / 删除常驻 Python Worker，用于动态数据接入和实时地图渲染。
+- **Worker 后台任务**：Agent 可以经用户批准创建 / 重启 / 暂停 / 删除独立 JVM 中的常驻 Java Worker，用于动态数据接入和实时地图渲染。
 
 ### 2.2 GIS 与地图能力
 
@@ -123,7 +123,7 @@ OpenGIS 是一个基于 Agent 的开源 GIS 桌面应用。它不是一个简单
 
 - **Workflow**：面向多步骤分析的 DAG，节点可描述接收上游什么内容、输出什么内容。
 - **Operation**：软件级原子操作，包含输入结构、输出结构、依赖、代码、说明和运行记录。
-- **Worker**：常驻 Python 服务包，结构固定为 `main.py + config.json + manifest.json + src/`，适合实时数据、轮询 API、动态渲染。
+- **Worker**：常驻 Java 服务包，入口实现 `OpenGisWorker`，适合实时数据、轮询 API 和动态渲染。
 - **Project Skills**：skills 是项目级能力 / 知识包，区别于 tool。Tool 是 Agent 可直接调用的函数；Skill 是用户接入的上下文、流程、约束或能力集合。
 - **Run Archive**：每一轮 Agent 执行都归档为事件流、工具调用、MessagePart、artifact 和元数据。
 
@@ -131,48 +131,52 @@ OpenGIS 是一个基于 Agent 的开源 GIS 桌面应用。它不是一个简单
 
 ### 3.1 总体进程模型
 
-OpenGIS 是一个 **Electron 桌面壳 + React Renderer + Python Sidecar + Python 子进程 / Worker** 的混合架构：
+OpenGIS 是一个 **Electron 桌面壳 + React Renderer + Java 21 / Spring Boot Sidecar** 架构。React 与 Spring Boot 仍是应用框架；插件只负责能力发现、装配和卸载，不替代框架本身：
 
 ```text
 Electron Main
-  ├─ 管理窗口、菜单、文件系统、设置、Python sidecar 生命周期
+  ├─ 管理窗口、菜单、文件系统、设置、Java sidecar 生命周期
   │
   └─ Renderer (React + TypeScript)
        ├─ MapLibre 地图渲染
        ├─ Chat / MessagePart UI
        ├─ 图层、资源、Operation、Workflow、Worker、Layout Composer
-       └─ JSON-RPC Dispatcher：处理 Python -> UI 的反向 RPC
+       ├─ RendererPluginRuntime：装配 RPC、地图扩展和 UI contribution
+       └─ JSON-RPC Dispatcher：处理 Java -> UI 的反向 RPC
 
-Python Sidecar (FastAPI + uvicorn + LiteLLM)
+Java Sidecar (Java 21 + Spring Boot + Spring AI)
   ├─ WebSocket JSON-RPC 服务
   ├─ Agent loop / session / memory / tool runtime
   ├─ GIS / OSM / datasource / raster / operation / workflow / worker 集成
-  ├─ 每轮代码执行子进程
-  └─ 常驻 Worker 进程
+  ├─ PluginRuntime：按依赖装配内置能力插件
+  └─ Java Worker 进程
 ```
 
 | 层 | 技术 | 主要职责 | 关键目录 |
 |---|---|---|---|
-| Electron Main | Electron 30 + Node | 窗口、菜单、IPC、Python sidecar 启停 | `electron/` |
-| Renderer | React 18 + TypeScript + Zustand | UI、地图、图层状态、反向 RPC handler | `src/features/`、`src/services/`、`src/stores/` |
-| Map Engine | MapLibre GL JS | WebGL 地图、source/layer 同步、导出 | `src/features/map/` |
-| Python Sidecar | FastAPI + uvicorn + LiteLLM | JSON-RPC、Agent、Tool、Workflow、Worker | `python-backend/opengis_backend/` |
-| Python Execution | subprocess runner | Agent 写的 Python 代码执行 | `agent/execution/` |
-| Resident Worker | Python process | 后台动态数据、持续渲染、长期服务 | `worker/` |
+| Electron Main | Electron 30 + Node | 窗口、菜单、IPC、Java sidecar 启停 | `electron/` |
+| Renderer | React 18 + TypeScript + Zustand | UI、地图、图层状态、反向 RPC handler | `src/app/`、`src/shell/`、`src/plugins/`、`src/shared/` |
+| Map Engine | MapLibre GL JS | WebGL 地图、source/layer 同步、导出 | `src/plugins/gis/map/` |
+| Java Sidecar | Java 21 + Spring Boot + Spring AI | JSON-RPC、Agent、Tool、Workflow、GIS、Worker | `java-backend/` |
+| Java Plugin Host | 纯 Java PluginRuntime | Tool catalog、Memory、GIS、Execution 能力装配 | `java-backend/server/src/org/opengis/framework/`、`java-backend/server/src/org/opengis/plugins/` |
+| Renderer Plugin Host | TypeScript | RPC bridge、地图扩展、侧栏/主区 contribution | `src/app/plugins/` |
+| Java Worker | 独立 JVM | 后台动态数据、持续渲染、长期服务 | `java-backend/server/src/org/opengis/worker/` |
+
+插件边界采用“稳定内核 + 领域模块 + 能力插件”：稳定内核只定义生命周期、依赖图、profile 和服务查找；领域模块实现 Agent、Tool、GIS、Workflow 等业务；能力插件只在组合边界把跨模块能力注册到宿主。当前插件均随应用编译和打包，不是热加载脚本，也不是插件市场。完整设计见 [`docs/architecture/plugin-architecture.md`](docs/architecture/plugin-architecture.md)。
 
 ### 3.2 通信模型：双向 JSON-RPC
 
-Renderer 和 Python sidecar 之间通过一条 WebSocket 通道通信。协议是 JSON-RPC 2.0，同时支持两种方向：
+Renderer 和 Java sidecar 之间通过一条 WebSocket 通道通信。协议是 JSON-RPC 2.0，同时支持两种方向：
 
 ```text
-Renderer -> Python
+Renderer -> Java
   chat.user_message
   rpc.code.run_script
   rpc.runs.list / get
   rpc.agent.*
   rpc.worker.*
 
-Python -> Renderer
+Java -> Renderer
   rpc.ui.map.add_layer_from_geojson
   rpc.ui.map.dynamic_layer_update
   rpc.ui.map.set_layer_style
@@ -180,14 +184,14 @@ Python -> Renderer
   chat / event notification
 ```
 
-前端 `src/services/pythonClient.ts` 负责 WebSocket 连接、请求超时、通知分发和动态地图事件缓冲。入站 `rpc.ui.*` notification 进入 `src/services/rpc/handlers/`，最终写入 Zustand store 或直接调用 MapEngine。
+前端 `src/shared/backend/backendClient.ts` 负责 WebSocket 连接、请求超时、通知分发和动态地图事件缓冲。`rpc-bridge` 插件把入站 `rpc.ui.*` notification 注册到 `src/shared/backend/rpc/handlers/`，最终写入 Zustand store 或调用 MapEngine。
 
 关键原则：
 
-- **地图状态在前端**：Python 不持有 MapLibre 句柄，所有图层事实以前端 store 为准。
-- **重计算在 Python**：空间分析、栅格处理、模型推理、Operation、Worker 运行在 Python。
-- **UI 操作走反向 RPC**：Python 工具通过 `rpc.ui.map.*` 指挥前端加载图层、更新样式、切换视角。
-- **动态数据走通知流**：Worker stdout 输出一行 JSON，sidecar 解析后转发到前端 dynamic handler。
+- **地图状态在前端**：Java 不持有 MapLibre 句柄，所有图层事实以前端 store 为准。
+- **领域计算在 Java**：空间分析、栅格处理、模型推理、Operation、Workflow 和 Worker 由 Java 模块负责。
+- **UI 操作走反向 RPC**：Java 工具通过 `rpc.ui.map.*` 指挥前端加载图层、更新样式、切换视角。
+- **动态数据走通知流**：Worker 输出结构化事件，sidecar 转发到前端 dynamic handler。
 
 ### 3.3 Agent 新架构
 
@@ -203,19 +207,17 @@ AgentProfile
   -> EventLog / RunArchive / MessagePart
 ```
 
-| 模块 | 职责 | 目录 |
+| 领域包 | 职责 | 目录 |
 |---|---|---|
-| `agent/loop/` | AgentLoop、TurnRunner、LoopKernel、RuntimeControl、循环策略 | `python-backend/opengis_backend/agent/loop/` |
-| `agent/execution/` | ToolRuntime、tool schema、参数校验、Python 执行、自动安装 | `agent/execution/` |
-| `agent/context/` | ContextManager、ContextProjector、MemoryStore、压缩、失败记忆 | `agent/context/` |
-| `agent/session/` | SessionCoordinator、queue、run session、inbox | `agent/session/` |
-| `agent/governance/` | AgentProfile、PermissionRuntime、权限规则 | `agent/governance/` |
-| `agent/telemetry/` | EventLog、MessagePart、RunArchive、script archive、artifact | `agent/telemetry/` |
-| `agent/workflow/` | Workflow 模型、存储、输出传递、DAG 编排 | `agent/workflow/` |
+| `agent` | Spring AI Agent 编排、SessionCoordinator、RuntimeControl、上下文和归档 | `java-backend/server/src/org/opengis/agent/` |
+| `tool` | ToolRuntime、schema 校验、权限和 artifact | `java-backend/server/src/org/opengis/tool/` |
+| `ai` | 模型配置、Provider 投影和稳定 LLM 创建端口 | `java-backend/server/src/org/opengis/ai/` |
+| `workflow` | Workflow 模型、存储、输出传递和 DAG 编排 | `java-backend/server/src/org/opengis/workflow/` |
+| `plugins` | Memory 等跨领域能力适配器 | `java-backend/server/src/org/opengis/plugins/` |
 
 #### 3.3.1 Function-call 优先
 
-OpenGIS 现在以 function call 为 Agent 主路径。模型输出结构化 tool call，框架按 schema 执行工具并返回结构化结果。Python 代码执行仍是一个工具，但不再作为 loop 控制协议。
+OpenGIS 现在以 function call 为 Agent 主路径。模型输出结构化 tool call，框架按 schema 执行工具并返回结构化结果。代码执行仍是一个受权限和取消机制约束的工具，但不再作为 loop 控制协议。
 
 这样做解决旧 CodeAct 的几个问题：
 
@@ -232,14 +234,14 @@ Agent 输出不再是一整段混合文本，而是事件化的 `MessagePart[]`�
 |---|---|
 | `text` | 普通 Agent 回复 |
 | `tool` | 工具调用和结果 |
-| `code` | 生成 / 执行 Python 代码 |
+| `code` | 生成 / 执行 Java 代码（仍可回放旧 Python 记录） |
 | `artifact` | 图片、报告、文件、图层等产物 |
 | `operation` | Operation 运行块 |
 | `progress` | 当前最底部的运行状态 |
 | `plan` | Plan / Workflow 进度 |
 | `error` | 错误和中断 |
 
-前端 Chat 直接渲染 MessagePart。普通 tool call 默认折叠；Python 代码可折叠展示；执行输出默认压缩；图片和 Markdown 引用的本地资源通过安全路径转换渲染。
+前端 Chat 直接渲染 MessagePart。普通 tool call 默认折叠；代码可折叠展示；执行输出默认压缩；图片和 Markdown 引用的本地资源通过安全路径转换渲染。
 
 #### 3.3.3 Loop 收敛与异常保护
 
@@ -261,13 +263,13 @@ Agent loop 不靠硬编码某个任务"最多几步"，而是结合以下信号�
 | **Skill** | 用户 / 项目可接入的知识、流程、约束或能力包，可影响上下文与工具选择 | 外部 skill 包、项目级说明 | 项目 / 用户级 |
 | **Operation** | 可复用的软件级原子操作，带输入输出 schema、依赖、主程序、说明和运行记录 | DBSCAN 聚类、核密度、格式转换 | 内置 + workspace |
 | **Workflow** | DAG 多步骤任务编排，节点定义输入 / 输出描述 | 学术报告、流域分析 | `.flow.json` |
-| **Worker** | 常驻 Python 服务，用于持续数据处理和动态渲染 | 航班追踪、动态点、实时轨迹 | workspace |
+| **Worker** | 独立子 JVM 中的常驻 Java 服务，用于持续数据处理和动态渲染 | 航班追踪、动态点、实时轨迹 | workspace |
 
 旧代码中曾经把工具也叫 skill。新架构中应当尽量避免混用：**工具叫 Tool，外部能力包叫 Skill，复用算法叫 Operation。**
 
 ### 3.5 Tool Runtime
 
-所有工具集中在 `python-backend/opengis_backend/tools/`：
+工具契约、Registry、权限和 Runtime 位于 `java-backend/server/src/org/opengis/tool/`；GIS catalog 位于 `java-backend/server/src/org/opengis/gis/`，跨领域注册适配器位于 `java-backend/server/src/org/opengis/plugins/`：
 
 | 工具组 | 代表工具 | 说明 |
 |---|---|---|
@@ -287,7 +289,7 @@ Agent loop 不靠硬编码某个任务"最多几步"，而是结合以下信号�
 
 ToolRuntime 负责：
 
-- 将 Python 函数注册成 LLM 可见 JSON schema。
+- 将 `OpenGisTool` 注册成 LLM 可见 JSON schema。
 - 执行前做参数校验和权限决策。
 - 执行后统一输出结构、截断大结果、生成 artifact pointer。
 - 将 tool call / result 写入 RunArchive 和 MessagePart。
@@ -368,15 +370,14 @@ Workflow document
 
 Operation 是比脚本更稳定的复用单元。它用于把一次复杂探索沉淀为以后可复用、可修改、可验证的原子能力。
 
-一个 Operation 包含：
+一个 Workspace Operation 包含：
 
 ```text
 operation/
-  manifest.json      # 名称、描述、输入输出 schema、依赖、版本
-  main.py            # 唯一入口
+  operation.json     # 名称、描述、输入输出 schema、依赖、版本
+  src/main/java/...  # 实现 OpenGisScript 的唯一入口
   README.md          # 使用说明
-  examples/          # 示例参数
-  runs/              # 运行记录
+  revisions/         # 可审计的历史版本
 ```
 
 Operation 分两类：
@@ -395,7 +396,7 @@ Agent 可以：
 
 ### 3.10 Worker 架构
 
-Worker 是常驻 Python 服务，适合以下场景：
+Worker 是运行在独立子 JVM 中的常驻 Java 服务，适合以下场景：
 
 - 持续轮询外部 API。
 - 实时读取动态数据。
@@ -406,52 +407,38 @@ Worker 服务包结构：
 
 ```text
 worker/<name>-<worker_id>/
-  main.py              # 唯一入口
-  opengis_worker.py    # OpenGIS 自动生成 helper，不应手改
-  config.json          # worker_id、interval_seconds、layer ids、API 参数
-  manifest.json        # 服务元数据、权限、动态层声明
+  manifest.json        # runtime、入口类、依赖、权限
+  config.json          # interval、layer ids、API 参数
+  metadata.json        # 状态、重启次数和运行信息
   README.md
   stdout.log
   stderr.log
-  metadata.json
-  src/
-    datasource.py      # 数据获取
-    service.py         # 状态和业务逻辑
-    publisher.py       # OpenGIS 输出适配
+  src/main/java/.../Worker.java
 ```
 
-动态地图协议：
+入口类实现 `OpenGisWorker`，通过 SDK 发布有序的 full / diff 动态地图事件：
 
-```python
-from opengis_worker import emit_moving_objects
-
-emit_moving_objects(
-    point_layer_id="live_points",
-    track_layer_id="live_tracks",
-    points=[{"id": "p1", "lon": 121.5, "lat": 31.2}],
-    tracks={"p1": [[121.5, 31.2], [121.51, 31.21]]},
-    sequence=1,
-)
+```java
+public final class FlightWorker implements OpenGisWorker {
+  @Override
+  public void run(WorkerContext context) throws Exception {
+    context.publish("rpc.ui.map.dynamic_layer_update", frame);
+  }
+}
 ```
 
-Helper 会向 stdout 输出：
-
-```json
-{"opengis_method":"rpc.ui.map.dynamic_layer_update","params":{...}}
-```
-
-Worker manager 解析 stdout，补充 `worker_id`、`worker_name`、`workspace_path`、`worker_started_at`，再转发给前端。前端 dynamic handler 更新图层 store，并即时同步 MapLibre source。
+Worker manager 管理编译、独立 JVM、事件转发、有限重启、资源采样和进程树清理。前端 dynamic handler 更新图层 store，并即时同步 MapLibre source。
 
 约束：
 
 - 默认最多两个 running worker。
 - 启动、重启、暂停、删除需要权限治理。
 - 后台持续任务必须用 worker，不应写在 `execute_code` 里。
-- 入口强制是 `main.py`，可以有多个辅助模块，但不能有多个入口。
+- 入口类必须实现 `OpenGisWorker`；旧 Python Worker 只读扫描并生成迁移报告，不会在 Java 模式执行。
 
 ### 3.11 地图与渲染架构
 
-前端地图由 `src/features/map/engine/MapEngine.ts` 统一管理。Renderer 拆分在 `src/features/map/renderers/`：
+前端地图由 `src/plugins/gis/map/engine/MapEngine.ts` 统一管理。Renderer 拆分在 `src/plugins/gis/map/renderers/`：
 
 | Renderer | 用途 |
 |---|---|
@@ -464,7 +451,7 @@ Worker manager 解析 stdout，补充 `worker_id`、`worker_name`、`workspace_p
 | `rasterRenderer` | 栅格 |
 | `extrusionRenderer` | 3D 拉伸 |
 
-图层数据解析位于 `src/services/geo/parsers/`。大矢量数据会使用 handle 化策略，避免把全部 GeoJSON 反复塞入 React store。栅格数据支持前端解析和后端服务端瓦片两条路径。
+图层数据解析位于 `src/shared/geo/parsers/`。大矢量数据会使用 handle 化策略，避免把全部 GeoJSON 反复塞入 React store。栅格数据支持前端解析和后端服务端瓦片两条路径。
 
 样式系统支持：
 
@@ -497,7 +484,7 @@ Layout Composer 是面向制图导出的画布系统，目标对标 ArcGIS / QGI
 - 导出图片。
 - 将画布元素暴露为 Agent tool，便于自然语言制图。
 
-当前实现位于 `src/features/layout-composer/`。
+当前实现位于 `src/plugins/gis/layout/`。
 
 ### 3.14 权限与安全
 
@@ -511,7 +498,7 @@ OpenGIS 不是强沙箱产品，但提供多层安全网：
 | Worker | 启动 / 重启 / 删除审批，最大运行数限制 |
 | RunArchive | 完整事件与工具调用留痕 |
 | Workspace | git snapshot，可回滚 |
-| Python 执行 | 子进程隔离，可中断、可清理进程树 |
+| Java 代码执行 | 独立子 JVM、静态检查、依赖治理、可中断和进程树清理 |
 
 ### 3.15 项目目录
 
@@ -519,31 +506,20 @@ OpenGIS 不是强沙箱产品，但提供多层安全网：
 OpenGIS/
   electron/                         # Electron main / preload
   src/
-    features/
-      chat/                         # MessagePart Chat UI
-      map/                          # MapLibre engine / renderers / identify
-      layers/                       # 图层管理和样式面板
-      assets/                       # 文件资源浏览
-      workflows/                    # Workflow 编辑器
-      operations/                   # Operation UI
-      workers/                      # Worker 管理面板
-      layout-composer/              # 制图画布
-      pivot/                        # 数据透视
-      settings/                     # 设置
-    services/
-      rpc/                          # 前端 JSON-RPC dispatcher / handlers
-      geo/                          # 数据类型、解析器、栅格 / 矢量工具
-    stores/                         # Zustand stores
-  python-backend/
-    opengis_backend/
-      agent/                        # Agent 新架构
-      tools/                        # Tool registry 和内置工具
-      integrations/                 # gis / osm / qgis / datasource
-      operations/                   # 内置 Operation
-      worker/                       # Worker manager 和协议
-      runs/                         # RunArchive
-      rpc/                          # WebSocket JSON-RPC handler
-      workspace/                    # Workspace snapshot / templates
+    app/                            # React 启动与插件运行时
+    shell/                          # 桌面工作台外壳
+    plugins/
+      assistant/                    # 对话与审批
+      workspace/                    # 文件、查看器与 Java 脚本
+      gis/                          # 地图、图层、分析、制图与 Operation
+      automation/                   # Workflow、Worker 与 Run
+      system/                       # 设置和 Tool/Skill 目录
+    shared/                         # JSON-RPC、Geo 契约与通用 UI
+  java-backend/
+    server/src/org/opengis/         # 单一 Spring Boot 模块化单体
+      core/ assistant/ gis/ automation/ tool/ server/
+    script-sdk/                     # 隔离 Java 脚本和 Worker 的稳定 API
+  python-backend/                   # 显式开发兼容/迁移参考，不进入生产包
   resources/                        # 图标、截图、静态资源
   docs/                             # 设计记录和 bug scan
 ```
@@ -555,10 +531,10 @@ OpenGIS/
 | 依赖 | 版本 | 必需 | 说明 |
 |---|---|---|---|
 | Node.js | >= 18 | 是 | 前端、Electron、构建 |
-| Python | >= 3.11 | 是 | Python sidecar 和 GIS 工具 |
+| Java | 21 | 是 | Spring Boot 后端、Agent、GIS 和 Worker |
 | Git | 任意 | 是 | workspace snapshot / run 回滚 |
 | LLM API Key | OpenAI / Anthropic / DeepSeek / MiniMax / GLM / Ollama 等 | Agent 必需 | 地图基础功能不依赖 LLM |
-| GDAL / Rasterio 相关 wheel | 与 Python 环境匹配 | 推荐 | 栅格 / Shapefile / GeoPandas 能力 |
+| GDAL 兼容原生库 | 依平台而定 | 可选 | 扩展栅格 / 矢量格式能力 |
 
 ### 4.2 克隆仓库
 
@@ -573,28 +549,14 @@ cd OpenGIS
 npm install
 ```
 
-### 4.4 安装 Python 后端环境
+### 4.4 验证 Java 后端
 
-```bash
-npm run setup:python
+```powershell
+cd java-backend
+./mvnw.cmd verify
 ```
 
-该命令会在用户数据目录创建共享虚拟环境并安装 Python 依赖。开发模式和打包后的应用都会复用这个环境，避免在源码目录和用户应用目录之间维护两套 Python 依赖。
-
-典型路径：
-
-```text
-macOS:   ~/Library/Application Support/opengis/venv
-Windows: %APPDATA%/opengis/venv
-Linux:   ~/.config/opengis/venv
-```
-
-如果 Windows / macOS 上 GDAL、Fiona、Rasterio 安装失败，可以先使用 conda 安装二进制依赖：
-
-```bash
-conda install -c conda-forge geopandas rasterio fiona pyproj shapely -y
-npm run setup:python
-```
+Maven Wrapper 会使用项目固定的 Maven 配置完成全部 Java 模块测试。生产打包使用 `npm run build:java-runtime` 生成随应用分发的 Java runtime；通常无需单独安装 Maven。
 
 ### 4.5 启动开发模式
 
@@ -606,10 +568,10 @@ npm run dev:electron
 
 1. electron-vite 启动 renderer dev server。
 2. 编译 Electron main / preload。
-3. Electron main 拉起 Python sidecar。
+3. Electron main 拉起 Spring Boot Java sidecar。
 4. Renderer 通过 token 连接 sidecar WebSocket。
 
-看到窗口和 Python ready 状态后即可使用。
+看到窗口和 Java backend ready 状态后即可使用。仅在源码开发中显式设置兼容运行时，才会启用旧 Python 回退；生产安装包不包含该回退。
 
 ### 4.6 配置模型
 
@@ -656,34 +618,30 @@ npm run dist:win         # Windows 打包
 npm run dist:linux       # Linux 打包
 ```
 
-后端测试示例：
-
-```bash
-"$HOME/Library/Application Support/opengis/venv/bin/python" -m unittest discover -s python-backend/tests
-```
-
-Windows PowerShell 路径通常是：
+后端测试：
 
 ```powershell
-& "$env:APPDATA/opengis/venv/Scripts/python.exe" -m unittest discover -s python-backend/tests
+cd java-backend
+./mvnw.cmd verify
 ```
 
 ### 5.2 添加一个 Tool
 
-1. 在 `python-backend/opengis_backend/tools/builtin/` 新建或修改工具文件。
-2. 使用 `@tool(...)` 声明名称、分组、参数和返回说明。
-3. 通过 `ToolContext` 访问 workspace、conversation、notify 等上下文。
-4. 如果要操作地图，优先发 `rpc.ui.map.*` 反向 RPC，不要在 Python 里维护地图状态。
-5. 补充测试，至少覆盖参数校验和返回结构。
+1. 在 `java-backend/server/src/org/opengis/tool/` 实现 `OpenGisTool`；GIS 工具放在 `java-backend/server/src/org/opengis/gis/`。
+2. 声明 `ToolDefinition`、JSON schema、分组和风险级别。
+3. 通过 `ToolExecutionContext` 访问 workspace、取消信号和 UI RPC。
+4. 在所属 `ToolCatalogPlugin` 中贡献工具；跨领域适配器放到 `java-backend/server/src/org/opengis/plugins/`。
+5. 如果要操作地图，优先发 `rpc.ui.map.*` 反向 RPC，不要在 Java 后端维护地图状态。
+6. 补充测试，至少覆盖参数校验、权限、返回结构和插件卸载后的撤销行为。
 
 ### 5.3 添加地图能力
 
 地图能力通常需要两端一起做：
 
 1. 后端 tool：声明 Agent 可调用入口。
-2. 前端 RPC handler：在 `src/services/rpc/handlers/map/` 接收 `rpc.ui.map.*`。
+2. 前端 RPC handler：在 `src/shared/backend/rpc/handlers/map/` 接收 `rpc.ui.map.*`。
 3. Store：必要时扩展 `MapLayerDefinition` 或 `LayerStyle`。
-4. Renderer：在 `src/features/map/renderers/` 扩展 MapLibre paint / layout。
+4. Renderer：在 `src/plugins/gis/map/renderers/` 扩展 MapLibre paint / layout。
 5. UI：如果用户也要手动控制，在图层面板或样式面板添加编辑入口。
 
 ### 5.4 添加 Operation
@@ -691,36 +649,32 @@ Windows PowerShell 路径通常是：
 内置 Operation 放在：
 
 ```text
-python-backend/opengis_backend/operations/builtin/
+java-backend/server/src/org/opengis/gis/operation/builtin/
 ```
 
 推荐结构：
 
 ```text
-my_operation/
-  manifest.json
-  main.py
-  README.md
-  examples/
+MyOperation.java
 ```
 
-`manifest.json` 应清楚描述：
+Operation 定义应清楚描述：
 
 - 输入 schema。
 - 输出 schema。
-- Python 依赖。
+- Java / runtime 依赖。
 - 操作说明。
 - 适用场景。
 
 ### 5.5 添加 Worker 场景
 
-Worker 不应写成一个巨大脚本。推荐结构：
+Worker 不应写成一个巨大类。推荐按 Java package 分离职责：
 
 ```text
-main.py              # 加载 config，启动循环
-src/datasource.py    # 取数据
-src/service.py       # 更新状态、轨迹、过滤
-src/publisher.py     # emit_dynamic_points / emit_moving_objects
+Worker.java          # 实现 OpenGisWorker，控制生命周期
+Datasource.java      # 取数据
+WorkerService.java   # 更新状态、轨迹、过滤
+Publisher.java       # 发布 full / diff 动态地图事件
 ```
 
 动态地图必须保证：
@@ -729,14 +683,14 @@ src/publisher.py     # emit_dynamic_points / emit_moving_objects
 - 第一帧 full，后续 diff，或使用 high-level helper 自动处理。
 - feature id 稳定。
 - sequence 单调递增。
-- 不要在 `execute_code` 中写无限循环。
+- 不要在 `execute_code` 中写无限循环；持续任务必须使用 Worker。
 
 ### 5.6 Windows 注意事项
 
 - 路径中可能包含空格和中文，代码应使用 `Path` / JSON 参数，不要拼 shell 字符串。
-- Python venv 路径和 Electron 打包路径不同，避免硬编码 macOS 路径。
-- 子进程取消在 Windows 走 `CTRL_BREAK_EVENT` 和 `taskkill /F /T`，新增后台进程时要考虑进程树清理。
-- GDAL / Rasterio 推荐使用预编译 wheel 或 conda-forge。
+- 开发 JDK 与随包 jlink runtime 的路径不同，不要硬编码本机 JDK 路径。
+- Java 代码与 Worker 运行在子 JVM，新增后台进程时必须接入取消和进程树清理。
+- 本机原生 GIS 库属于可选增强，基础 GeoJSON、OSM、JTS 和 GeoTIFF 能力由 Java 模块提供。
 
 ## 6. Roadmap
 

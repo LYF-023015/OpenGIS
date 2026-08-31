@@ -1,84 +1,85 @@
-import { ipcMain, app, dialog } from 'electron'
-import { readFile, writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
-import { existsSync } from 'fs'
+/** 文件职责：共享基础能力：实现该文件名所对应的单一职责。 */
+import { ipcMain, app, dialog } from "electron";
+import { readFile, writeFile, mkdir } from "fs/promises";
+import { join } from "path";
+import { existsSync } from "fs";
 
-const SETTINGS_FILE = 'settings.json'
-const PROJECTS_FILE = 'projects.json'
+const SETTINGS_FILE = "settings.json";
+const PROJECTS_FILE = "projects.json";
 
 // ─── Project types ─────────────────────────────────────────────
 export interface ProjectEntry {
-  id: string
-  name: string
-  path: string
-  createdAt: number
-  lastOpenedAt: number
+  id: string;
+  name: string;
+  path: string;
+  createdAt: number;
+  lastOpenedAt: number;
 }
 
 interface ProjectsData {
-  projects: ProjectEntry[]
-  lastProjectId?: string
-  schemaVersion?: number
+  projects: ProjectEntry[];
+  lastProjectId?: string;
+  schemaVersion?: number;
   backend?: {
-    storageOwner: 'electron-main'
-    javaCompatible: boolean
-  }
+    storageOwner: "electron-main";
+    javaCompatible: boolean;
+  };
 }
 
 const DEFAULT_PROJECTS: ProjectsData = {
   projects: [],
   schemaVersion: 2,
-  backend: { storageOwner: 'electron-main', javaCompatible: true },
-}
+  backend: { storageOwner: "electron-main", javaCompatible: true },
+};
 
 // ─── Settings types ────────────────────────────────────────────
 interface AppSettings {
-  schemaVersion?: number
+  schemaVersion?: number;
   backend?: {
-    runtime: 'java'
-    protocolVersion: '3.0'
-    pythonBackup: 'retained'
-  }
+    runtime: "java";
+    protocolVersion: "3.0";
+    pythonBackup: "retained";
+  };
   model: {
-    provider: string
-    modelName: string
-    apiKey?: string
-    baseURL?: string
-    temperature: number
-    maxTokens: number
-  }
+    provider: string;
+    modelName: string;
+    apiKey?: string;
+    baseURL?: string;
+    temperature: number;
+    maxTokens: number;
+  };
   appearance: {
-    theme: 'dark' | 'light' | 'system'
-    language: 'en' | 'zh'
-    fontSize: number
-    mapStyle: 'streets' | 'satellite' | 'dark' | 'light'
-  }
+    theme: "dark" | "light" | "system";
+    language: "en" | "zh";
+    fontSize: number;
+    mapStyle: "streets" | "satellite" | "dark" | "light";
+  };
   agent: {
-    maxIterations: number
-    codeExecutionTimeout: number
-    requireConfirmation: boolean
-    autoRenderResults: boolean
-  }
+    maxIterations: number;
+    codeExecutionTimeout: number;
+    requireConfirmation: boolean;
+    autoRenderResults: boolean;
+  };
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
   schemaVersion: 3,
   backend: {
-    runtime: 'java',
-    protocolVersion: '3.0',
-    pythonBackup: 'retained',
+    runtime: "java",
+    protocolVersion: "3.0",
+    pythonBackup: "retained",
   },
   model: {
-    provider: 'openai',
-    modelName: 'gpt-4o',
+    provider: "openai",
+    modelName: "gpt-4o",
     temperature: 0.7,
     maxTokens: 4096,
   },
   appearance: {
-    theme: 'dark',
-    language: 'en',
+    theme: "dark",
+    language: "en",
     fontSize: 14,
-    mapStyle: 'dark',
+    mapStyle: "dark",
   },
   agent: {
     maxIterations: 10,
@@ -86,191 +87,208 @@ const DEFAULT_SETTINGS: AppSettings = {
     requireConfirmation: true,
     autoRenderResults: true,
   },
-}
+};
 
 function getSettingsPath(): string {
-  return join(app.getPath('userData'), SETTINGS_FILE)
+  return join(app.getPath("userData"), SETTINGS_FILE);
 }
 
 function getProjectsPath(): string {
-  return join(app.getPath('userData'), PROJECTS_FILE)
+  return join(app.getPath("userData"), PROJECTS_FILE);
 }
 
 async function loadSettings(): Promise<AppSettings> {
-  const settingsPath = getSettingsPath()
+  const settingsPath = getSettingsPath();
 
   if (!existsSync(settingsPath)) {
-    return { ...DEFAULT_SETTINGS }
+    return { ...DEFAULT_SETTINGS };
   }
 
   try {
-    const content = await readFile(settingsPath, 'utf-8')
-    const saved = JSON.parse(content)
-    const merged = deepMerge(DEFAULT_SETTINGS, saved)
-    delete merged.python
-    merged.schemaVersion = 3
-    merged.backend = { runtime: 'java', protocolVersion: '3.0', pythonBackup: 'retained' }
-    return merged
+    const content = await readFile(settingsPath, "utf-8");
+    const saved = JSON.parse(content);
+    const merged = deepMerge(DEFAULT_SETTINGS, saved);
+    delete merged.python;
+    merged.schemaVersion = 3;
+    merged.backend = {
+      runtime: "java",
+      protocolVersion: "3.0",
+      pythonBackup: "retained",
+    };
+    return merged;
   } catch {
-    return { ...DEFAULT_SETTINGS }
+    return { ...DEFAULT_SETTINGS };
   }
 }
 
 async function saveSettings(settings: AppSettings): Promise<void> {
-  const settingsPath = getSettingsPath()
-  const dir = join(app.getPath('userData'))
+  const settingsPath = getSettingsPath();
+  const dir = join(app.getPath("userData"));
 
   if (!existsSync(dir)) {
-    await mkdir(dir, { recursive: true })
+    await mkdir(dir, { recursive: true });
   }
 
-  const upgraded = deepMerge(DEFAULT_SETTINGS, settings)
-  delete upgraded.python
-  upgraded.schemaVersion = 3
-  upgraded.backend = { runtime: 'java', protocolVersion: '3.0', pythonBackup: 'retained' }
-  await writeFile(settingsPath, JSON.stringify(upgraded, null, 2), 'utf-8')
+  const upgraded = deepMerge(DEFAULT_SETTINGS, settings);
+  delete upgraded.python;
+  upgraded.schemaVersion = 3;
+  upgraded.backend = {
+    runtime: "java",
+    protocolVersion: "3.0",
+    pythonBackup: "retained",
+  };
+  await writeFile(settingsPath, JSON.stringify(upgraded, null, 2), "utf-8");
 }
 
 // ─── Projects persistence ──────────────────────────────────────
 export async function loadProjects(): Promise<ProjectsData> {
-  const projectsPath = getProjectsPath()
+  const projectsPath = getProjectsPath();
   if (!existsSync(projectsPath)) {
-    return { ...DEFAULT_PROJECTS }
+    return { ...DEFAULT_PROJECTS };
   }
   try {
-    const content = await readFile(projectsPath, 'utf-8')
-    const saved = JSON.parse(content) as ProjectsData
+    const content = await readFile(projectsPath, "utf-8");
+    const saved = JSON.parse(content) as ProjectsData;
     return {
       ...saved,
       projects: Array.isArray(saved.projects) ? saved.projects : [],
       schemaVersion: 2,
-      backend: { storageOwner: 'electron-main', javaCompatible: true },
-    }
+      backend: { storageOwner: "electron-main", javaCompatible: true },
+    };
   } catch {
-    return { ...DEFAULT_PROJECTS }
+    return { ...DEFAULT_PROJECTS };
   }
 }
 
 export async function saveProjects(data: ProjectsData): Promise<void> {
-  const projectsPath = getProjectsPath()
+  const projectsPath = getProjectsPath();
   const upgraded: ProjectsData = {
     ...data,
     schemaVersion: 2,
-    backend: { storageOwner: 'electron-main', javaCompatible: true },
-  }
-  await writeFile(projectsPath, JSON.stringify(upgraded, null, 2), 'utf-8')
+    backend: { storageOwner: "electron-main", javaCompatible: true },
+  };
+  await writeFile(projectsPath, JSON.stringify(upgraded, null, 2), "utf-8");
 }
 
 function deepMerge(target: any, source: any): any {
-  const result = { ...target }
+  const result = { ...target };
   for (const key of Object.keys(source)) {
     if (
       source[key] &&
-      typeof source[key] === 'object' &&
+      typeof source[key] === "object" &&
       !Array.isArray(source[key]) &&
       target[key] &&
-      typeof target[key] === 'object'
+      typeof target[key] === "object"
     ) {
-      result[key] = deepMerge(target[key], source[key])
+      result[key] = deepMerge(target[key], source[key]);
     } else {
-      result[key] = source[key]
+      result[key] = source[key];
     }
   }
-  return result
+  return result;
 }
 
 /**
  * Register settings IPC handlers.
  */
 export function registerSettingsHandlers(): void {
-  ipcMain.handle('settings:get', async () => {
-    return await loadSettings()
-  })
+  ipcMain.handle("settings:get", async () => {
+    return await loadSettings();
+  });
 
-  ipcMain.handle('settings:set', async (_event, key: string, value: any) => {
-    const settings = await loadSettings()
+  ipcMain.handle("settings:set", async (_event, key: string, value: any) => {
+    const settings = await loadSettings();
 
     // Support dot-notation keys like "model.provider"
-    const keys = key.split('.')
-    let current: any = settings
+    const keys = key.split(".");
+    let current: any = settings;
     for (let i = 0; i < keys.length - 1; i++) {
       if (current[keys[i]] === undefined) {
-        current[keys[i]] = {}
+        current[keys[i]] = {};
       }
-      current = current[keys[i]]
+      current = current[keys[i]];
     }
-    current[keys[keys.length - 1]] = value
+    current[keys[keys.length - 1]] = value;
 
-    await saveSettings(settings)
-    return { success: true }
-  })
+    await saveSettings(settings);
+    return { success: true };
+  });
 
-  ipcMain.handle('app:version', () => {
-    return app.getVersion()
-  })
+  ipcMain.handle("app:version", () => {
+    return app.getVersion();
+  });
 
   // ─── Project management ────────────────────────────────────────
-  ipcMain.handle('projects:list', async () => {
-    return await loadProjects()
-  })
+  ipcMain.handle("projects:list", async () => {
+    return await loadProjects();
+  });
 
-  ipcMain.handle('projects:create', async (_event, name: string, path: string) => {
-    const data = await loadProjects()
-    const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 8)
-    const entry: ProjectEntry = {
-      id,
-      name,
-      path,
-      createdAt: Date.now(),
-      lastOpenedAt: Date.now(),
-    }
-    data.projects.unshift(entry)
-    data.lastProjectId = id
-    await saveProjects(data)
-    return entry
-  })
+  ipcMain.handle(
+    "projects:create",
+    async (_event, name: string, path: string) => {
+      const data = await loadProjects();
+      const id =
+        Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+      const entry: ProjectEntry = {
+        id,
+        name,
+        path,
+        createdAt: Date.now(),
+        lastOpenedAt: Date.now(),
+      };
+      data.projects.unshift(entry);
+      data.lastProjectId = id;
+      await saveProjects(data);
+      return entry;
+    },
+  );
 
-  ipcMain.handle('projects:open', async (_event, id: string) => {
-    const data = await loadProjects()
-    const project = data.projects.find(p => p.id === id)
-    if (!project) return { error: 'Project not found' }
-    project.lastOpenedAt = Date.now()
-    data.lastProjectId = id
-    await saveProjects(data)
-    return project
-  })
+  ipcMain.handle("projects:open", async (_event, id: string) => {
+    const data = await loadProjects();
+    const project = data.projects.find((p) => p.id === id);
+    if (!project) return { error: "Project not found" };
+    project.lastOpenedAt = Date.now();
+    data.lastProjectId = id;
+    await saveProjects(data);
+    return project;
+  });
 
-  ipcMain.handle('projects:rename', async (_event, id: string, newName: string) => {
-    const data = await loadProjects()
-    const project = data.projects.find(p => p.id === id)
-    if (!project) return { error: 'Project not found' }
-    project.name = newName
-    await saveProjects(data)
-    return project
-  })
+  ipcMain.handle(
+    "projects:rename",
+    async (_event, id: string, newName: string) => {
+      const data = await loadProjects();
+      const project = data.projects.find((p) => p.id === id);
+      if (!project) return { error: "Project not found" };
+      project.name = newName;
+      await saveProjects(data);
+      return project;
+    },
+  );
 
-  ipcMain.handle('projects:delete', async (_event, id: string) => {
-    const data = await loadProjects()
-    data.projects = data.projects.filter(p => p.id !== id)
-    if (data.lastProjectId === id) data.lastProjectId = undefined
-    await saveProjects(data)
-    return { success: true }
-  })
+  ipcMain.handle("projects:delete", async (_event, id: string) => {
+    const data = await loadProjects();
+    data.projects = data.projects.filter((p) => p.id !== id);
+    if (data.lastProjectId === id) data.lastProjectId = undefined;
+    await saveProjects(data);
+    return { success: true };
+  });
 
-  ipcMain.handle('projects:browse-folder', async (event) => {
+  ipcMain.handle("projects:browse-folder", async (event) => {
     // Find the BrowserWindow that sent this request and use it as parent
     // so the dialog appears on top of the always-on-top loading window.
-    const { BrowserWindow: BW } = require('electron')
-    const sender = event.sender
-    const parentWin = BW.getAllWindows().find((w: any) => w.webContents === sender)
+    const { BrowserWindow: BW } = require("electron");
+    const sender = event.sender;
+    const parentWin = BW.getAllWindows().find(
+      (w: any) => w.webContents === sender,
+    );
     const dialogOpts: Electron.OpenDialogOptions = {
-      properties: ['openDirectory', 'createDirectory'],
-      title: '选择项目文件夹',
-    }
+      properties: ["openDirectory", "createDirectory"],
+      title: "选择项目文件夹",
+    };
     const result = parentWin
       ? await dialog.showOpenDialog(parentWin, dialogOpts)
-      : await dialog.showOpenDialog(dialogOpts)
-    if (result.canceled || !result.filePaths.length) return { canceled: true }
-    return { path: result.filePaths[0] }
-  })
+      : await dialog.showOpenDialog(dialogOpts);
+    if (result.canceled || !result.filePaths.length) return { canceled: true };
+    return { path: result.filePaths[0] };
+  });
 }

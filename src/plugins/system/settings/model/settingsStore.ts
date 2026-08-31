@@ -1,0 +1,158 @@
+/** 文件职责：settings 前端功能：管理状态或持久化数据。 */
+import { create } from "zustand";
+
+// Supported protocol types — only openai and anthropic
+export type ProtocolType = "openai" | "anthropic";
+
+export interface ModelPreset {
+  id: string;
+  name: string;
+  provider: string;
+  protocol: ProtocolType;
+  modelName: string;
+  apiKey: string;
+  baseURL: string;
+}
+
+export interface ModelSettings {
+  protocol: ProtocolType;
+  modelName: string;
+  apiKey: string;
+  baseURL: string;
+  temperature: number;
+  maxTokens: number;
+  contextWindow: number;
+  reasoningEffort: "low" | "medium" | "high";
+  presets: ModelPreset[];
+}
+
+export interface AppearanceSettings {
+  theme: "dark" | "light" | "system";
+  language: "en" | "zh";
+  fontSize: number;
+  basemapId: string;
+  customTileUrl: string;
+  showMapLabels: boolean;
+}
+
+export interface AgentSettings {
+  maxConsecutiveMistakes: number;
+  codeExecutionTimeout: number;
+  requireConfirmation: boolean;
+  autoRenderResults: boolean;
+  useAutoCondense: boolean;
+  customInstructions: string;
+  debugMode: boolean;
+}
+
+interface SettingsState {
+  model: ModelSettings;
+  appearance: AppearanceSettings;
+  agent: AgentSettings;
+
+  // 操作方法
+  updateModel: (updates: Partial<SettingsState["model"]>) => void;
+  updateAppearance: (updates: Partial<SettingsState["appearance"]>) => void;
+  updateAgent: (updates: Partial<SettingsState["agent"]>) => void;
+  loadFromElectron: () => Promise<void>;
+  saveToElectron: () => Promise<void>;
+}
+
+export const useSettingsStore = create<SettingsState>((set, get) => ({
+  // 默认值
+  model: {
+    protocol: "openai" as ProtocolType,
+    modelName: "gpt-4o",
+    apiKey: "",
+    baseURL: "",
+    temperature: 0,
+    maxTokens: 4096,
+    contextWindow: 128000,
+    reasoningEffort: "medium" as const,
+    presets: [] as ModelPreset[],
+  },
+  appearance: {
+    theme: "system",
+    language: "en",
+    fontSize: 14,
+    basemapId: "osm-streets",
+    customTileUrl: "",
+    showMapLabels: false,
+  },
+  agent: {
+    maxConsecutiveMistakes: 3,
+    codeExecutionTimeout: 60,
+    requireConfirmation: true,
+    autoRenderResults: true,
+    useAutoCondense: true,
+    customInstructions: "",
+    debugMode: false,
+  },
+
+  // 操作方法
+  updateModel: (updates) =>
+    set((state) => ({
+      model: { ...state.model, ...updates },
+    })),
+
+  updateAppearance: (updates) =>
+    set((state) => {
+      const newAppearance = { ...state.appearance, ...updates };
+      // Auto-switch basemap when theme changes (but not vice versa)
+      if (
+        updates.theme !== undefined &&
+        updates.theme !== state.appearance.theme
+      ) {
+        if (updates.theme === "dark") {
+          newAppearance.basemapId = "carto-dark-nolabels";
+        } else if (updates.theme === "light") {
+          newAppearance.basemapId = "carto-light-nolabels";
+        }
+        // 'system' → detect OS theme
+        if (updates.theme === "system") {
+          const isDark = window.matchMedia?.(
+            "(prefers-color-scheme: dark)",
+          ).matches;
+          newAppearance.basemapId = isDark
+            ? "carto-dark-nolabels"
+            : "carto-light-nolabels";
+        }
+      }
+      return { appearance: newAppearance };
+    }),
+
+  updateAgent: (updates) =>
+    set((state) => ({
+      agent: { ...state.agent, ...updates },
+    })),
+
+  loadFromElectron: async () => {
+    if (typeof window !== "undefined" && window.electronAPI) {
+      try {
+        const settings = await window.electronAPI.getSettings();
+        const agentSettings = { ...(settings.agent || {}) };
+        delete (agentSettings as { maxIterations?: unknown }).maxIterations;
+        set({
+          model: { ...get().model, ...settings.model },
+          appearance: { ...get().appearance, ...settings.appearance },
+          agent: { ...get().agent, ...agentSettings },
+        });
+      } catch (error) {
+        console.error("[settingsStore] 加载设置失败:", error);
+      }
+    }
+  },
+
+  saveToElectron: async () => {
+    if (typeof window !== "undefined" && window.electronAPI) {
+      const state = get();
+      try {
+        await window.electronAPI.setSetting("model", state.model);
+        await window.electronAPI.setSetting("appearance", state.appearance);
+        await window.electronAPI.setSetting("agent", state.agent);
+      } catch (error) {
+        console.error("[settingsStore] 保存设置失败:", error);
+      }
+    }
+  },
+}));

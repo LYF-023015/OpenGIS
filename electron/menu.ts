@@ -1,10 +1,11 @@
-import { Menu, BrowserWindow, app } from 'electron'
+/** 文件职责：共享基础能力：实现该文件名所对应的单一职责。 */
+import { Menu, BrowserWindow, app } from "electron";
 
 /**
  * Create the application menu.
  */
 export function createMenu(mainWindow: BrowserWindow): void {
-  const isMac = process.platform === 'darwin'
+  const isMac = process.platform === "darwin";
 
   const template: Electron.MenuItemConstructorOptions[] = [
     // App menu (macOS only)
@@ -13,15 +14,15 @@ export function createMenu(mainWindow: BrowserWindow): void {
           {
             label: app.name,
             submenu: [
-              { role: 'about' as const },
-              { type: 'separator' as const },
-              { role: 'services' as const },
-              { type: 'separator' as const },
-              { role: 'hide' as const },
-              { role: 'hideOthers' as const },
-              { role: 'unhide' as const },
-              { type: 'separator' as const },
-              { role: 'quit' as const },
+              { role: "about" as const },
+              { type: "separator" as const },
+              { role: "services" as const },
+              { type: "separator" as const },
+              { role: "hide" as const },
+              { role: "hideOthers" as const },
+              { role: "unhide" as const },
+              { type: "separator" as const },
+              { role: "quit" as const },
             ],
           },
         ]
@@ -29,95 +30,99 @@ export function createMenu(mainWindow: BrowserWindow): void {
 
     // File menu
     {
-      label: 'File',
+      label: "File",
       submenu: [
         {
-          label: 'Open GIS File...',
-          accelerator: 'CmdOrCtrl+O',
+          label: "Open GIS File...",
+          accelerator: "CmdOrCtrl+O",
           click: () => {
-            mainWindow.webContents.send('menu:open-file')
+            mainWindow.webContents.send("menu:open-file");
           },
         },
-        { type: 'separator' },
+        { type: "separator" },
         {
-          label: 'Export Map...',
-          accelerator: 'CmdOrCtrl+Shift+E',
+          label: "Export Map...",
+          accelerator: "CmdOrCtrl+Shift+E",
           click: () => {
-            mainWindow.webContents.send('menu:export-map')
+            mainWindow.webContents.send("menu:export-map");
           },
         },
-        { type: 'separator' },
-        isMac ? { role: 'close' } : { role: 'quit' },
+        { type: "separator" },
+        isMac ? { role: "close" } : { role: "quit" },
       ],
     },
 
     // Edit menu
     {
-      label: 'Edit',
+      label: "Edit",
       submenu: [
-        { role: 'undo' },
-        { role: 'redo' },
-        { type: 'separator' },
-        { role: 'cut' },
-        { role: 'copy' },
-        { role: 'paste' },
-        { role: 'selectAll' },
+        { role: "undo" },
+        { role: "redo" },
+        { type: "separator" },
+        { role: "cut" },
+        { role: "copy" },
+        { role: "paste" },
+        { role: "selectAll" },
       ],
     },
 
     // View menu
     {
-      label: 'View',
+      label: "View",
       submenu: [
         {
-          label: 'Map View',
-          accelerator: 'CmdOrCtrl+1',
+          label: "Map View",
+          accelerator: "CmdOrCtrl+1",
           click: () => {
-            mainWindow.webContents.send('menu:view', 'map')
+            mainWindow.webContents.send("menu:view", "map");
           },
         },
         {
-          label: 'Chat View',
-          accelerator: 'CmdOrCtrl+2',
+          label: "Chat View",
+          accelerator: "CmdOrCtrl+2",
           click: () => {
-            mainWindow.webContents.send('menu:view', 'chat')
+            mainWindow.webContents.send("menu:view", "chat");
           },
         },
         {
-          label: 'Chart View',
-          accelerator: 'CmdOrCtrl+3',
+          label: "Chart View",
+          accelerator: "CmdOrCtrl+3",
           click: () => {
-            mainWindow.webContents.send('menu:view', 'chart')
+            mainWindow.webContents.send("menu:view", "chart");
           },
         },
-        { type: 'separator' },
-        { role: 'togglefullscreen' },
-        { type: 'separator' },
-        { role: 'toggleDevTools' },
-        { role: 'reload' },
+        { type: "separator" },
+        { role: "togglefullscreen" },
+        { type: "separator" },
+        { role: "toggleDevTools" },
+        { role: "reload" },
       ],
     },
 
     // Help menu
     {
-      label: 'Help',
+      label: "Help",
       submenu: [
         {
-          label: 'Documentation',
+          label: "Documentation",
           click: () => {
-            require('electron').shell.openExternal('https://github.com/opengis/opengis')
+            require("electron").shell.openExternal(
+              "https://github.com/opengis/opengis",
+            );
           },
         },
         {
-          label: 'Report Issue',
+          label: "Report Issue",
           click: () => {
-            require('electron').shell.openExternal('https://github.com/opengis/opengis/issues')
+            require("electron").shell.openExternal(
+              "https://github.com/opengis/opengis/issues",
+            );
           },
         },
       ],
     },
-  ]
+  ];
 
-  const menu = Menu.buildFromTemplate(template)
-  Menu.setApplicationMenu(menu)
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
 }

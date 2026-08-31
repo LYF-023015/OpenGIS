@@ -1,6 +1,11 @@
-import { app, BrowserWindow } from 'electron'
-import type { BackendProcessManager, BackendRuntime, BackendStatus } from './backendTypes'
-import { JavaBackendManager } from './javaBackendManager'
+/** 文件职责：共享基础能力：承载该领域的核心业务流程。 */
+import { app, BrowserWindow } from "electron";
+import type {
+  BackendProcessManager,
+  BackendRuntime,
+  BackendStatus,
+} from "./backendTypes";
+import { JavaBackendManager } from "./javaBackendManager";
 
 /**
  * Runtime-neutral desktop backend facade.
@@ -10,76 +15,83 @@ import { JavaBackendManager } from './javaBackendManager'
  * environment has been prepared explicitly by a maintainer.
  */
 export class BackendManager implements BackendProcessManager {
-  private delegate: BackendProcessManager | null = null
-  private mainWindow: BrowserWindow | null = null
-  readonly runtime: BackendRuntime
+  private delegate: BackendProcessManager | null = null;
+  private mainWindow: BrowserWindow | null = null;
+  readonly runtime: BackendRuntime;
 
   constructor() {
-    const requested = process.env.OPENGIS_BACKEND?.trim().toLowerCase()
-    if (app.isPackaged && requested === 'python') {
-      console.warn('[Backend] OPENGIS_BACKEND=python ignored in packaged builds; Java is mandatory')
+    const requested = process.env.OPENGIS_BACKEND?.trim().toLowerCase();
+    if (app.isPackaged && requested === "python") {
+      console.warn(
+        "[Backend] OPENGIS_BACKEND=python ignored in packaged builds; Java is mandatory",
+      );
     }
-    this.runtime = !app.isPackaged && requested === 'python' ? 'python' : 'java'
+    this.runtime =
+      !app.isPackaged && requested === "python" ? "python" : "java";
   }
 
   setMainWindow(window: BrowserWindow | null): void {
-    this.mainWindow = window
-    this.delegate?.setMainWindow(window)
+    this.mainWindow = window;
+    this.delegate?.setMainWindow(window);
   }
 
   getStatus(): BackendStatus {
-    return this.delegate?.getStatus() ?? { status: 'stopped', runtime: this.runtime }
+    return (
+      this.delegate?.getStatus() ?? { status: "stopped", runtime: this.runtime }
+    );
   }
 
   getPort(): number | null {
-    return this.delegate?.getPort() ?? null
+    return this.delegate?.getPort() ?? null;
   }
 
   getWsToken(): string | null {
-    return this.delegate?.getWsToken() ?? null
+    return this.delegate?.getWsToken() ?? null;
   }
 
   async start(): Promise<void> {
-    const manager = await this.getDelegate()
-    await manager.start()
+    const manager = await this.getDelegate();
+    await manager.start();
   }
 
   async stop(): Promise<void> {
-    await this.delegate?.stop()
+    await this.delegate?.stop();
   }
 
   async restart(): Promise<void> {
-    const manager = await this.getDelegate()
-    await manager.restart()
+    const manager = await this.getDelegate();
+    await manager.restart();
   }
 
   private async getDelegate(): Promise<BackendProcessManager> {
     if (!this.delegate) {
-      if (this.runtime === 'python') {
-        const { PythonManager } = await import('./pythonManager')
-        const legacy = new PythonManager()
+      if (this.runtime === "python") {
+        const { PythonManager } = await import("./pythonManager");
+        const legacy = new PythonManager();
         this.delegate = {
           setMainWindow: (window) => legacy.setMainWindow(window),
           getStatus: () => {
-            const status = legacy.getStatus()
+            const status = legacy.getStatus();
             return {
               ...status,
-              runtime: 'python',
+              runtime: "python",
               executablePath: status.pythonPath,
-              diagnostics: ['Development-only Python backup runtime; never selected in packaged builds.'],
-            }
+              diagnostics: [
+                "Development-only Python backup runtime; never selected in packaged builds.",
+              ],
+            };
           },
           getPort: () => legacy.getPort(),
           getWsToken: () => legacy.getWsToken(),
           start: () => legacy.start(),
           stop: () => legacy.stop(),
           restart: () => legacy.restart(),
-        }
+        };
       } else {
-        this.delegate = new JavaBackendManager()
+        this.delegate = new JavaBackendManager();
       }
-      this.delegate.setMainWindow(this.mainWindow)
+      this.delegate.setMainWindow(this.mainWindow);
     }
-    return this.delegate
+    return this.delegate;
   }
 }

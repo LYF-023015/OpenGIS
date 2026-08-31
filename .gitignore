@@ -125,6 +125,8 @@ Internal-Agent-Projects.md
 scripts/
 !electron/scripts/
 !electron/scripts/**
+!src/plugins/workspace/scripts/
+!src/plugins/workspace/scripts/**
 
 # ===== Test Data & Scripts =====
 test/

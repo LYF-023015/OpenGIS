@@ -98,7 +98,7 @@ def main() -> None:
     rows.append(entry("storage:user-instructions", "storage", "~/.opengis/user_instructions.md", "global user preferences", "opengis-platform", "temporary-home anonymous fixture + Python/Java round-trip", 3))
 
     for provider in providers["providers"]:
-        rows.append(entry(f"provider:{provider['id']}", "llm-provider", "src/features/settings/providerMap.ts", "Settings + Agent LLM caller", "opengis-ai", f"{provider['current_protocol']} fixture + {provider['support_tier']}", 5, provider["decision"]))
+        rows.append(entry(f"provider:{provider['id']}", "llm-provider", "src/plugins/system/settings/model/providerMap.ts", "Settings + Agent LLM caller", "assistant", f"{provider['current_protocol']} fixture + {provider['support_tier']}", 5, provider["decision"]))
 
     for consumer in consumers["consumers"]:
         rows.append(entry(f"python-consumer:{consumer['file']}", "python-semantic-consumer", consumer["file"], consumer["category"], consumer["java_target"], consumer["replacement"], 9 if consumer["category"] in {"electron-launcher", "documentation"} else "owning-module"))
